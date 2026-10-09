@@ -70,9 +70,9 @@ await sleep(900);
 check(await ev("location.origin") === new URL(url).origin, "double-clicking the LF logo stays on the calculator");
 await sleep(400);
 const atar = await ev("document.querySelector('.atar-num .sr-only').textContent.trim()");
-check(atar.startsWith("63.14"), "sample student ATAR matches the reference", atar);
+check(atar.startsWith("48.64"), "sample student ATAR matches the reference", atar);
 const stats = await ev("[...document.querySelectorAll('header .num')].map(n => (n.querySelector('.sr-only') ?? n).textContent)");
-check(stats[0] === "223.1" && stats[1] === "366.5", "scaled 223.1 / raw 366.5 in the readout", stats.join(", "));
+check(stats[0] === "154.0" && stats[1] === "332.0", "scaled 154.0 / raw 332.0 in the readout", stats.join(", "));
 check(await ev("document.body.innerText.includes('Studies of Religion I — 1 unit')"), "Studies of Religion I unit shown as not counted");
 await shot("02-sample-desktop");
 
@@ -87,7 +87,7 @@ check(await ev("getComputedStyle(document.activeElement.querySelector('.pin-halo
 
 // ---- the pin: pointer drag -------------------------------------------------
 const box = await ev("(() => { const r = document.querySelector('svg.chart').getBoundingClientRect(); return { x: r.x, y: r.y, w: r.width, h: r.height }; })()");
-const px = box.x + box.w * 0.62, py = box.y + box.h * 0.5;
+const px = box.x + box.w * 0.4, py = box.y + box.h * 0.5;   // inside the reachable range for the sample student
 await send("Input.dispatchMouseEvent", { type: "mousePressed", x: px, y: py, button: "left", clickCount: 1 });
 await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: px + 40, y: py, button: "left", buttons: 1 });
 await send("Input.dispatchMouseEvent", { type: "mouseReleased", x: px + 40, y: py, button: "left", clickCount: 1 });

@@ -2,15 +2,11 @@
   "name": "Sample student",
   "settings": { "moderation": false, "level": "average", "spread": 10 },
   "subjects": [
-    { "courseId": "eng-std",    "internalMark": 76, "rank": 25, "cohortSize": 90,  "exam": 74, "expected": 74, "target": 81 },
-    { "courseId": "maths-std2", "internalMark": 72, "rank": 40, "cohortSize": 110, "exam": 70, "expected": 70, "target": 78 },
-    { "courseId": "biology",    "internalMark": 74, "rank": 33, "cohortSize": 95,  "exam": 73, "expected": 73, "target": 80 },
-    { "courseId": "business", "rank": 18, "cohortSize": 60, "exam": 76, "expected": 76, "target": 83, "mode": "tasks", "tasks": [
-      { "name": "Operations research report", "weight": 20, "raw": 23, "max": 30,  "pct": null, "rank": 22 },
-      { "name": "Finance in-class test",      "weight": 25, "raw": 15, "max": 20,  "pct": null, "rank": 19 },
-      { "name": "Marketing business plan",    "weight": 20, "raw": 24, "max": 30,  "pct": null, "rank": 16 },
-      { "name": "Trial HSC examination",      "weight": 35, "raw": 77, "max": 100, "pct": null, "rank": 17 } ] },
-    { "courseId": "hms",  "internalMark": 71, "rank": 22, "cohortSize": 55, "exam": 70, "expected": 70, "target": 77 },
-    { "courseId": "sor1", "internalMark": 70, "rank": 14, "cohortSize": 48, "exam": 69, "expected": 69, "target": 76 }
+    { "courseId": "maths-std2",  "internalMark": 70 },
+    { "courseId": "eng-std",     "internalMark": 70 },
+    { "courseId": "business",    "internalMark": 64 },
+    { "courseId": "italian-beg", "internalMark": 66 },
+    { "courseId": "sor1",        "internalMark": 60 },
+    { "courseId": "hms",         "internalMark": 62 }
   ]
 }

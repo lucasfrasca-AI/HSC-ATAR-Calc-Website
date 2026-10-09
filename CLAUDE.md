@@ -16,7 +16,7 @@ Fonts: system stack first (`-apple-system` renders SF Pro on Apple devices — S
 - `reference/` is the original spec HTML + brand sheet. **Never edit it.**
 
 ## Architecture
-- `src/lib/engine.ts`: the whole model, pure functions over `Data`; returns message *keys*, never copy. Golden test: the sample student gives raw 366.5, scaled 223.1, ATAR 63.14 with the Studies of Religion I unit outside the best 10 (the original reference script, run without its six UAC-derived anchors, gives the same). If a change moves those, the chain changed.
+- `src/lib/engine.ts`: the whole model, pure functions over `Data`; returns message *keys*, never copy. Golden test: the sample student (Maths Std 2 70, English Std 70, Business 64, Italian Beginners 66, SOR I 60, HMS 62 — the owner's chosen test data) gives raw 332.0, scaled 154.0, ATAR 48.64 with the SOR I unit outside the best 10; the original reference script gives the same. If a change moves those, the chain changed.
 - `src/lib/state.tsx`: one store. All writes go through `update(fn)`, which clones, mutates and sets synchronously via a ref (drags fire many times per frame). Drags snapshot a baseline at start (`beginDrag`) so moves never compound.
 - `src/components/*`: render only. `NumInput` keeps typed text while focused, so a recompute never interrupts typing.
 - Motion: `useTween` (rAF number easing), `withTransition` (View Transitions for tab cross-fade and the circular theme reveal; skipped when unsupported or reduced motion), the gliding tab pill, `.rise` entrance on mount only, `.lift` hover. Every one is off under `prefers-reduced-motion`; browser-check asserts the theme switch is instant there.

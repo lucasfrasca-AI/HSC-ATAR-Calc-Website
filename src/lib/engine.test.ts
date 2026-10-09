@@ -9,15 +9,16 @@ import {
 const data = (subjects: Subject[]): Data => ({ ...blankData(), subjects });
 const keys = (d: Data, level?: string) => validate(d).issues.filter((i) => !level || i.level === level).map((i) => i.key);
 
-// Golden values come from running the ORIGINAL reference script with its six
-// "supplied" anchors removed (they were UAC-derived; see CLAUDE.md). With those
-// anchors the reference gives 366.0 / 229.3 / 64.39; without, 366.5 / 223.1 / 63.14.
+// Golden values come from running the ORIGINAL reference script (its six
+// UAC-derived "supplied" anchors removed; see CLAUDE.md) on this sample student:
+// Maths Standard 2 70, English Standard 70, Business Studies 64, Italian Beginners 66,
+// Studies of Religion I 60, Health and Movement Science 62 — exam marks default to internal.
 test("golden: the sample student matches the reference calculator exactly", () => {
   const d = sanitise(sample);
   const c = compute(d);
-  assert.equal(c.rawAggregate.toFixed(1), "366.5");
-  assert.equal(c.aggregate.toFixed(1), "223.1");
-  assert.equal(c.atar.toFixed(2), "63.14");
+  assert.equal(c.rawAggregate.toFixed(1), "332.0");
+  assert.equal(c.aggregate.toFixed(1), "154.0");
+  assert.equal(c.atar.toFixed(2), "48.64");
   assert.deepEqual(c.notCounted.map((n) => `${n.u.r.s.courseId}:${n.why}`), ["sor1:best10"]);
   assert.equal(validate(d).eligible, true);
 });
@@ -107,7 +108,7 @@ test("examImpact: ranked, never negative, zero at the 100 cap, and consistent wi
   for (const x of imp) assert.ok(x.atarDelta >= 0);
   const top = imp[0]!, s = d.subjects.find((x) => x.uid === top.uid)!;
   const bumped = structuredClone(d);
-  bumped.subjects.find((x) => x.uid === top.uid)!.exam = (s.exam ?? 0) + 5;
+  bumped.subjects.find((x) => x.uid === top.uid)!.exam = baseline(d)[s.uid]! + 5;   // the what-if mark, not a saved one
   assert.ok(Math.abs(compute(bumped).atar - compute(d).atar - top.atarDelta) < 1e-9);
   const capped = structuredClone(d);
   capped.subjects[0]!.exam = 100;
