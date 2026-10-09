@@ -372,3 +372,7 @@ h3 { letter-spacing: -0.012em; line-height: 1.25; }
   details[open] > .theme-menu, .listbox { animation: none; }
   dialog.confirm, dialog.confirm[open] { transform: none; filter: none; }
 }
+
+/* Monogram: answers the press instantly, like every other control. */
+.monogram .mark { transition: transform 0.25s cubic-bezier(.2, .9, .3, 1); }
+.monogram:active .mark { transform: scale(0.92); transition: transform 100ms ease-out; }

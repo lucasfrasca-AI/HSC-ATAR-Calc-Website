@@ -178,20 +178,25 @@ function Readout() {
  * so a single mouse click waits one double-click interval before navigating.
  */
 function Monogram() {
-  const { replace } = useCalc();
+  const { data, replace, undo } = useCalc();
   const { toast } = useFeedback();
   const timer = useRef(0);
   const onClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.detail === 0) return; // keyboard / new-tab: default
     e.preventDefault();
     window.clearTimeout(timer.current);
-    if (e.detail >= 2) { replace(sampleData()); toast(site.toasts.testLoaded); return; }
+    if (e.detail >= 2) {
+      const had = data.subjects.length > 0;
+      replace(sampleData());
+      toast(site.toasts.testLoaded, had ? { label: site.toasts.undo, run: undo } : undefined);
+      return;
+    }
     const href = e.currentTarget.href;
     timer.current = window.setTimeout(() => window.location.assign(href), 280);
   };
   useEffect(() => () => window.clearTimeout(timer.current), []);
   return (
-    <a href={site.author.url} aria-label={site.author.linkLabel} onClick={onClick} className="-ml-2 -mt-1 shrink-0 rounded-full">
+    <a href={site.author.url} aria-label={site.author.linkLabel} onClick={onClick} className="monogram -ml-2 -mt-1 shrink-0 rounded-full">
       <img src={mark} alt="" width={56} height={56} className="mark" draggable={false} />
     </a>
   );
