@@ -15,12 +15,16 @@ Fonts: system stack first (`-apple-system` renders SF Pro on Apple devices — S
 - Australian English, plain language. Every estimated number is labelled as an estimate. Data never leaves the browser (users are minors).
 - `reference/` is the original spec HTML + brand sheet. **Never edit it.**
 
+## Design reference
+The `apple-design` skill (github.com/emilkowalski/skills, MIT; installed at `~/.claude/skills/apple-design`) is the motion and interaction reference. Applied: critically damped springs that keep velocity on retarget (`useSpring`), grab offset and rubber-banding on the pin with release-velocity handoff, 100 ms press states, menus and dialogs that materialise from their trigger and exit the same way, a scroll-edge fade under the floating tab bar, rem-based body type with size-specific tracking, reduced motion as gentle cross-fades rather than nothing, and undo toasts instead of confirmations for anything undoable.
+
 ## Architecture
 - `src/lib/engine.ts`: the whole model, pure functions over `Data`; returns message *keys*, never copy. Golden test: the sample student gives raw 366.5, scaled 223.1, ATAR 63.14 with the Studies of Religion I unit outside the best 10 (the original reference script, run without its six UAC-derived anchors, gives the same). If a change moves those, the chain changed.
 - `src/lib/state.tsx`: one store. All writes go through `update(fn)`, which clones, mutates and sets synchronously via a ref (drags fire many times per frame). Drags snapshot a baseline at start (`beginDrag`) so moves never compound.
 - `src/components/*`: render only. `NumInput` keeps typed text while focused, so a recompute never interrupts typing.
 - Motion: `useTween` (rAF number easing), `withTransition` (View Transitions for tab cross-fade and the circular theme reveal; skipped when unsupported or reduced motion), the gliding tab pill, `.rise` entrance on mount only, `.lift` hover. Every one is off under `prefers-reduced-motion`; browser-check asserts the theme switch is instant there.
-- Undo/redo: `update` coalesces bursts (700 ms) into one step; `beginDrag`/`endDrag`/`setAggregate` and `replace` are hard boundaries. Cmd/Ctrl+Z is ignored inside text fields so native undo still works.
+- Undo/redo: only *continuous* input merges into one step — changes made inside `typing(el, fn)` for the same field (NumInput, Range, TextInput wrap their handlers), or the frames of one drag, within 700 ms. Everything else (buttons, checkboxes, menus, `replace`, `update(fn, { discrete: true })`) is its own step. Cmd/Ctrl+Z is ignored inside text fields so native undo still works.
+- Confirmations only for actions that start outside the app (opening a share link). Undoable actions act immediately and offer Undo in the toast.
 - `examImpact` ("Where marks matter most"): ATAR change from +5 exam marks in one subject, others held. Same estimates as everything else; labelled.
 - Accent discipline in practice: slider fills, chips and secondary buttons are neutral; accent only on the pin, focus ring, tab underline, top impact bar, links and the ATAR spectrum underline.
 - Share links (`src/lib/share.ts`): data is deflate-compressed into the URL **fragment** (`#share=v1.…`), never sent to a server or in Referer. Name excluded unless opted in. Decoding is hostile-input: payload and decompressed-size caps (zip-bomb test), then `sanitise`. Opening asks first, is undoable, and the fragment is cleared immediately. Handled on load *and* `hashchange` (pasting a link into an open tab doesn't reload).
@@ -50,6 +54,9 @@ Verify every deploy against production with curl, not the emulator.
 Its SHA-256 is in the CSP in `firebase.json`. Edit the script → build → `node scripts/check-content.mjs` prints the new hash → replace it in `firebase.json`.
 
 ## Traps (each one has happened)
+- Grouping undo by `document.activeElement` merged a button press into the previous typing: scripted clicks and Safari clicks don't move focus to the button. Continuity is now marked at the input event (`typing()`), never inferred from focus.
+- `Page.navigate` to the same URL with only a different `#fragment` is a same-document navigation: React state survives, `localStorage.clear()` doesn't reset it. Debug scripts must load a fresh document.
+- A global reduced-motion rule that zeroes every transition also kills colour/opacity feedback; restrict it to movement properties instead.
 - Custom class names that match a Tailwind utility get the utility too: `.ring` drew a 1px ring box-shadow, `.table`/`.grid` set display. check-content now fails on any collision between components.css classes and the built utilities layer.
 - A browser check that ran after an earlier step had already moved state passed for the wrong reason (Apply was disabled; undo reverted something else). Checks that act must first reset to a known state.
 - Unlayered CSS beats every Tailwind utility (utilities live in `@layer utilities`). A plain `a { color }` silently overrode `text-foreground` on links. Base rules live in `@layer base`; `components.css` is imported `layer(components)`.

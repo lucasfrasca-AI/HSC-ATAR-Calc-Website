@@ -54,6 +54,19 @@ function Shell() {
   // Lazy tabs stay mounted once visited, so their local state (open panels) survives tab switches.
   const [visited, setVisited] = useState<Set<TabKey>>(() => new Set([fromHash()]));
   if (!visited.has(tab)) setVisited(new Set(visited).add(tab));
+  // Scroll edge effect only while the tab bar is actually floating over content.
+  useEffect(() => {
+    const nav = document.getElementById("tabs");
+    if (!nav) return;
+    let raf = 0;
+    const onScroll = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => { nav.dataset.stuck = String(nav.getBoundingClientRect().top <= 13 && window.scrollY > 0); });
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => { window.removeEventListener("scroll", onScroll); cancelAnimationFrame(raf); };
+  }, []);
   // Fetch the other tabs while the browser is idle, so switching is instant.
   useEffect(() => {
     const idle = (cb: () => void) => (typeof window.requestIdleCallback === "function" ? window.requestIdleCallback(cb, { timeout: 3000 }) : globalThis.setTimeout(cb, 1500));

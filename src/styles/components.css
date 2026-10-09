@@ -77,7 +77,7 @@
   transition: color 0.2s, border-color 0.2s, background-color 0.2s, transform 0.2s;
 }
 .btn:hover { color: hsl(var(--foreground)); border-color: hsl(var(--foreground-3)); }
-.btn:active { transform: scale(0.98); }
+
 .btn:disabled { opacity: 0.45; cursor: not-allowed; }
 .btn-primary { background: hsl(var(--accent-fill)); border-color: hsl(var(--accent-fill)); color: hsl(var(--on-accent)); }
 .btn-primary:hover { color: hsl(var(--on-accent)); border-color: hsl(var(--accent)); filter: brightness(1.06); }
@@ -213,7 +213,8 @@ html[data-vt="theme"]::view-transition-old(panel),
 html[data-vt="theme"]::view-transition-new(panel) { animation: none; }
 html[data-vt="theme"]::view-transition-new(root) { animation: vt-reveal 0.6s cubic-bezier(.4, 0, .2, 1) both; }
 @keyframes vt-reveal { from { clip-path: circle(0 at var(--vt-x, 50%) var(--vt-y, 0)); } to { clip-path: circle(var(--vt-r, 150vmax) at var(--vt-x, 50%) var(--vt-y, 0)); } }
-@media (prefers-reduced-motion: reduce) { ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; } }
+html[data-vt="fade"]::view-transition-group(*) { animation-duration: 0s; }
+html[data-vt="fade"]::view-transition-old(*), html[data-vt="fade"]::view-transition-new(*) { animation-duration: 0.18s; animation-timing-function: ease; }
 
 /* ---------- gliding tab indicator ---------- */
 .tabs { position: relative; }
@@ -234,7 +235,7 @@ html[data-vt="theme"]::view-transition-new(root) { animation: vt-reveal 0.6s cub
   .lift:hover { transform: translateY(-2px); box-shadow: inset 0 1px 0 hsl(var(--border) / 0.16), 0 22px 44px -26px hsl(var(--background) / 0.95); border-color: hsl(var(--border) / 0.16); }
 }
 .btn { transition: color 0.2s, border-color 0.2s, background-color 0.2s, transform 0.18s cubic-bezier(.2, .8, .2, 1), box-shadow 0.2s; }
-.btn:active:not(:disabled) { transform: scale(0.96); }
+.btn:active:not(:disabled) { transform: scale(0.97); transition: transform 100ms ease-out; }
 :focus-visible { transition: outline-offset 0.15s ease; }
 
 /* ---------- glass range slider ---------- */
@@ -319,3 +320,55 @@ input[type="range"].glide:disabled { opacity: 0.4; }
 .ring-track { fill: none; stroke: hsl(var(--foreground) / 0.1); stroke-width: 4; }
 .ring-arc { fill: none; stroke: hsl(var(--accent-fill)); stroke-width: 4; stroke-linecap: round; transition: stroke-dashoffset 0.9s cubic-bezier(.2, .8, .2, 1); }
 @media (prefers-reduced-motion: reduce) { .ring-arc { transition: none; } }
+
+/* ---------- Apple pass: response, materials, spatial consistency ---------- */
+/* Press states answer on pointer-down, in 100 ms. */
+.tab:active { transform: scale(0.97); transition: transform 100ms ease-out; }
+.lift:active { transform: scale(0.99); transition: transform 100ms ease-out; }
+.chip-btn:active, [role="option"]:active { transform: scale(0.98); transition: transform 100ms ease-out; }
+
+/* Menus materialise from their trigger (blur + scale together), not from nowhere. */
+@keyframes materialize { from { opacity: 0; transform: scale(0.94); filter: blur(8px); } }
+details[open] > .theme-menu { transform-origin: top right; animation: materialize 0.28s cubic-bezier(.2, .9, .3, 1) both; }
+.listbox { transform-origin: top center; animation: materialize 0.24s cubic-bezier(.2, .9, .3, 1) both; }
+.listbox.reveal { animation-name: materialize; }
+
+/* Dialogs grow from the button that opened them and leave the same way (allow-discrete exit). */
+dialog.confirm {
+  opacity: 0; transform: scale(0.94); filter: blur(6px);
+  transform-origin: var(--from-x, 50%) var(--from-y, 50%);
+  transition: opacity 0.22s ease, transform 0.32s cubic-bezier(.2, .9, .3, 1), filter 0.32s ease,
+    overlay 0.32s allow-discrete, display 0.32s allow-discrete;
+}
+dialog.confirm[open] { opacity: 1; transform: none; filter: none; animation: none; }
+@starting-style { dialog.confirm[open] { opacity: 0; transform: scale(0.94); filter: blur(6px); } }
+dialog.confirm::backdrop { transition: opacity 0.25s ease, overlay 0.25s allow-discrete, display 0.25s allow-discrete; opacity: 0; }
+dialog.confirm[open]::backdrop { opacity: 1; }
+@starting-style { dialog.confirm[open]::backdrop { opacity: 0; } }
+
+/* Scroll edge effect: where content slides under the floating tab bar, fade it out
+   softly instead of drawing a hard line. Only while the bar is actually floating. */
+nav#tabs::before {
+  content: ""; position: absolute; left: -100vw; right: -100vw; top: -12px; height: 84px; z-index: -1; pointer-events: none;
+  background: linear-gradient(hsl(var(--background) / 0.92), hsl(var(--background) / 0.6) 55%, transparent);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  -webkit-mask-image: linear-gradient(hsl(var(--background)) 55%, transparent); mask-image: linear-gradient(hsl(var(--background)) 55%, transparent);
+  opacity: 0; transition: opacity 0.3s ease;
+}
+nav#tabs[data-stuck="true"]::before { opacity: 1; }
+
+/* Size-specific tracking (Apple §15): tighten as type grows, open up the smallest text. */
+h2 { line-height: 1.08; text-wrap: balance; }
+h3 { letter-spacing: -0.012em; line-height: 1.25; }
+.field, .help, .flag, .pill, .count { letter-spacing: 0.01em; }
+
+/* Toast with an action (undo) needs to be clickable. */
+.toast[data-action="true"] { pointer-events: auto; display: flex; align-items: center; gap: 14px; padding-right: 8px; }
+.toast .toast-action { font-weight: 600; color: hsl(var(--accent)); padding: 4px 10px; border-radius: 999px; }
+.toast .toast-action:hover { background: hsl(var(--accent) / 0.12); }
+.toast:not([data-on="true"]) { pointer-events: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  details[open] > .theme-menu, .listbox { animation: none; }
+  dialog.confirm, dialog.confirm[open] { transform: none; filter: none; }
+}

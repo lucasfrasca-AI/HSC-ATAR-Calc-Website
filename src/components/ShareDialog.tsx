@@ -3,7 +3,7 @@ import site from "../../content/site.json";
 import { encodeShare, shareUrl } from "../lib/share.ts";
 import { useCalc } from "../lib/state.tsx";
 import { t } from "../lib/text.ts";
-import { useFeedback } from "./Feedback.tsx";
+import { originFrom, useFeedback } from "./Feedback.tsx";
 
 export function ShareButton() {
   const { data } = useCalc();
@@ -24,7 +24,9 @@ export function ShareButton() {
 
   const show = () => {
     if (!data.subjects.length) { toast(s.empty); return; }
-    setLink(""); setOpen(true); dialog.current?.showModal();
+    setLink(""); setOpen(true);
+    originFrom(dialog.current, document.activeElement);
+    dialog.current?.showModal();
   };
   const close = () => { dialog.current?.close(); setOpen(false); };
   const copy = async () => {

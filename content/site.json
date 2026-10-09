@@ -146,12 +146,7 @@
   },
   "dialogs": {
     "confirm": "Confirm",
-    "cancel": "Cancel",
-    "remove": "Remove {name}?",
-    "replaceWithTest": "Replace everything you've entered with the test data?",
-    "clearAll": "Clear every subject and start a new student?",
-    "replaceSet": "Replace your saved {label} marks with the current sliders?",
-    "clearSet": "Clear your saved {label} marks?"
+    "cancel": "Cancel"
   },
   "toasts": {
     "removed": "Removed {name}",
@@ -169,7 +164,12 @@
     "imported": "Imported {n} subjects",
     "importFailed": "Couldn't import: {reason}",
     "importNoSubjects": "This file doesn't contain any subjects.",
-    "importBadJson": "the file isn't valid JSON"
+    "importBadJson": "the file isn't valid JSON",
+    "undo": "Undo",
+    "replacedWithTest": "Test data loaded",
+    "clearedAll": "Cleared — add your first subject",
+    "savedOver": "Saved {n} marks as your {label} set",
+    "clearedSet": "Cleared your {label} marks"
   },
   "labels": {
     "expected": "expected",

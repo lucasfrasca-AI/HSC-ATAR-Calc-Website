@@ -89,6 +89,34 @@ const dragged = await ev("Number(document.querySelector('[role=slider]').getAttr
 check(Math.abs(dragged - after) > 5, "dragging the chart moves the pin and the marks", `${after} → ${dragged}`);
 check(await ev("document.body.innerText.includes('moved')"), "drag note explains how far subjects moved");
 
+// ---- Apple pass: grab offset, rubber-banding, spring settle -----------------
+const pinX = () => ev("(() => { const g = document.querySelector('.pin').parentElement; const m = g.getAttribute('transform').match(/translate\\(([\\d.]+)/); const svg = document.querySelector('svg.chart'); const r = svg.getBoundingClientRect(); return r.left + Number(m[1]) / 640 * r.width; })()");
+await sleep(700);
+const x0 = await pinX();
+const pinY = await ev("document.querySelector('.pin').getBoundingClientRect().top + 10");
+await send("Input.dispatchMouseEvent", { type: "mousePressed", x: x0 + 7, y: pinY, button: "left", clickCount: 1 });
+await sleep(120);
+const x1 = await pinX();
+check(Math.abs(x1 - x0) < 1.5, "grabbing the pin off-centre does not make it jump", `${(x1 - x0).toFixed(2)}px`);
+await send("Input.dispatchMouseEvent", { type: "mouseReleased", x: x0 + 7, y: pinY, button: "left", clickCount: 1 });
+await sleep(500);
+// Only one subject ticked: the reachable maximum is low, so a long drag right overshoots it.
+await ev("[...document.querySelectorAll('button')].find(b => b.textContent.trim() === 'Untick all').click()");
+await ev("document.querySelector('[data-focus], #curve aside input[type=checkbox]').click()"); await sleep(300);
+const bx = await ev("(() => { const r = document.querySelector('svg.chart').getBoundingClientRect(); return { l: r.left, w: r.width }; })()");
+const sx = await pinX();
+await send("Input.dispatchMouseEvent", { type: "mousePressed", x: sx, y: pinY, button: "left", clickCount: 1 });
+for (let k = 1; k <= 12; k++) { await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: sx + (bx.l + bx.w * 0.97 - sx) * k / 12, y: pinY, button: "left", buttons: 1 }); await sleep(16); }
+await sleep(60);
+const held = await pinX();
+const capAgg = await ev("Number(document.querySelector('[role=slider]').getAttribute('aria-valuenow'))");
+const capX = bx.l + (18 + capAgg / 500 * 604) / 640 * bx.w;
+check(held > capX + 4 && held < bx.l + bx.w * 0.97 - 10, "past the reachable maximum the pin rubber-bands (follows, but resists)", `cap ${capX.toFixed(0)} · pin ${held.toFixed(0)} · pointer ${(bx.l + bx.w * 0.97).toFixed(0)}`);
+await send("Input.dispatchMouseEvent", { type: "mouseReleased", x: bx.l + bx.w * 0.97, y: pinY, button: "left", clickCount: 1 });
+await sleep(1000);
+check(Math.abs(await pinX() - capX) < 2, "on release the pin springs back to the real aggregate", `${(await pinX()).toFixed(0)} vs ${capX.toFixed(0)}`);
+await ev("[...document.querySelectorAll('button')].find(b => b.textContent.trim() === 'Tick all').click()"); await sleep(200);
+
 // ---- where marks matter most ---------------------------------------------
 const impact = await ev("[...document.querySelectorAll('[aria-labelledby=impact-h] li')].map(li => parseFloat(li.querySelector('.text-right')?.textContent.replace('+','')))");
 check(impact.length === 6 && impact.every((v, i) => i === 0 || impact[i - 1] >= v), "impact panel ranks all 6 subjects by ATAR gain", impact.join(", "));
@@ -156,6 +184,12 @@ const n0 = await ev("document.querySelectorAll('article[id^=card-]').length");
 await key("Enter", "Enter"); await sleep(400);
 check(await ev("document.querySelectorAll('article[id^=card-]').length") === n0 + 1 && await ev("document.activeElement.id === 'addCourse' && document.activeElement.value === ''"),
   "Enter adds the course and keeps focus in the search for the next one");
+const nBefore = await ev("document.querySelectorAll('article[id^=card-]').length");
+await ev("document.querySelector('article[id^=card-] button[aria-label^=Remove]').click()"); await sleep(300);
+check(await ev("!document.querySelector('dialog.confirm[open]')") && await ev("document.querySelectorAll('article[id^=card-]').length") === nBefore - 1, "removing a subject happens straight away — no confirmation dialog");
+check(await ev("!!document.querySelector('.toast .toast-action')"), "the removal toast offers Undo");
+await ev("document.querySelector('.toast .toast-action').click()"); await sleep(400);
+check(await ev("document.querySelectorAll('article[id^=card-]').length") === nBefore, "Undo in the toast brings the subject back");
 await ev("location.hash = '#calculator'"); await sleep(400);
 
 // ---- tabs: keyboard + hash + back -----------------------------------------
@@ -247,11 +281,14 @@ check(rm.js && rm.blob === "none", "reduced motion: ambient animation off, JS se
 await ev("document.querySelector('[role=slider]').focus()");
 await key("End", "End");
 await sleep(30);
-const jumped = await ev("[...document.querySelectorAll('.odo-strip, .ring-arc, .band-marker')].every(e => parseFloat(getComputedStyle(e).transitionDuration) < 0.001)");
-check(jumped, "reduced motion: odometer, ring and band markers jump instead of animating");
+const rmT = await ev("[...document.querySelectorAll('.odo-strip, .ring-arc, .band-marker, .btn')].map(e => getComputedStyle(e).transitionProperty)");
+check(rmT.every((p) => !/transform|left|stroke-dashoffset|\ball\b/.test(p)), "reduced motion: nothing moves (no transform/position transitions)", [...new Set(rmT)].join(" | ").slice(0, 120));
+check(rmT.some((p) => /opacity|color/.test(p)), "reduced motion: gentle opacity/colour fades are kept, not removed");
 await ev("document.querySelector('details summary.btn').click()"); await sleep(100);
-await ev("document.querySelector('input[name=theme][value=blue-light]').click()"); await sleep(60);
-check(await ev("document.documentElement.dataset.theme === 'blue-light' && !document.documentElement.dataset.vt"), "reduced motion: theme switches instantly, no view transition");
+await ev("document.querySelector('input[name=theme][value=blue-light]').click()");
+const vtKind = await ev("document.documentElement.dataset.vt ?? 'none'");
+await sleep(500);
+check(await ev("document.documentElement.dataset.theme === 'blue-light'") && (vtKind === "fade" || vtKind === "none"), "reduced motion: theme change cross-fades (no circular reveal)", vtKind);
 await send("Emulation.setEmulatedMedia", { features: [] });
 
 // ---- every theme renders --------------------------------------------------

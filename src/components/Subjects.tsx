@@ -10,7 +10,7 @@ import {
 import { sampleData, useCalc } from "../lib/state.tsx";
 import { msg, t } from "../lib/text.ts";
 import { useFeedback } from "./Feedback.tsx";
-import { Glass, NumInput, Section } from "./ui.tsx";
+import { Glass, NumInput, Section, TextInput } from "./ui.tsx";
 
 const AREAS = [...new Set(CATALOG.map((c) => c.area))];
 function CourseOptions() {
@@ -31,8 +31,8 @@ const scalingText = (s: Subject) => {
 
 type Panel = "tasks" | "exam" | "settings";
 function SubjectCard({ s, i }: { s: Subject; i: number }) {
-  const { data, v, update } = useCalc();
-  const { toast, confirm } = useFeedback();
+  const { data, v, update, undo } = useCalc();
+  const { toast } = useFeedback();
   const [open, setOpen] = useState<Set<Panel>>(new Set());
   const toggle = (p: Panel, on?: boolean) => setOpen((o) => { const n = new Set(o); if (on ?? !n.has(p)) n.add(p); else n.delete(p); return n; });
   const edit = (fn: (x: Subject) => void) => update((d) => fn(d.subjects.find((x) => x.uid === s.uid)!));
@@ -54,10 +54,9 @@ function SubjectCard({ s, i }: { s: Subject; i: number }) {
     fresh.uid = old.uid;
     d.subjects[k] = fresh;
   });
-  const remove = async () => {
-    if (!(await confirm(t(site.dialogs.remove, { name: nameForLabels })))) return;
+  const remove = () => {
     update((d) => { d.subjects = d.subjects.filter((x) => x.uid !== s.uid); });
-    toast(t(site.toasts.removed, { name: nameForLabels }));
+    toast(t(site.toasts.removed, { name: nameForLabels }), { label: site.toasts.undo, run: undo });
   };
   const openTasks = () => {
     if (!tasksMode) {
@@ -100,7 +99,7 @@ function SubjectCard({ s, i }: { s: Subject; i: number }) {
               : sub.card.rankHelp}
           </span>
         </div>
-        <button type="button" className="mt-5 row-start-1 col-start-3 md:col-start-4 grid h-9 w-9 place-items-center rounded-full text-[1.4rem] text-foreground-3 hover:bg-loss/10 hover:text-loss" aria-label={t(sub.card.remove, { name: nameForLabels })} onClick={() => void remove()}>
+        <button type="button" className="mt-5 row-start-1 col-start-3 md:col-start-4 grid h-9 w-9 place-items-center rounded-full text-[1.4rem] text-foreground-3 hover:bg-loss/10 hover:text-loss" aria-label={t(sub.card.remove, { name: nameForLabels })} onClick={remove}>
           <span aria-hidden="true">×</span>
         </button>
       </div>
@@ -108,7 +107,7 @@ function SubjectCard({ s, i }: { s: Subject; i: number }) {
         <div className="px-4 pb-2">
           <label className="field max-w-sm">
             <span>{sub.card.customName}<span className="req">{sub.card.required}</span></span>
-            <input id={`cname-${s.uid}`} className="input" type="text" maxLength={60} placeholder={sub.card.customPlaceholder} value={s.name} onChange={(ev) => edit((x) => { x.name = ev.target.value; })} />
+            <TextInput id={`cname-${s.uid}`} className="input" maxLength={60} placeholder={sub.card.customPlaceholder} value={s.name} onText={(v) => edit((x) => { x.name = v; })} />
           </label>
         </div>
       )}
@@ -150,7 +149,7 @@ function SubjectCard({ s, i }: { s: Subject; i: number }) {
                   const n = ti + 1, m = taskMark(tk);
                   return (
                     <tr key={ti}>
-                      <td><input className="input input-sm !w-full min-w-[150px] !text-left" type="text" maxLength={80} placeholder={t(sub.tasks.placeholder, { n })} aria-label={t(sub.tasks.aria.name, { n })} value={tk.name} onChange={(ev) => editTask(ti, (x) => { x.name = ev.target.value; })} /></td>
+                      <td><TextInput className="input input-sm !w-full min-w-[150px] !text-left" maxLength={80} placeholder={t(sub.tasks.placeholder, { n })} aria-label={t(sub.tasks.aria.name, { n })} value={tk.name} onText={(v) => editTask(ti, (x) => { x.name = v; })} /></td>
                       <td><NumInput id={`tw-${s.uid}-${ti}`} className="input-sm" min={0} max={100} step={0.5} aria-label={t(sub.tasks.aria.weight, { n })} value={tk.weight} onValue={(val) => editTask(ti, (x) => { x.weight = val; })} /></td>
                       <td><NumInput className="input-sm" min={0} step={0.5} aria-label={t(sub.tasks.aria.score, { n })} value={tk.raw} onValue={(val) => editTask(ti, (x) => { x.raw = val; })} /></td>
                       <td><NumInput className="input-sm" min={1} step={0.5} aria-label={t(sub.tasks.aria.outOf, { n })} value={tk.max} onValue={(val) => editTask(ti, (x) => { x.max = val; })} /></td>
@@ -227,12 +226,12 @@ function SubjectCard({ s, i }: { s: Subject; i: number }) {
 }
 
 function AddBar() {
-  const { data, update, replace } = useCalc();
-  const { toast, confirm } = useFeedback();
+  const { data, update, replace, undo } = useCalc();
+  const { toast } = useFeedback();
   const add = (c: Course) => {
     if (c.id !== "custom" && data.subjects.some((s) => s.courseId === c.id)) { toast(t(site.toasts.already, { name: c.name })); return; }
     const s = subjectFrom(c.id);
-    update((d: Data) => { d.subjects.push(s); });
+    update((d: Data) => { d.subjects.push(s); }, { discrete: true });
     toast(t(sub.add.added, { name: c.name }));
     // Keep focus in the search so a whole subject list can be typed in one go;
     // bring the new card into view without stealing focus.
@@ -241,13 +240,15 @@ function AddBar() {
       if (c.id === "custom") document.getElementById(`cname-${s.uid}`)?.focus({ preventScroll: true });
     });
   };
-  const test = async () => {
-    if (data.subjects.length && !(await confirm(site.dialogs.replaceWithTest))) return;
-    replace(sampleData()); toast(site.toasts.testLoaded);
+  const test = () => {
+    const had = data.subjects.length > 0;
+    replace(sampleData());
+    toast(site.toasts.testLoaded, had ? { label: site.toasts.undo, run: undo } : undefined);
   };
-  const clear = async () => {
-    if (!(await confirm(site.dialogs.clearAll))) return;
-    replace(blankData()); toast(site.toasts.cleared);
+  const clear = () => {
+    if (!data.subjects.length) return;
+    replace(blankData());
+    toast(site.toasts.cleared, { label: site.toasts.undo, run: undo });
   };
   return (
     <div className="flex flex-wrap items-start gap-2.5 rounded-[16px] border border-dashed border-input-border p-4">
@@ -256,8 +257,8 @@ function AddBar() {
         <CourseSearch inputId="addCourse" onPick={add} />
       </div>
       <div className="flex flex-wrap gap-2.5 sm:mt-[22px]">
-        <button type="button" className="btn" onClick={() => void test()}>{sub.add.test}</button>
-        <button type="button" className="btn btn-danger" onClick={() => void clear()}>{sub.add.clear}</button>
+        <button type="button" className="btn" onClick={test}>{sub.add.test}</button>
+        <button type="button" className="btn btn-danger" onClick={clear}>{sub.add.clear}</button>
       </div>
     </div>
   );
@@ -313,7 +314,7 @@ function OptionalSettings() {
         <summary className="flex justify-between px-5 py-3.5 text-[0.92rem] font-semibold">{o.summary} <span className="plus" aria-hidden="true">+</span></summary>
         <div className="grid gap-4 border-t border-border/10 p-5 [grid-template-columns:repeat(auto-fit,minmax(220px,1fr))]">
           <label className="field"><span>{o.name} <span className="opt">{o.nameOpt}</span></span>
-            <input className="input" type="text" maxLength={60} placeholder={o.namePlaceholder} value={data.name} onChange={(e) => update((d) => { d.name = e.target.value; })} />
+            <TextInput className="input" maxLength={60} placeholder={o.namePlaceholder} value={data.name} onText={(v) => update((d) => { d.name = v; })} />
           </label>
           <div className="field"><span>{o.mod} <span className="opt">{o.nameOpt}</span></span>
             <label className="flex items-center gap-2 py-2 text-[0.86rem] text-foreground"><input type="checkbox" checked={st.moderation} onChange={(e) => update((d) => { d.settings.moderation = e.target.checked; })} />{o.modToggle}</label>

@@ -134,8 +134,8 @@ function AtarBox({ id, label, value, onSet, big, placeholder }: { id: string; la
 
 function CurveSection() {
   const calcState = useCalc();
-  const { data, c, update, setAggregate, lastDrag, clearDrag, goalSet, clearGoal } = calcState;
-  const { toast, confirm } = useFeedback();
+  const { data, c, update, setAggregate, lastDrag, clearDrag, goalSet, clearGoal, undo } = calcState;
+  const { toast } = useFeedback();
   const E = scenarioAgg(data, "expected"), T = scenarioAgg(data, "target");
   const has = c.counted.length > 0;
   const rows = c.rows.filter((r) => r.valid);
@@ -143,8 +143,9 @@ function CurveSection() {
 
   const setGoal = async (field: GoalField, v: number | null) => {
     if (v === null) {
-      if (data.subjects.some((s) => inRange(s[field], 0, 100) !== null) && (await confirm(t(site.dialogs.clearSet, { label: site.labels[field] })))) {
+      if (data.subjects.some((s) => inRange(s[field], 0, 100) !== null)) {
         update((d) => { for (const s of d.subjects) s[field] = null; }); clearGoal();
+        toast(t(site.toasts.clearedSet, { label: site.labels[field] }), { label: site.toasts.undo, run: undo });
       }
       return;
     }
@@ -433,16 +434,17 @@ function ProjectionCard({ s, i }: { s: Subject; i: number }) {
 }
 
 function ProjectionSection() {
-  const { data, c, update, clearDrag } = useCalc();
-  const { toast, confirm } = useFeedback();
+  const { data, c, update, clearDrag, undo } = useCalc();
+  const { toast } = useFeedback();
   const p = calc.projection;
-  const save = async (field: GoalField) => {
+  const save = (field: GoalField) => {
     const label = site.labels[field];
     const valid = c.rows.filter((r) => r.valid);
     if (!valid.length) { toast(site.toasts.needInternal); return; }
-    if (data.subjects.some((s) => inRange(s[field], 0, 100) !== null) && !(await confirm(t(site.dialogs.replaceSet, { label })))) return;
+    const hadSet = data.subjects.some((s) => inRange(s[field], 0, 100) !== null);
     update((d) => { for (const r of valid) { const s = d.subjects.find((x) => x.uid === r.s.uid)!; s[field] = Math.round(examOf(s, r.used.mark!) * 10) / 10; } });
-    toast(t(site.toasts.saved, { n: valid.length, label }));
+    // Replacing an existing set is undoable, so no up-front confirmation (Apple: forgiveness over friction).
+    toast(t(site.toasts.saved, { n: valid.length, label }), hadSet ? { label: site.toasts.undo, run: undo } : undefined);
   };
   const load = (field: GoalField) => {
     const label = site.labels[field];
@@ -455,8 +457,8 @@ function ProjectionSection() {
       <Glass className="glass-sm mb-4 flex flex-wrap items-center justify-between gap-3.5 px-4 py-3.5">
         <p className="max-w-[50ch] text-[0.86rem] text-foreground-2"><b className="text-foreground">{p.scenLead}</b> {p.scenText.replace(p.scenLead, "").trim()}</p>
         <div className="flex flex-wrap gap-2">
-          <button type="button" className="btn" onClick={() => void save("expected")}>{p.saveExp}</button>
-          <button type="button" className="btn" onClick={() => void save("target")}>{p.saveTgt}</button>
+          <button type="button" className="btn" onClick={() => save("expected")}>{p.saveExp}</button>
+          <button type="button" className="btn" onClick={() => save("target")}>{p.saveTgt}</button>
           <button type="button" className="btn" onClick={() => load("expected")}>{p.loadExp}</button>
           <button type="button" className="btn" onClick={() => load("target")}>{p.loadTgt}</button>
           <button type="button" className="btn" onClick={() => { update((d) => d.subjects.forEach((s) => (s.exam = null))); clearDrag(); toast(site.toasts.reset); }}>{p.reset}</button>
@@ -581,17 +583,18 @@ function SplitSection() {
 }
 
 export function Calculator() {
-  const { data, replace } = useCalc();
-  const { toast, confirm } = useFeedback();
-  const loadTest = async () => {
-    if (data.subjects.length && !(await confirm(site.dialogs.replaceWithTest))) return;
-    replace(sampleData()); toast(site.toasts.testLoaded);
+  const { data, replace, undo } = useCalc();
+  const { toast } = useFeedback();
+  const loadTest = () => {
+    const had = data.subjects.length > 0;
+    replace(sampleData());
+    toast(site.toasts.testLoaded, had ? { label: site.toasts.undo, run: undo } : undefined);
   };
   return (
     <>
       <Steps />
       <Checks />
-      {!data.subjects.length ? <EmptyState onTest={() => void loadTest()} /> : (
+      {!data.subjects.length ? <EmptyState onTest={loadTest} /> : (
         <>
           <CurveSection />
           <PlanSection />

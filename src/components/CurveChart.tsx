@@ -3,7 +3,7 @@
 import { useMemo, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
 import calc from "../../content/calculator.json";
 import { MAX_AGGREGATE, aggregateToAtar, density, fmt } from "../lib/engine.ts";
-import { useTween } from "../lib/motion.ts";
+import { useSpring } from "../lib/motion.ts";
 import { useCalc } from "../lib/state.tsx";
 import { t } from "../lib/text.ts";
 
@@ -11,16 +11,30 @@ const W = 640, H = 250, L = 18, R = 18, T = 22, B = 44;
 const x = (agg: number) => L + (agg / MAX_AGGREGATE) * (W - L - R);
 const y = (d: number) => T + (1 - d) * (H - T - B);
 
+// Rubber-banding (Apple, Designing Fluid Interfaces): past what the ticked subjects
+// can reach, the pin follows with growing resistance instead of stopping dead.
+const BAND = MAX_AGGREGATE * 0.12;
+const rubber = (o: number) => (o * BAND * 0.55) / (BAND + 0.55 * Math.abs(o));
+const soft = (v: number, lo: number, hi: number) => (v > hi ? hi + rubber(v - hi) : v < lo ? lo - rubber(lo - v) : v);
+const clampAgg = (v: number) => Math.max(0, Math.min(MAX_AGGREGATE, v));
+
 export function CurveChart({ expected, target }: { expected: number | null; target: number | null }) {
   const { c, beginDrag, driveTo, endDrag, setAggregate } = useCalc();
   const svg = useRef<SVGSVGElement>(null);
   const [dragging, setDragging] = useState(false);
   const has = c.counted.length > 0;
   const agg = c.aggregate;
-  // Drawn position: follows the pointer exactly while dragging, eases otherwise.
-  const eased = useTween(agg, 420);
-  const at = dragging ? agg : eased;
-  const expEased = useTween(expected ?? 0, 420), tgtEased = useTween(target ?? 0, 420);
+  // While dragging the pin is glued to the pointer (dragAt, rubber-banded at the
+  // limits); on release a critically damped spring takes it to the real aggregate,
+  // starting from where it is and at the pointer's release velocity.
+  const [dragAt, setDragAt] = useState<number | null>(null);
+  const [at, pin] = useSpring(dragAt ?? agg, 0.35);
+  const [expEased] = useSpring(expected ?? 0, 0.4), [tgtEased] = useSpring(target ?? 0, 0.4);
+  const g = useRef({ offset: 0, lo: 0, hi: MAX_AGGREGATE, hist: [] as { t: number; x: number }[] });
+  const velocity = () => {
+    const h = g.current.hist, a = h[0], b = h[h.length - 1];
+    return a && b && b.t - a.t > 8 ? ((b.x - a.x) / (b.t - a.t)) * 1000 : 0;
+  };
 
   const curve = useMemo(() => {
     const pts: string[] = [];
@@ -35,18 +49,38 @@ export function CurveChart({ expected, target }: { expected: number | null; targ
     return `M${x(0)},${y(0)}L${pts.join("L")}L${x(at)},${y(0)}Z`;
   }, [at, has]);
 
-  const aggFrom = (e: PointerEvent<SVGSVGElement>) => {
+  /** Pointer position in aggregate units — unclamped, so the rubber band can see past the ends. */
+  const rawAgg = (e: PointerEvent<SVGSVGElement>) => {
     const r = svg.current!.getBoundingClientRect();
-    const vx = ((e.clientX - r.left) / r.width) * W;
-    return Math.max(0, Math.min(MAX_AGGREGATE, ((vx - L) / (W - L - R)) * MAX_AGGREGATE));
+    return ((((e.clientX - r.left) / r.width) * W - L) / (W - L - R)) * MAX_AGGREGATE;
+  };
+  const track = (want: number, now: number) => {
+    const r = driveTo(clampAgg(want));
+    const lo = Math.max(0, r?.lo ?? 0), hi = Math.min(MAX_AGGREGATE, r?.hi ?? MAX_AGGREGATE);
+    const shown = soft(want, lo, hi);
+    const h = g.current.hist;
+    h.push({ t: now, x: shown });
+    while (h.length > 2 && now - h[0]!.t > 90) h.shift();
+    setDragAt(shown);
+    pin.jump(shown, velocity());
   };
   const down = (e: PointerEvent<SVGSVGElement>) => {
     if (!has || e.button !== 0) return;
     e.currentTarget.setPointerCapture(e.pointerId);
-    setDragging(true); beginDrag(); driveTo(aggFrom(e));
+    const raw = rawAgg(e);
+    // Grabbed the pin itself? Keep the offset from where it was grabbed instead of snapping its centre.
+    const pxPerAgg = svg.current!.getBoundingClientRect().width / W * ((W - L - R) / MAX_AGGREGATE);
+    g.current.offset = Math.abs(raw - at) * pxPerAgg < 18 ? at - raw : 0;
+    g.current.hist = [];
+    setDragging(true); beginDrag();
+    track(raw + g.current.offset, e.timeStamp);
   };
-  const moveTo = (e: PointerEvent<SVGSVGElement>) => { if (dragging) driveTo(aggFrom(e)); };
-  const up = () => { if (dragging) { setDragging(false); endDrag(); } };
+  const moveTo = (e: PointerEvent<SVGSVGElement>) => { if (dragging) track(rawAgg(e) + g.current.offset, e.timeStamp); };
+  const up = () => {
+    if (!dragging) return;
+    pin.jump(at, velocity());   // hand the release velocity to the spring
+    setDragAt(null); setDragging(false); endDrag();
+  };
 
   const key = (e: KeyboardEvent<SVGGElement>) => {
     const big = e.shiftKey ? 10 : 1;
@@ -92,8 +126,10 @@ export function CurveChart({ expected, target }: { expected: number | null; targ
           onKeyDown={key}
         >
           <line className="pin-stem" x1={x(at)} x2={x(at)} y1={y(density(at))} y2={y(0)} />
-          <circle className="pin-halo" cx={x(at)} cy={y(density(at))} r={dragging ? 22 : 17} />
-          <circle className="pin" cx={x(at)} cy={y(density(at))} r={dragging ? 11 : 10} />
+          <g transform={`translate(${x(at).toFixed(2)} ${y(density(at)).toFixed(2)})`}>
+            <circle className="pin-halo" r={dragging ? 22 : 17} />
+            <circle className="pin" r={dragging ? 11 : 10} />
+          </g>
         </g>
       )}
     </svg>

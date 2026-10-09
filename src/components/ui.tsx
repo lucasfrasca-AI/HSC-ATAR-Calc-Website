@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ComponentPropsWithoutRef, type CSSPro
 import site from "../../content/site.json";
 import { fmt } from "../lib/engine.ts";
 import { useTween } from "../lib/motion.ts";
+import { typing } from "../lib/state.tsx";
 
 type GlassProps<T extends ElementType> = { as?: T; className?: string; children?: ReactNode } & Omit<ComponentPropsWithoutRef<T>, "as" | "className" | "children">;
 export function Glass<T extends ElementType = "div">({ as, className = "", children, ...rest }: GlassProps<T>) {
@@ -50,7 +51,7 @@ export function NumInput({ value, onValue, onCommit, min, max, step, integer, cl
       onFocus={(e) => { focused.current = true; rest.onFocus?.(e); }}
       onBlur={(e) => { focused.current = false; const p = parse(text); if (p !== undefined) onCommit?.(p); setText(shown); rest.onBlur?.(e); }}
       onKeyDown={(e) => { if (e.key === "Enter" && onCommit) (e.target as HTMLInputElement).blur(); rest.onKeyDown?.(e); }}
-      onChange={(e) => { setText(e.target.value); const p = parse(e.target.value); if (p !== undefined) onValue?.(p); }}
+      onChange={(e) => { setText(e.target.value); const p = parse(e.target.value); if (p !== undefined) typing(e.currentTarget, () => onValue?.(p)); }}
     />
   );
 }
@@ -72,7 +73,12 @@ export function TweenNum({ value, digits = 1, suffix = "" }: { value: number | n
 }
 
 /** Native range input with the glass thumb and an accent fill up to the value. */
-export function Range({ value, min, max, className = "", ...rest }: { value: number; min: number; max: number } & Omit<ComponentPropsWithoutRef<"input">, "type" | "value" | "min" | "max">) {
+export function Range({ value, min, max, className = "", onChange, ...rest }: { value: number; min: number; max: number } & Omit<ComponentPropsWithoutRef<"input">, "type" | "value" | "min" | "max">) {
   const pct = max > min ? ((value - min) / (max - min)) * 100 : 0;
-  return <input {...rest} type="range" min={min} max={max} value={value} className={`glide ${className}`} style={{ "--fill": `${Math.max(0, Math.min(100, pct))}%` } as CSSProperties} />;
+  return <input {...rest} onChange={(e) => typing(e.currentTarget, () => onChange?.(e))} type="range" min={min} max={max} value={value} className={`glide ${className}`} style={{ "--fill": `${Math.max(0, Math.min(100, pct))}%` } as CSSProperties} />;
+}
+
+/** Text input whose keystrokes merge into one undo step (see typing()). */
+export function TextInput({ onText, ...rest }: { onText: (v: string) => void } & Omit<ComponentPropsWithoutRef<"input">, "onChange" | "type">) {
+  return <input {...rest} type="text" onChange={(e) => typing(e.currentTarget, () => onText(e.target.value))} />;
 }

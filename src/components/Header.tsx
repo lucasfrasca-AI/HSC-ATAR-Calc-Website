@@ -24,7 +24,7 @@ function ThemePicker() {
         <span aria-hidden="true" className="inline-block h-3 w-3 rounded-full bg-accent-fill" />
         {name}
       </summary>
-      <Glass as="fieldset" className="glass-sm absolute right-0 z-20 mt-2 w-52 p-2">
+      <Glass as="fieldset" className="theme-menu glass-sm absolute right-0 z-20 mt-2 w-52 p-2">
         <legend className="sr-only">{site.theme.label}</legend>
         {THEMES.map((o) => (
           <label key={o.id} className="flex cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2 text-sm hover:bg-foreground/5">

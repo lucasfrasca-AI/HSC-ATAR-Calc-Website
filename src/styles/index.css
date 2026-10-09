@@ -42,8 +42,12 @@ html { background: hsl(var(--background)); color: hsl(var(--foreground)); }
 body {
   margin: 0;
   font-family: var(--font-sans);
-  font-size: 15px;
+  /* rem, not px: respects the reader's browser text size (Apple: Dynamic Type). 0.9375rem = 15px at default. */
+  font-size: 0.9375rem;
   line-height: 1.55;
+  letter-spacing: 0;
+  font-optical-sizing: auto;
+  text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   font-feature-settings: "tnum" 0;
 }
@@ -51,6 +55,12 @@ body {
 a { color: hsl(var(--accent)); }
 }
 
+/* Reduced motion is not "no feedback" (Apple §14): drop movement — keyframes,
+   transforms, position, size — but keep short opacity and colour fades that aid comprehension. */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important;
+    transition-property: opacity, color, background-color, border-color, fill, stroke, box-shadow, outline-color !important;
+    transition-duration: 160ms !important; transition-delay: 0s !important;
+  }
 }
