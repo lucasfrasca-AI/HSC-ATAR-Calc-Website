@@ -34,13 +34,13 @@ function Steps() {
       d: hasE || hasT ? t(site.steps.s3.some, { e: hasE ? site.steps.s3.saved : site.steps.s3.notSaved, t: hasT ? site.steps.s3.saved : site.steps.s3.notSaved }) : site.steps.s3.none },
   ];
   return (
-    <ol className="mb-5 grid gap-2.5 md:grid-cols-3" aria-label={site.steps.label}>
+    // One grouped surface (Apple: proximity implies relationship), not three floating cards.
+    <Glass as="ol" className="rise glass-sm steps mb-6 grid !p-1.5 md:grid-cols-3" aria-label={site.steps.label}>
       {steps.map((s) => (
         <li key={s.k}>
           <button
             type="button" onClick={s.go} aria-current={next === s.k ? "step" : undefined}
-            style={{ "--i": s.k } as CSSProperties}
-            className={`rise lift glass glass-sm flex h-full w-full items-start gap-3 p-3.5 text-left ${next === s.k ? "!border-accent/60" : ""}`}
+            className="step flex h-full w-full items-start gap-3 rounded-[14px] p-3 text-left"
           >
             <span aria-hidden="true" className={`grid h-7 w-7 shrink-0 place-items-center rounded-full border-2 text-[0.85rem] font-bold ${s.done ? "border-gain bg-gain text-on-fill" : next === s.k ? "border-accent text-accent" : "border-input-border text-foreground-2"}`}>
               {s.done ? "✓" : s.k}
@@ -52,7 +52,7 @@ function Steps() {
           </button>
         </li>
       ))}
-    </ol>
+    </Glass>
   );
 }
 
@@ -64,9 +64,10 @@ function Dot({ level }: { level: keyof typeof DOT }) {
 function Checks() {
   const { data, v } = useCalc();
   const nav = useNav();
-  if (!data.subjects.length) return null;
   const errs = v.issues.filter((i) => i.level === "error"), warns = v.issues.filter((i) => i.level === "warn");
   const list = [...errs, ...warns];
+  // All clear is already said by step 1's tick; this panel only appears when something needs attention.
+  if (!data.subjects.length || !list.length) return null;
   const tone = errs.length ? "border-l-loss" : warns.length ? "border-l-warn" : "border-l-gain";
   return (
     <Glass className={`glass-sm mb-6 border-l-4 px-4 py-3.5 ${tone}`} role="region" aria-label={site.checks.regionLabel}>
@@ -225,7 +226,7 @@ function CurveSection() {
               })}
             </ul>
           ) : <p className="text-[0.8rem] text-foreground-3">{calc.curve.focusEmpty}</p>}
-          <div className="mt-2.5 flex gap-2">
+          <div className="seg mt-2.5">
             <button type="button" className="btn" onClick={() => { update((d) => d.subjects.forEach((s) => (s.focus = true))); clearDrag(); }}>{calc.curve.tickAll}</button>
             <button type="button" className="btn" onClick={() => { update((d) => d.subjects.forEach((s) => (s.focus = false))); clearDrag(); }}>{calc.curve.untickAll}</button>
           </div>
@@ -454,21 +455,28 @@ function ProjectionSection() {
   };
   return (
     <Section id="projection" kicker={site.kickers.projection} title={p.title} intro={p.intro}>
-      <Glass className="glass-sm mb-4 flex flex-wrap items-center justify-between gap-3.5 px-4 py-3.5">
-        <p className="max-w-[50ch] text-[0.86rem] text-foreground-2"><b className="text-foreground">{p.scenLead}</b> {p.scenText.replace(p.scenLead, "").trim()}</p>
-        <div className="flex flex-wrap gap-2">
-          <button type="button" className="btn" onClick={() => save("expected")}>{p.saveExp}</button>
-          <button type="button" className="btn" onClick={() => save("target")}>{p.saveTgt}</button>
-          <button type="button" className="btn" onClick={() => load("expected")}>{p.loadExp}</button>
-          <button type="button" className="btn" onClick={() => load("target")}>{p.loadTgt}</button>
-          <button type="button" className="btn" onClick={() => { update((d) => d.subjects.forEach((s) => (s.exam = null))); clearDrag(); toast(site.toasts.reset); }}>{p.reset}</button>
+      {/* One control surface: the numbers the sliders move, then what you can do with them. */}
+      <Glass className="glass-sm mb-5 overflow-hidden !p-0">
+        <div className="grid grid-cols-2 md:grid-cols-4 md:divide-x md:divide-border/10">
+          <Stat className="p-4" value={<TweenNum value={c.aggregate} />} label={p.stats.agg} />
+          <Stat className="p-4" value={<TweenNum value={c.counted.length ? c.atar : null} digits={2} />} label={p.stats.atar} />
+          <Stat className="p-4" value={<TweenNum value={c.rawInternal} />} label={p.stats.banked} />
+          <Stat className="p-4" value={<TweenNum value={c.rawExam} />} label={p.stats.fromExams} />
         </div>
-      </Glass>
-      <Glass className="glass-sm mb-4 grid grid-cols-2 gap-px overflow-hidden !p-0 md:grid-cols-4">
-        <Stat className="p-4" value={<TweenNum value={c.aggregate} />} label={p.stats.agg} />
-        <Stat className="p-4" value={<TweenNum value={c.counted.length ? c.atar : null} digits={2} />} label={p.stats.atar} />
-        <Stat className="p-4" value={<TweenNum value={c.rawInternal} />} label={p.stats.banked} />
-        <Stat className="p-4" value={<TweenNum value={c.rawExam} />} label={p.stats.fromExams} />
+        <div className="flex flex-wrap items-center justify-between gap-3.5 border-t border-border/10 px-4 py-3.5">
+          <p className="max-w-[46ch] text-[0.84rem] text-foreground-2"><b className="text-foreground">{p.scenLead}</b> {p.scenText.replace(p.scenLead, "").trim()}</p>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="seg" role="group" aria-label={p.saveGroup}>
+              <button type="button" className="btn" onClick={() => save("expected")}>{p.saveExp}</button>
+              <button type="button" className="btn" onClick={() => save("target")}>{p.saveTgt}</button>
+            </div>
+            <div className="seg" role="group" aria-label={p.loadGroup}>
+              <button type="button" className="btn" onClick={() => load("expected")}>{p.loadExp}</button>
+              <button type="button" className="btn" onClick={() => load("target")}>{p.loadTgt}</button>
+            </div>
+            <button type="button" className="btn btn-quiet" onClick={() => { update((d) => d.subjects.forEach((s) => (s.exam = null))); clearDrag(); toast(site.toasts.reset); }}>{p.reset}</button>
+          </div>
+        </div>
       </Glass>
       <div className="grid gap-3.5 [grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))]">
         {data.subjects.map((s, i) => <ProjectionCard key={s.uid} s={s} i={i} />)}

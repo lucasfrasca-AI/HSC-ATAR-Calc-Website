@@ -91,7 +91,9 @@
     "bandTop": "In the Band 6 range",
     "bandOut": "Next band out of reach this exam",
     "bandNote": "approx.",
-    "bandLabel": "B{n}"
+    "bandLabel": "B{n}",
+    "saveGroup": "Save the what-if marks",
+    "loadGroup": "Load saved marks"
   },
   "compare": {
     "title": "Expected vs target",

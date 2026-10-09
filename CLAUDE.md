@@ -25,6 +25,8 @@ The `apple-design` skill (github.com/emilkowalski/skills, MIT; installed at `~/.
 - "Full breakdown" `<details>` holds Expected vs target, ten units and 250+250 (common path first); Plan is section 04.
 - Background is static (skill: no full-viewport moving backgrounds).
 - Hero is centred (title, intro, readout stacked; stats in a hairline-divided row).
+- Steps are one grouped surface (hairline dividers, current step a quiet accent fill). The eligibility panel shows only when something needs fixing; "all clear" is step 1's tick.
+- Related actions share a `.seg` track (save/load what-if marks, tick/untick all); the exam-marks stats and its actions are one panel.
 
 ## Liquid glass (WebGL, `src/lib/liquidGlass.ts`)
 - Port of the refraction model in ybouane/liquidglass (MIT): rounded-rect SDF, biconvex bevel, dual-surface refraction, chromatic aberration, Fresnel, specular rim, inner stroke, drop shadow. Not the library itself: it rasterises the DOM with html-to-image (data: URIs, blocked by our CSP) and needs glass to be direct children of one root.

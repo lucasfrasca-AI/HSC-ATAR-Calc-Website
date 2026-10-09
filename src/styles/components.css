@@ -453,3 +453,18 @@ h3 { letter-spacing: -0.012em; line-height: 1.25; }
 
 /* Larger, Apple-like type scale (§15). */
 section > h2 { font-size: clamp(1.7rem, 3.4vw, 2.4rem); letter-spacing: -0.032em; line-height: 1.06; }
+
+/* Grouped steps: one surface, hairline-separated; the current step gets a quiet fill. */
+.steps > li + li { border-top: 1px solid hsl(var(--border) / 0.08); }
+@media (min-width: 768px) { .steps > li + li { border-top: 0; border-left: 1px solid hsl(var(--border) / 0.08); } }
+.step { transition: background-color 0.2s ease, transform 0.2s ease; }
+.step:hover { background: hsl(var(--foreground) / 0.05); }
+.step:active { transform: scale(0.98); transition: transform 100ms ease-out; }
+.step[aria-current="step"] { background: hsl(var(--accent) / 0.1); }
+
+/* Segmented button groups (related actions share one track). */
+.seg { display: inline-flex; padding: 3px; gap: 2px; border-radius: 999px; background: hsl(var(--foreground) / 0.07); }
+.seg .btn { min-height: 32px; padding: 5px 13px; border-color: transparent; background: transparent; }
+.seg .btn:hover { background: hsl(var(--foreground) / 0.09); border-color: transparent; }
+.btn-quiet { border-color: transparent; background: transparent; }
+.btn-quiet:hover { background: hsl(var(--foreground) / 0.07); border-color: transparent; }
