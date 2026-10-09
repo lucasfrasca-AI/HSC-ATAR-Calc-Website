@@ -34,6 +34,7 @@ Its SHA-256 is in the CSP in `firebase.json`. Edit the script → build → `nod
 ## Traps (each one has happened)
 - `actions/upload-artifact` drops dotfiles unless `include-hidden-files: true` (still the default in v7). Deploy job asserts the file exists.
 - `cleanUrls` in firebase.json breaks per-path headers; use explicit `redirects`. Asserted.
+- Firebase header/redirect `regex` is RE2: no lookahead `(?!`, no backreferences. The deploy uploads every file and only then fails at "finalizing version" with HTTP 400. Asserted.
 - `ignore: ["**/.*"]` drops `.well-known`. Asserted.
 - Never run `firebase init` — it offers to overwrite `dist/index.html`. `firebase.json` and `.firebaserc` are committed.
 - Vite inlines small assets as `data:` URIs; the CSP has no `data:`. `assetsInlineLimit: 0`. Asserted.

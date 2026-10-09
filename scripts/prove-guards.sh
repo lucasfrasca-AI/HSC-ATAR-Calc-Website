@@ -21,6 +21,7 @@ t "inline script edited, hash stale" index.html 's/catch\(e\)\{\}/catch(err){}/'
 t "unsafe-inline in script-src" firebase.json "s/script-src 'self'/script-src 'self' 'unsafe-inline'/" "$B"
 t "frame-ancestors removed" firebase.json "s/ frame-ancestors 'none';//" "$B"
 t "cleanUrls enabled" firebase.json 's/"cleanUrls": false/"cleanUrls": true/' "$B"
+t "RE2-incompatible header regex" firebase.json 's/\^\/\$\|/^\/(?!assets)/' "$B"
 t "dotfile ignore glob" firebase.json 's|"\*\*/\.DS_Store"|"**/.*"|' "$B"
 t "security.txt dropped" public/.well-known/security.txt 's/.*//s' "rm -rf dist/.well-known; npx vite build >/dev/null 2>&1; rm -rf dist/.well-known; node scripts/check-content.mjs"
 t "hex colour in component" src/App.tsx 's/text-foreground-2/text-[#ff00ff]/' "$B"

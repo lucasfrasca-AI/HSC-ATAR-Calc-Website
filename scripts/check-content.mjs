@@ -69,6 +69,9 @@ for (const k of ["X-Content-Type-Options", "Referrer-Policy", "Permissions-Polic
 // Firebase traps (CLAUDE.md).
 check(hosting.cleanUrls !== true, "firebase.json: cleanUrls breaks per-path headers — use explicit redirects");
 check(!(hosting.ignore ?? []).some((g) => g === "**/.*" || g === ".*"), "firebase.json: ignore pattern drops .well-known");
+// Firebase compiles header/redirect regexes with RE2: no lookaround, no backreferences.
+for (const r of [...(hosting.headers ?? []), ...(hosting.redirects ?? []), ...(hosting.rewrites ?? [])].map((h) => h.regex).filter(Boolean))
+  check(!/\(\?<?[=!]|\\[1-9]/.test(r), `firebase.json: regex ${r} uses syntax RE2 rejects (lookaround/backreference)`);
 check(hosting.public === "dist", "firebase.json: hosting.public must be dist");
 
 // No data: URIs anywhere in the built output — the CSP has no data: source.
