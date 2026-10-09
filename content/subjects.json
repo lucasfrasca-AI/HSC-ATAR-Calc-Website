@@ -1,0 +1,66 @@
+{
+  "title": "Your subjects",
+  "intro": "For each subject you only need two things: the course and the final internal mark your school reported. Add your rank if you know it. Task-by-task marks, exam marks and course settings are all optional — open them only if you want more detail.",
+  "introStrong": "final internal mark",
+  "noneTitle": "No subjects yet",
+  "noneBody": "Choose your first course below and enter the final internal mark your school reported. That's all the calculator needs to start.",
+  "card": {
+    "course": "Course",
+    "internal": "Final internal mark %", "required": "Required", "internalPlaceholder": "e.g. 68.5",
+    "rank": "Internal rank", "optional": "(optional)", "rankPlaceholder": "Rank", "of": "of", "cohortPlaceholder": "Class size",
+    "rankLabel": "{name} rank", "cohortLabel": "{name} class size",
+    "remove": "Remove {name}",
+    "customName": "Course name", "customPlaceholder": "e.g. Chinese Continuers",
+    "meta": "{units} · {area}{english} · Scaling: {scaling}", "metaEnglish": " · English",
+    "fromTasks": "Worked out from your task marks.",
+    "untilTask": "Used until a task mark is complete.",
+    "rankFromTasks": "Using weighted task rank {rank}.",
+    "rankModerated": "Moderated estimate: {mark}%",
+    "rankTop": "Top {pct}% of the class.",
+    "rankHelp": "Helps estimate moderation.",
+    "chipTasks": "Task marks ({n})", "chipAddTasks": "+ Add task-by-task marks", "chipUseTasks": "+ Use task-by-task marks",
+    "chipExam": "+ HSC exam marks", "chipExamSet": "HSC exam marks · {detail}", "chipExpected": "expected {v}", "chipTarget": "target {v}",
+    "chipSettings": "Course settings"
+  },
+  "tasks": {
+    "note": "Task names are optional. For each task, enter its weight and either the score and total or just the percentage. As soon as one task is complete, the internal mark is worked out for you.",
+    "cols": { "task": "Task", "weight": "Weight %", "score": "Score", "outOf": "Out of", "pct": "or %", "mark": "Mark", "rank": "Rank" },
+    "placeholder": "Task {n}",
+    "aria": { "weight": "Task {n} weight", "score": "Task {n} score", "outOf": "Task {n} out of", "pct": "Task {n} percentage", "rank": "Task {n} rank", "remove": "Remove task {n}", "name": "Task {n} name" },
+    "pctTitle": "Use this instead of score and total",
+    "add": "Add task", "weights": "Weights entered: {sum}% of 100%", "stop": "Stop using task marks"
+  },
+  "exam": {
+    "note": "Optional. These are the same marks as the sliders and the ATAR boxes on the calculator page — change them in either place.",
+    "whatIf": "What-if exam %", "whatIfHelp": "Linked to the sliders and the graph.", "whatIfPlaceholder": "Defaults to internal",
+    "expected": "Expected exam %", "expectedHelp": "The mark you realistically expect.",
+    "target": "Target exam %", "targetHelp": "The mark you're aiming for.", "notSaved": "Not saved"
+  },
+  "settings": {
+    "note": "Filled in automatically from the course list. Only change these if you know the details are different.",
+    "units": "Units", "english": "English course", "englishToggle": "Counts as English",
+    "cohortMean": "School cohort's expected exam mean", "cohortMeanOpt": "(moderation only)", "cohortMeanPlaceholder": "Uses cohort level",
+    "scaling": "Scaling",
+    "scalingCourse": "Anchors supplied for this course", "scalingTier": "{label} (estimate)", "scalingCustom": "Custom anchors",
+    "anchorFrom": "Anchor {n} blended mark", "anchorTo": "Anchor {n} scaled mark out of 100",
+    "anchorNote": "Blended HSC mark → scaled mark out of 100. See every course side by side on the How it works page.",
+    "labelSupplied": "supplied anchors", "labelCustom": "custom anchors", "labelTier": "{label} — estimate", "labelDefault": "generic average — estimate"
+  },
+  "add": { "label": "Add a subject", "button": "Add subject", "test": "Add test data", "clear": "Start fresh" },
+  "summary": {
+    "title": "Summary", "intro": "Everything above, in one table.",
+    "cols": { "subject": "Subject", "enteredAs": "Entered as", "weight": "Weight", "internal": "Internal mark", "rank": "Rank", "position": "Position", "moderated": "Moderated", "band": "Band" },
+    "tasks": "{n} tasks", "tasks1": "1 task", "final": "Final mark", "top": "Top {pct}%", "band": "Band {n}",
+    "all": "All courses", "units": "{n} units", "unitsShort": "{n}u"
+  },
+  "optional": {
+    "summary": "Optional settings — your name and the moderation estimate",
+    "name": "Student name", "nameOpt": "(optional)", "namePlaceholder": "Your name",
+    "mod": "Moderation estimate", "modToggle": "Adjust internal marks by rank and cohort level",
+    "modHelp": "Needs a rank and class size for a subject. Subjects without them use the mark as entered.",
+    "level": "Projected cohort level", "levelOption": "{label} (exam mean ≈ {mean})",
+    "levelHelp": "How strong your school's cohort is expected to be in the HSC exams.",
+    "spread": "Cohort spread", "spreadOpt": "(marks, 1 standard deviation)",
+    "spreadHelp": "How far apart your cohort's exam marks sit. 10 is a typical default."
+  }
+}

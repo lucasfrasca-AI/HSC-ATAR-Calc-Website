@@ -2,6 +2,7 @@
 @import "@fontsource-variable/geist";
 @import "@fontsource-variable/geist-mono";
 @import "./tokens.css";
+@import "./components.css";
 
 /* Token -> Tailwind bridge. Components use these utilities or hsl(var(--x) / a);
    no colour literal appears outside tokens.css (asserted by check-content). */

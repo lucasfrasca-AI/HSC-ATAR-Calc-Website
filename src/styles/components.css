@@ -1,0 +1,197 @@
+/* Component styles. Colours only via tokens (hsl(var(--x) / a)). */
+
+/* ---------- ambient backdrop: gives the glass something to bend ---------- */
+.ambient { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; background: hsl(var(--background)); }
+.ambient i { position: absolute; border-radius: 50%; filter: blur(70px); will-change: transform; }
+.ambient .a1 { width: 52vmax; height: 52vmax; left: -14vmax; top: -18vmax; background: radial-gradient(circle, hsl(var(--glow) / var(--glow-alpha)), transparent 68%); animation: drift-a 46s ease-in-out infinite alternate; }
+.ambient .a2 { width: 40vmax; height: 40vmax; right: -12vmax; top: 24vh; background: radial-gradient(circle, hsl(var(--foreground) / calc(var(--glow-alpha) * 0.45)), transparent 70%); animation: drift-b 58s ease-in-out infinite alternate; }
+.ambient .a3 { width: 34vmax; height: 34vmax; left: 30vw; bottom: -20vmax; background: radial-gradient(circle, hsl(var(--glow) / calc(var(--glow-alpha) * 0.6)), transparent 70%); animation: drift-c 64s ease-in-out infinite alternate; }
+@keyframes drift-a { to { transform: translate3d(9vw, 7vh, 0) scale(1.08); } }
+@keyframes drift-b { to { transform: translate3d(-10vw, -6vh, 0) scale(0.94); } }
+@keyframes drift-c { to { transform: translate3d(-6vw, -10vh, 0) scale(1.1); } }
+@media (prefers-reduced-motion: reduce) { .ambient .a1, .ambient .a2, .ambient .a3 { animation: none; } }
+
+/* ---------- liquid glass ---------- */
+.glass {
+  position: relative;
+  isolation: isolate;
+  background: hsl(var(--surface) / var(--glass-alpha));
+  -webkit-backdrop-filter: blur(22px) saturate(170%);
+  backdrop-filter: blur(22px) saturate(170%);
+  border: 1px solid hsl(var(--border) / 0.09);
+  border-radius: 22px;
+  box-shadow:
+    inset 0 1px 0 hsl(var(--border) / 0.13),
+    inset 0 -1px 0 hsl(var(--border) / 0.04),
+    0 18px 40px -24px hsl(var(--background) / 0.9);
+}
+/* Specular rim: a 1px neutral highlight that catches light top-left and bottom-right. */
+.glass::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; padding: 1px; pointer-events: none;
+  background: linear-gradient(140deg, hsl(var(--border) / 0.32), hsl(var(--border) / 0) 32%, hsl(var(--border) / 0) 68%, hsl(var(--border) / 0.14));
+  -webkit-mask: linear-gradient(hsl(var(--background)) 0 0) content-box, linear-gradient(hsl(var(--background)) 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(hsl(var(--background)) 0 0) content-box exclude, linear-gradient(hsl(var(--background)) 0 0);
+}
+.glass-sm { border-radius: 16px; }
+.glass-inset { background: hsl(var(--background) / 0.28); border: 1px solid hsl(var(--border) / 0.07); border-radius: 14px; }
+
+/* Refraction (Chromium only; class set by feature detection in Backdrop.tsx). */
+.can-refract .glass-refract {
+  -webkit-backdrop-filter: url(#lg-refract) blur(16px) saturate(180%);
+  backdrop-filter: url(#lg-refract) blur(16px) saturate(180%);
+}
+/* Pointer-tracked sheen on the readout card only. --spec is 0 when motion is reduced. */
+.glass-spec::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: -1;
+  background: radial-gradient(420px circle at var(--mx, 30%) var(--my, 0%), hsl(var(--foreground) / 0.09), transparent 62%);
+  opacity: var(--spec, 0); transition: opacity 0.4s ease;
+}
+
+:root[data-theme="contrast"] .glass,
+:root[data-theme="contrast"] .glass-inset {
+  -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: none; border-color: hsl(var(--border));
+}
+:root[data-theme="contrast"] .glass::before, :root[data-theme="contrast"] .glass-spec::after { display: none; }
+@media (prefers-reduced-transparency: reduce) {
+  .glass, .can-refract .glass-refract { -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
+
+/* ---------- logo blended into the corner ---------- */
+.mark {
+  width: 56px; height: 56px; display: block;
+  -webkit-mask-image: radial-gradient(circle, hsl(var(--background)) 50%, transparent 71%);
+  mask-image: radial-gradient(circle, hsl(var(--background)) 50%, transparent 71%);
+  mix-blend-mode: screen;
+}
+/* Light grounds: the brand sheet's shipping "Glyph" variant — the mark on its own disc, no recolouring. */
+:root[data-theme$="-light"] .mark { width: 46px; height: 46px; margin: 5px; -webkit-mask-image: none; mask-image: none; mix-blend-mode: normal; border-radius: 50%; box-shadow: 0 6px 16px -8px hsl(var(--foreground) / 0.5); }
+
+/* ---------- controls ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: 36px; padding: 7px 15px; border-radius: 999px; white-space: nowrap; cursor: pointer;
+  font-size: 0.82rem; font-weight: 500; color: hsl(var(--foreground-2));
+  background: hsl(var(--surface) / calc(var(--glass-alpha) * 0.9));
+  border: 1px solid hsl(var(--input-border));
+  transition: color 0.2s, border-color 0.2s, background-color 0.2s, transform 0.2s;
+}
+.btn:hover { color: hsl(var(--foreground)); border-color: hsl(var(--foreground-3)); }
+.btn:active { transform: scale(0.98); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn-primary { background: hsl(var(--accent-fill)); border-color: hsl(var(--accent-fill)); color: hsl(var(--on-accent)); }
+.btn-primary:hover { color: hsl(var(--on-accent)); border-color: hsl(var(--accent)); filter: brightness(1.06); }
+.btn-danger { color: hsl(var(--loss)); }
+.chip-btn { border-style: dashed; }
+.chip-btn[aria-expanded="true"] { border-style: solid; color: hsl(var(--foreground)); font-weight: 600; }
+
+.field { display: flex; flex-direction: column; gap: 5px; font-size: 0.8rem; color: hsl(var(--foreground-2)); min-width: 0; }
+.field .opt, .opt { color: hsl(var(--foreground-3)); font-weight: 400; }
+.field .help { font-size: 0.74rem; color: hsl(var(--foreground-3)); }
+.input {
+  width: 100%; min-width: 0; padding: 8px 11px; font: inherit; font-size: 0.92rem; color: hsl(var(--foreground));
+  background: hsl(var(--background) / 0.35); border: 1px solid hsl(var(--input-border)); border-radius: 11px;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+.input:hover { border-color: hsl(var(--foreground-3)); }
+.input[readonly] { background: transparent; border-style: dashed; color: hsl(var(--foreground-2)); }
+.input[aria-invalid="true"] { border-color: hsl(var(--loss)); background: hsl(var(--loss) / 0.1); }
+.input-sm { padding: 5px 7px; font-size: 0.85rem; border-radius: 8px; width: 74px; text-align: right; }
+.input-num { font-variant-numeric: tabular-nums; }
+select.input { appearance: none; padding-right: 30px; background-image: linear-gradient(45deg, transparent 50%, hsl(var(--foreground-3)) 50%), linear-gradient(135deg, hsl(var(--foreground-3)) 50%, transparent 50%); background-position: calc(100% - 16px) 55%, calc(100% - 11px) 55%; background-size: 5px 5px; background-repeat: no-repeat; }
+select.input option, select.input optgroup { background: hsl(var(--surface)); color: hsl(var(--foreground)); }
+input[type="range"] { accent-color: hsl(var(--accent-fill)); width: 100%; height: 26px; cursor: pointer; }
+input[type="checkbox"] { accent-color: hsl(var(--accent-fill)); width: 18px; height: 18px; }
+
+.req { font-size: 0.64rem; font-weight: 700; background: hsl(var(--foreground)); color: hsl(var(--background)); border-radius: 4px; padding: 1px 5px; margin-left: 6px; vertical-align: 1px; }
+.flag { font-size: 0.72rem; color: hsl(var(--warn)); background: hsl(var(--warn) / 0.12); border-radius: 4px; padding: 1px 6px; margin-left: 6px; white-space: nowrap; }
+.pill { font-size: 0.7rem; font-weight: 600; color: hsl(var(--accent)); border: 1px solid hsl(var(--accent) / 0.45); border-radius: 999px; padding: 1px 8px; white-space: nowrap; }
+.kicker { font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.16em; text-transform: uppercase; color: hsl(var(--foreground-3)); }
+.num { font-variant-numeric: tabular-nums; }
+
+/* ---------- headline ---------- */
+.atar-num { font-size: clamp(3.8rem, 13vw, 7rem); line-height: 0.86; font-weight: 600; letter-spacing: -0.045em; font-variant-numeric: tabular-nums; position: relative; display: inline-block; }
+/* The one accent gradient on the page: the brand spectrum under the ATAR. */
+.atar-num::after { content: ""; position: absolute; left: 2px; right: 2px; bottom: -12px; height: 4px; border-radius: 4px; background: linear-gradient(90deg, hsl(var(--spectrum-1)), hsl(var(--spectrum-2)), hsl(var(--spectrum-3))); }
+.atar-num[data-indicative="true"]::after { background: hsl(var(--foreground-3) / 0.5); }
+
+/* ---------- tabs ---------- */
+.tabs { display: inline-flex; gap: 4px; padding: 4px; border-radius: 999px; }
+.tab { position: relative; border: 0; background: transparent; color: hsl(var(--foreground-2)); font: inherit; font-size: 0.9rem; padding: 8px 16px; border-radius: 999px; cursor: pointer; white-space: nowrap; transition: color 0.25s, background-color 0.25s; }
+.tab:hover { color: hsl(var(--foreground)); }
+.tab[aria-selected="true"] { color: hsl(var(--foreground)); font-weight: 600; background: hsl(var(--foreground) / 0.08); box-shadow: inset 0 1px 0 hsl(var(--border) / 0.12); }
+.tab[aria-selected="true"]::after { content: ""; position: absolute; left: 30%; right: 30%; bottom: 3px; height: 2px; border-radius: 2px; background: hsl(var(--accent)); }
+.count { font-size: 0.72rem; border: 1px solid hsl(var(--input-border)); border-radius: 999px; padding: 0 7px; margin-left: 6px; font-weight: 500; }
+.count[data-error="true"] { background: hsl(var(--loss)); border-color: hsl(var(--loss)); color: hsl(var(--on-fill)); }
+@media (max-width: 639px) {
+  .tabs { display: flex; width: 100%; }
+  .tab { flex: 1 1 0; white-space: normal; padding: 8px 8px; font-size: 0.8rem; line-height: 1.2; text-align: center; }
+}
+
+/* ---------- panel / disclosure animation (progressive) ---------- */
+@supports (interpolate-size: allow-keywords) {
+  :root { interpolate-size: allow-keywords; }
+  details::details-content { height: 0; overflow: clip; transition: height 0.32s ease, content-visibility 0.32s allow-discrete; }
+  details[open]::details-content { height: auto; }
+}
+details > summary { list-style: none; cursor: pointer; }
+details > summary::-webkit-details-marker { display: none; }
+details > summary .plus { transition: transform 0.25s ease; display: inline-block; }
+details[open] > summary .plus { transform: rotate(45deg); }
+.reveal { animation: reveal 0.35s ease both; }
+@keyframes reveal { from { opacity: 0; transform: translateY(4px); } }
+
+/* ---------- tables ---------- */
+.tscroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.table { border-collapse: collapse; width: 100%; font-size: 0.86rem; }
+.table th, .table td { padding: 9px 12px; text-align: right; border-bottom: 1px solid hsl(var(--border) / 0.08); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.table th { font-weight: 600; font-size: 0.74rem; color: hsl(var(--foreground-3)); border-bottom-color: hsl(var(--border) / 0.16); }
+.table th:first-child, .table td:first-child { text-align: left; }
+.table tr.total td { font-weight: 600; background: hsl(var(--foreground) / 0.04); border-top: 1px solid hsl(var(--border) / 0.16); }
+.table tr.area td { font-weight: 600; font-size: 0.78rem; color: hsl(var(--foreground-2)); text-align: left; padding-top: 16px; background: hsl(var(--foreground) / 0.03); }
+.gain { color: hsl(var(--gain)); } .loss { color: hsl(var(--loss)); }
+
+/* ---------- meters ---------- */
+.meter { height: 8px; border-radius: 8px; background: hsl(var(--foreground) / 0.08); overflow: hidden; }
+.meter > i { display: block; height: 100%; border-radius: inherit; transition: width 0.5s cubic-bezier(.2,.8,.2,1); }
+.mix { display: flex; height: 22px; border-radius: 8px; overflow: hidden; font-size: 0.7rem; font-weight: 600; }
+.mix > span { display: flex; align-items: center; justify-content: center; overflow: hidden; color: hsl(var(--on-fill)); transition: width 0.4s cubic-bezier(.2,.8,.2,1); }
+
+/* ---------- chart ---------- */
+.chart { display: block; width: 100%; height: auto; touch-action: none; user-select: none; cursor: grab; }
+.chart[data-dragging="true"] { cursor: grabbing; }
+.chart .curve-fill { fill: hsl(var(--foreground) / 0.06); }
+.chart .curve-line { fill: none; stroke: hsl(var(--foreground-2)); stroke-width: 1.6; }
+.chart .grid { stroke: hsl(var(--border) / 0.08); }
+.chart .tick { fill: hsl(var(--foreground-3)); font-size: 11px; font-family: var(--font-mono); }
+.chart .axis-title { fill: hsl(var(--foreground-3)); font-size: 11px; }
+.chart .pin-stem { stroke: hsl(var(--accent)); stroke-width: 1.5; stroke-dasharray: 3 3; }
+.chart .pin { fill: hsl(var(--accent-fill)); stroke: hsl(var(--background)); stroke-width: 2.5; }
+.chart .pin-halo { fill: hsl(var(--accent) / 0.18); transition: r 0.25s; }
+.chart .pin-group:focus { outline: none; }
+.chart .pin-group:focus-visible .pin-halo { fill: none; stroke: hsl(var(--ring)); stroke-width: 2.5; }
+.chart .m-expected { fill: hsl(var(--expected)); stroke: hsl(var(--background)); stroke-width: 2; }
+.chart .m-target { fill: hsl(var(--target)); stroke: hsl(var(--background)); stroke-width: 2; }
+.chart .marker-label { font-size: 10px; font-weight: 600; fill: hsl(var(--foreground-2)); }
+.chart .shade { fill: hsl(var(--accent) / 0.10); }
+
+/* ---------- toast + dialog ---------- */
+.toast { background: hsl(var(--surface) / 0.94) !important; position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 12px); opacity: 0; pointer-events: none; z-index: 50; padding: 10px 18px; border-radius: 999px; font-size: 0.86rem; color: hsl(var(--foreground)); transition: opacity 0.25s, transform 0.25s; max-width: calc(100vw - 32px); }
+.toast[data-on="true"] { opacity: 1; transform: translate(-50%, 0); }
+dialog.confirm { padding: 0; border: 0; background: transparent; color: hsl(var(--foreground)); max-width: min(420px, calc(100vw - 32px)); }
+dialog.confirm::backdrop { background: hsl(var(--background) / 0.55); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+dialog.confirm[open] { animation: reveal 0.25s ease both; }
+
+/* ---------- skip link ---------- */
+.skip { position: absolute; left: 12px; top: -60px; z-index: 60; padding: 8px 14px; border-radius: 999px; background: hsl(var(--accent-fill)); color: hsl(var(--on-accent)); }
+.skip:focus { top: 12px; }
+
+/* ---------- no-JS fallback (index.html) ---------- */
+.fallback { max-width: 60ch; margin: 0 auto; padding: 64px 16px; }
+.fallback h1 { font-size: 2rem; margin: 0 0 12px; }
+
+@media print {
+  .ambient, .no-print, .toast { display: none !important; }
+  [hidden] { display: block !important; }
+  .glass { backdrop-filter: none; box-shadow: none; background: transparent; }
+}

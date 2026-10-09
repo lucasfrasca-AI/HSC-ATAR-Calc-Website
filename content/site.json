@@ -4,15 +4,14 @@
     "description": "Project your NSW HSC ATAR from your courses and internal marks. Nothing you type leaves your browser.",
     "lang": "en-AU"
   },
+  "noJs": "This calculator runs in your browser and needs JavaScript turned on. Nothing you type leaves your browser.",
+  "skipLink": "Skip to content",
   "header": {
-    "productName": "NSW HSC ATAR Calculator",
+    "logoAlt": "Lucas Frasca monogram",
+    "who": { "named": "{name} — NSW HSC ATAR projection.", "anon": "Your NSW HSC ATAR projection." },
     "intro": "Enter each course and its internal mark on the subjects page; add rank, tasks or scaling detail only if you have it."
   },
-  "noJs": "This calculator runs in your browser and needs JavaScript turned on. Nothing you type leaves your browser.",
-  "footer": {
-    "disclaimer": "Independent projection tool. Not affiliated with UAC or NESA. Scaling and ATAR mappings are approximations of published UAC data and change every year. Not an official result.",
-    "credit": "Lucas Frasca"
-  },
+  "toolbar": { "export": "Export data", "import": "Import data", "print": "Print", "importLabel": "Import a saved JSON file" },
   "theme": {
     "label": "Theme",
     "options": [
@@ -22,5 +21,73 @@
       { "id": "blue-light", "name": "Paper" },
       { "id": "contrast", "name": "High contrast" }
     ]
-  }
+  },
+  "readout": {
+    "atarLabel": "Projected ATAR",
+    "capEmpty": "Add subjects to see a projection.",
+    "capIndicative": "Indicative only — not yet eligible for an ATAR. See the checks below.",
+    "capOk": "Projected ATAR at the what-if marks.",
+    "indicativeBadge": "Indicative",
+    "stats": { "scaled": "Scaled aggregate / 500", "raw": "Raw aggregate / 500", "units": "ATAR units entered" }
+  },
+  "tabs": {
+    "label": "Sections",
+    "calc": { "label": "ATAR calculator", "hash": "calculator" },
+    "subj": { "label": "Subjects & internal marks", "hash": "subjects", "countLabel": "{n} subjects", "errorLabel": "has errors" },
+    "help": { "label": "How it works", "hash": "how-it-works" }
+  },
+  "steps": {
+    "label": "What to do",
+    "s1": { "title": "Add subjects and internal marks", "empty": "The course and final mark is all you need", "ok": "{n} subjects · ATAR-eligible", "ok1": "1 subject · ATAR-eligible", "bad": "{n} subjects · {reason}", "bad1": "1 subject · {reason}", "fallback": "some entries need fixing" },
+    "s2": { "title": "Set your exam marks", "detail": "Drag the pin, type an ATAR, or move the sliders" },
+    "s3": { "title": "Save expected and target", "none": "A realistic set and a stretch set", "some": "Expected {e} · target {t}", "saved": "saved", "notSaved": "not saved" },
+    "doneLabel": "Done", "nextLabel": "Next step"
+  },
+  "checks": {
+    "regionLabel": "Eligibility checks",
+    "ok": "Eligible for an ATAR — all UAC unit requirements are met.",
+    "notEligible": "Not eligible for an ATAR yet — the figures below are indicative only.",
+    "needsFix": "Some entries need fixing — see below.",
+    "fix": "Fix",
+    "more": "{n} more on the subjects page.",
+    "levels": { "error": "Error", "warn": "Warning", "info": "Note", "ok": "OK" }
+  },
+  "empty": {
+    "title": "Add your subjects to start",
+    "body": "You only need each course and the final internal mark your school reported. Rank, task marks and exam marks are optional and can be added later. Nothing you type leaves your browser.",
+    "add": "Add my subjects",
+    "test": "Add test data instead",
+    "note": "Test data fills the calculator with a typical NSW student so you can see how it works. You can clear it at any time."
+  },
+  "footer": {
+    "disclaimer": "Independent projection tool. Not affiliated with UAC or NESA. Scaling and ATAR mappings are approximations of published UAC data and change every year. Not an official result.",
+    "credit": "Lucas Frasca"
+  },
+  "dialogs": {
+    "confirm": "Confirm", "cancel": "Cancel",
+    "remove": "Remove {name}?",
+    "replaceWithTest": "Replace everything you've entered with the test data?",
+    "clearAll": "Clear every subject and start a new student?",
+    "replaceSet": "Replace your saved {label} marks with the current sliders?",
+    "clearSet": "Clear your saved {label} marks?"
+  },
+  "toasts": {
+    "removed": "Removed {name}",
+    "already": "{name} is already on the list",
+    "testLoaded": "Test data loaded — a typical student's marks",
+    "cleared": "Cleared — add your first subject",
+    "tasksStopped": "Task marks kept aside — using the final mark",
+    "needInternal": "Enter internal marks first",
+    "tickOne": "Tick at least one subject for the ATAR to adjust",
+    "saved": "Saved {n} marks as your {label} set",
+    "noneSaved": "No {label} marks saved yet",
+    "loaded": "Loaded your {label} marks into the sliders",
+    "reset": "What-if marks reset to each internal mark",
+    "exported": "Exported",
+    "imported": "Imported {n} subjects",
+    "importFailed": "Couldn't import: {reason}",
+    "importNoSubjects": "This file doesn't contain any subjects.",
+    "importBadJson": "the file isn't valid JSON"
+  },
+  "labels": { "expected": "expected", "target": "target", "unnamed": "Unnamed course", "thisCourse": "this course", "estimate": "estimate", "units1": "1 unit", "units2": "2 units", "dash": "—" }
 }

@@ -103,6 +103,12 @@ const scriptIds = JSON.parse(read("index.html").match(/var v=(\[[^\]]+\])/)?.[1]
 check(JSON.stringify(pickerIds) === JSON.stringify(tokenIds), `theme ids differ: picker ${pickerIds} vs tokens ${tokenIds}`);
 check(JSON.stringify(pickerIds) === JSON.stringify(scriptIds), `theme ids differ: picker ${pickerIds} vs index.html ${scriptIds}`);
 
+// Every message key the engine can emit has copy (a missing one renders the raw key).
+const messages = JSON.parse(read("content/messages.json"));
+const emitted = [...new Set([...read("src/lib/engine.ts").matchAll(/"((?:subject|task|elig)\.[A-Za-z0-9]+)"/g)].map((m) => m[1]))];
+for (const k of emitted) check(k in messages, `content/messages.json: no copy for message key ${k}`);
+check(emitted.length > 20, `expected the engine to emit 20+ message keys, found ${emitted.length}`);
+
 // ---- asset budgets ---------------------------------------------------------
 const LIMITS = [
   [/\.(png|jpe?g|webp|avif|gif)$/, 50_000, "image"],

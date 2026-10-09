@@ -63,6 +63,7 @@ const PAIRS = [
   ["accent-fill", "glass", UI, "chart pin / primary button edge"],
   ["expected", "glass", UI, "expected marker"],
   ["target", "glass", UI, "target marker"],
+  ...Array.from({ length: 8 }, (_, i) => [`subject-${i + 1}`, "glass", UI, `subject colour ${i + 1}`]),
 ];
 
 let failed = 0;

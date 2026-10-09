@@ -1,0 +1,30 @@
+{
+  "note": "Generic scaling tiers and ATAR curve from the original reference. ESTIMATES ONLY — not UAC data. Replace per course with UAC figures only once UAC has given written permission (see CLAUDE.md).",
+  "tiers": {
+    "low":     { "label": "Low scaling",           "anchors": [[67,28],[75,44],[83,62],[90,75],[95,88]] },
+    "below":   { "label": "Below-average scaling", "anchors": [[65,33],[75,51],[83,65],[90,78],[95,89]] },
+    "average": { "label": "Average scaling",       "anchors": [[65,40],[75,57],[83,71],[90,83],[95,91]] },
+    "above":   { "label": "Above-average scaling", "anchors": [[65,46],[75,63],[83,76],[90,87],[95,93]] },
+    "strong":  { "label": "Strong scaling",        "anchors": [[65,55],[75,71],[83,82],[90,91],[95,96]] }
+  },
+  "cohortLevels": {
+    "low":     { "label": "Below state average",         "mean": 62 },
+    "average": { "label": "Around state average",        "mean": 70 },
+    "above":   { "label": "Above state average",         "mean": 76 },
+    "high":    { "label": "High-performing / selective", "mean": 84 }
+  },
+  "atarAnchors": [
+    { "aggregate": 154.50, "atar": 48.75 },
+    { "aggregate": 283.53, "atar": 74.50 }
+  ],
+  "rules": {
+    "year": 2025,
+    "maxAggregate": 500,
+    "countingUnits": 10,
+    "minUnits": 10,
+    "minEnglishUnits": 2,
+    "minTwoUnitCourses": 3,
+    "minSubjects": 4,
+    "maxSubjects": 20
+  }
+}

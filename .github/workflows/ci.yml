@@ -25,6 +25,8 @@ jobs:
         run: npm run typecheck
       - name: Lint
         run: npm run lint
+      - name: Engine tests (golden numbers + bug cases)
+        run: npm test
       - name: Contrast (WCAG AA, every theme)
         run: npm run check:contrast
       - name: Build

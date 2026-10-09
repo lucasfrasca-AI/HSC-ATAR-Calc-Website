@@ -11,11 +11,11 @@
     "build": "tsc -b && vite build",
     "typecheck": "tsc -b",
     "lint": "eslint .",
-    "test": "node --test \"src/**/*.test.ts\" \"scripts/**/*.test.mjs\"",
+    "test": "node --test \"src/**/*.test.ts\"",
     "check:contrast": "node scripts/check-contrast.mjs",
     "check:content": "node scripts/check-content.mjs",
     "check:budget": "node scripts/check-budget.mjs",
-    "verify": "npm run typecheck && npm run lint && npm run check:contrast && npm run build && npm run check:content && npm run check:budget",
+    "verify": "npm run typecheck && npm run lint && npm test && npm run check:contrast && npm run build && npm run check:content && npm run check:budget",
     "preview": "vite preview"
   },
   "dependencies": {

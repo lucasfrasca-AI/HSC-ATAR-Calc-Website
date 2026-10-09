@@ -31,6 +31,14 @@
   --spectrum-1: 239 84% 67%;
   --spectrum-2: 273 91% 65%;
   --spectrum-3: 45 96% 64%;
+  --subject-1: 270 62% 70%;
+  --subject-2: 210 62% 70%;
+  --subject-3: 160 62% 70%;
+  --subject-4: 35 62% 70%;
+  --subject-5: 340 62% 70%;
+  --subject-6: 190 62% 70%;
+  --subject-7: 120 62% 70%;
+  --subject-8: 15 62% 70%;
   color-scheme: dark;
 }
 
@@ -61,6 +69,14 @@
   --spectrum-1: 239 84% 60%;
   --spectrum-2: 273 80% 55%;
   --spectrum-3: 40 96% 50%;
+  --subject-1: 270 60% 38%;
+  --subject-2: 210 60% 38%;
+  --subject-3: 160 60% 38%;
+  --subject-4: 35 60% 38%;
+  --subject-5: 340 60% 38%;
+  --subject-6: 190 60% 38%;
+  --subject-7: 120 60% 38%;
+  --subject-8: 15 60% 38%;
   color-scheme: light;
 }
 
@@ -92,6 +108,14 @@
   --spectrum-1: 200 100% 60%;
   --spectrum-2: 211 100% 58%;
   --spectrum-3: 230 90% 70%;
+  --subject-1: 270 62% 70%;
+  --subject-2: 210 62% 70%;
+  --subject-3: 160 62% 70%;
+  --subject-4: 35 62% 70%;
+  --subject-5: 340 62% 70%;
+  --subject-6: 190 62% 70%;
+  --subject-7: 120 62% 70%;
+  --subject-8: 15 62% 70%;
   color-scheme: dark;
 }
 
@@ -123,6 +147,14 @@
   --spectrum-1: 200 100% 42%;
   --spectrum-2: 214 100% 45%;
   --spectrum-3: 235 75% 55%;
+  --subject-1: 270 60% 38%;
+  --subject-2: 210 60% 38%;
+  --subject-3: 160 60% 38%;
+  --subject-4: 35 60% 38%;
+  --subject-5: 340 60% 38%;
+  --subject-6: 190 60% 38%;
+  --subject-7: 120 60% 38%;
+  --subject-8: 15 60% 38%;
   color-scheme: light;
 }
 
@@ -154,5 +186,13 @@
   --spectrum-1: 270 100% 84%;
   --spectrum-2: 270 100% 84%;
   --spectrum-3: 270 100% 84%;
+  --subject-1: 270 100% 80%;
+  --subject-2: 210 100% 80%;
+  --subject-3: 160 100% 80%;
+  --subject-4: 35 100% 80%;
+  --subject-5: 340 100% 80%;
+  --subject-6: 190 100% 80%;
+  --subject-7: 120 100% 80%;
+  --subject-8: 15 100% 80%;
   color-scheme: dark;
 }
