@@ -38,7 +38,7 @@ jobs:
         with:
           name: dist
           path: dist
-          include-hidden-files: true
+          include-hidden-files: false
           if-no-files-found: error
           retention-days: 7
 
