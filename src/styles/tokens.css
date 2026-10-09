@@ -1,0 +1,158 @@
+/* Theme tokens. HSL triplets, no wrapper: use as hsl(var(--x) / a).
+   Token NAMES are identical in every theme. Adding a theme = one new block.
+   --glass-alpha is the opacity of glass surfaces; contrast is checked against
+   the composited result, worst case (over --glow at full strength). */
+
+:root,
+:root[data-theme="violet-dark"] {
+  --background: 260 87% 3%;
+  --foreground: 40 6% 95%;
+  --foreground-2: 40 6% 80%;
+  --foreground-3: 40 5% 64%;
+  --surface: 262 32% 11%;
+  --glass-alpha: 0.62;
+  --glow: 268 80% 45%;
+  --glow-alpha: 0.16;
+  --border: 40 6% 95%;
+  --input-border: 260 10% 46%;
+  --accent: 270 95% 74%;
+  --accent-fill: 270 80% 62%;
+  --on-accent: 260 87% 3%;
+  --ring: 270 95% 74%;
+  --gain: 152 55% 55%;
+  --loss: 2 85% 70%;
+  --warn: 45 96% 64%;
+  --internal: 232 80% 76%;
+  --exam: 32 92% 64%;
+  --dropped: 270 12% 66%;
+  --expected: 40 5% 64%;
+  --target: 152 55% 55%;
+  --on-fill: 260 87% 3%;
+  --spectrum-1: 239 84% 67%;
+  --spectrum-2: 273 91% 65%;
+  --spectrum-3: 45 96% 64%;
+  color-scheme: dark;
+}
+
+:root[data-theme="violet-light"] {
+  --background: 40 12% 96%;
+  --foreground: 262 40% 8%;
+  --foreground-2: 262 12% 28%;
+  --foreground-3: 262 6% 38%;
+  --surface: 0 0% 100%;
+  --glass-alpha: 0.66;
+  --glow: 268 90% 70%;
+  --glow-alpha: 0.18;
+  --border: 262 40% 8%;
+  --input-border: 262 8% 52%;
+  --accent: 268 72% 46%;
+  --accent-fill: 268 72% 46%;
+  --on-accent: 0 0% 100%;
+  --ring: 268 72% 46%;
+  --gain: 156 82% 24%;
+  --loss: 2 72% 41%;
+  --warn: 36 92% 28%;
+  --internal: 226 62% 40%;
+  --exam: 24 88% 36%;
+  --dropped: 268 18% 40%;
+  --expected: 262 6% 38%;
+  --target: 156 82% 24%;
+  --on-fill: 0 0% 100%;
+  --spectrum-1: 239 84% 60%;
+  --spectrum-2: 273 80% 55%;
+  --spectrum-3: 40 96% 50%;
+  color-scheme: light;
+}
+
+/* "Midnight": black, white and blue */
+:root[data-theme="blue-dark"] {
+  --background: 0 0% 2%;
+  --foreground: 0 0% 96%;
+  --foreground-2: 0 0% 80%;
+  --foreground-3: 0 0% 64%;
+  --surface: 216 12% 11%;
+  --glass-alpha: 0.62;
+  --glow: 211 100% 45%;
+  --glow-alpha: 0.14;
+  --border: 0 0% 96%;
+  --input-border: 216 6% 46%;
+  --accent: 208 100% 66%;
+  --accent-fill: 211 100% 45%;
+  --on-accent: 0 0% 100%;
+  --ring: 208 100% 66%;
+  --gain: 145 60% 55%;
+  --loss: 2 90% 70%;
+  --warn: 45 96% 62%;
+  --internal: 208 100% 72%;
+  --exam: 30 95% 63%;
+  --dropped: 216 8% 64%;
+  --expected: 0 0% 64%;
+  --target: 145 60% 55%;
+  --on-fill: 0 0% 2%;
+  --spectrum-1: 200 100% 60%;
+  --spectrum-2: 211 100% 58%;
+  --spectrum-3: 230 90% 70%;
+  color-scheme: dark;
+}
+
+/* "Paper": white, black and blue */
+:root[data-theme="blue-light"] {
+  --background: 0 0% 98%;
+  --foreground: 0 0% 5%;
+  --foreground-2: 0 0% 26%;
+  --foreground-3: 0 0% 38%;
+  --surface: 0 0% 100%;
+  --glass-alpha: 0.68;
+  --glow: 211 100% 60%;
+  --glow-alpha: 0.14;
+  --border: 0 0% 5%;
+  --input-border: 0 0% 52%;
+  --accent: 214 100% 40%;
+  --accent-fill: 214 100% 42%;
+  --on-accent: 0 0% 100%;
+  --ring: 214 100% 40%;
+  --gain: 150 85% 24%;
+  --loss: 2 75% 41%;
+  --warn: 36 92% 28%;
+  --internal: 214 100% 36%;
+  --exam: 24 90% 35%;
+  --dropped: 216 10% 40%;
+  --expected: 0 0% 38%;
+  --target: 150 85% 24%;
+  --on-fill: 0 0% 100%;
+  --spectrum-1: 200 100% 42%;
+  --spectrum-2: 214 100% 45%;
+  --spectrum-3: 235 75% 55%;
+  color-scheme: light;
+}
+
+/* High contrast: opaque, no glow, no transparency. */
+:root[data-theme="contrast"] {
+  --background: 0 0% 0%;
+  --foreground: 0 0% 100%;
+  --foreground-2: 0 0% 100%;
+  --foreground-3: 0 0% 88%;
+  --surface: 0 0% 0%;
+  --glass-alpha: 1;
+  --glow: 0 0% 0%;
+  --glow-alpha: 0;
+  --border: 0 0% 100%;
+  --input-border: 0 0% 100%;
+  --accent: 270 100% 84%;
+  --accent-fill: 270 100% 84%;
+  --on-accent: 0 0% 0%;
+  --ring: 55 100% 60%;
+  --gain: 140 85% 65%;
+  --loss: 0 100% 76%;
+  --warn: 52 100% 60%;
+  --internal: 205 100% 75%;
+  --exam: 32 100% 68%;
+  --dropped: 0 0% 82%;
+  --expected: 0 0% 88%;
+  --target: 140 85% 65%;
+  --on-fill: 0 0% 0%;
+  --spectrum-1: 270 100% 84%;
+  --spectrum-2: 270 100% 84%;
+  --spectrum-3: 270 100% 84%;
+  color-scheme: dark;
+}

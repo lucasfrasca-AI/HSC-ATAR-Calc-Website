@@ -1,0 +1,53 @@
+@import "tailwindcss";
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/geist-mono";
+@import "./tokens.css";
+
+/* Token -> Tailwind bridge. Components use these utilities or hsl(var(--x) / a);
+   no colour literal appears outside tokens.css (asserted by check-content). */
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-foreground-2: hsl(var(--foreground-2));
+  --color-foreground-3: hsl(var(--foreground-3));
+  --color-surface: hsl(var(--surface));
+  --color-border: hsl(var(--border));
+  --color-input-border: hsl(var(--input-border));
+  --color-accent: hsl(var(--accent));
+  --color-accent-fill: hsl(var(--accent-fill));
+  --color-on-accent: hsl(var(--on-accent));
+  --color-ring: hsl(var(--ring));
+  --color-gain: hsl(var(--gain));
+  --color-loss: hsl(var(--loss));
+  --color-warn: hsl(var(--warn));
+  --color-internal: hsl(var(--internal));
+  --color-exam: hsl(var(--exam));
+  --color-dropped: hsl(var(--dropped));
+  --color-on-fill: hsl(var(--on-fill));
+  --font-sans: -apple-system, BlinkMacSystemFont, "Geist Variable", system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Geist Mono Variable", Menlo, monospace;
+}
+
+/* Honour an OS high-contrast request inside the glass themes too. */
+@media (prefers-contrast: more) {
+  :root:not([data-theme="contrast"]) { --glass-alpha: 0.94; --glow-alpha: 0; }
+}
+@media (prefers-reduced-transparency: reduce) {
+  :root { --glass-alpha: 1; }
+}
+
+html { background: hsl(var(--background)); color: hsl(var(--foreground)); }
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "tnum" 0;
+}
+:focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: 2px; border-radius: 4px; }
+a { color: hsl(var(--accent)); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+}

@@ -1,0 +1,26 @@
+{
+  "meta": {
+    "title": "NSW HSC ATAR Calculator",
+    "description": "Project your NSW HSC ATAR from your courses and internal marks. Nothing you type leaves your browser.",
+    "lang": "en-AU"
+  },
+  "header": {
+    "productName": "NSW HSC ATAR Calculator",
+    "intro": "Enter each course and its internal mark on the subjects page; add rank, tasks or scaling detail only if you have it."
+  },
+  "noJs": "This calculator runs in your browser and needs JavaScript turned on. Nothing you type leaves your browser.",
+  "footer": {
+    "disclaimer": "Independent projection tool. Not affiliated with UAC or NESA. Scaling and ATAR mappings are approximations of published UAC data and change every year. Not an official result.",
+    "credit": "Lucas Frasca"
+  },
+  "theme": {
+    "label": "Theme",
+    "options": [
+      { "id": "violet-dark", "name": "Violet" },
+      { "id": "violet-light", "name": "Violet light" },
+      { "id": "blue-dark", "name": "Midnight" },
+      { "id": "blue-light", "name": "Paper" },
+      { "id": "contrast", "name": "High contrast" }
+    ]
+  }
+}

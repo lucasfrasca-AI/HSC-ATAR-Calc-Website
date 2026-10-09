@@ -1,0 +1,3 @@
+Contact: https://github.com/lucasfrasca-AI/HSC-ATAR-Calc-Website/security/advisories/new
+Expires: 2027-10-09T00:00:00.000Z
+Preferred-Languages: en

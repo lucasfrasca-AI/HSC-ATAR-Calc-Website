@@ -1,0 +1,12 @@
+node_modules
+dist
+*.local
+.DS_Store
+.firebase/
+firebase-debug.log*
+*.tsbuildinfo
+# never commit credentials
+*-key.json
+service-account*.json
+.env*
+.build-meta

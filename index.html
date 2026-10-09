@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="%LANG%">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>%TITLE%</title>
+    <meta name="description" content="%DESCRIPTION%" />
+    <meta name="color-scheme" content="dark light" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <script>(function(){try{var v=["violet-dark","violet-light","blue-dark","blue-light","contrast"],t=localStorage.getItem("hsc-theme");if(v.indexOf(t)<0){var m=function(q){return window.matchMedia(q).matches};t=m("(prefers-contrast: more)")?"contrast":m("(prefers-color-scheme: light)")?"violet-light":"violet-dark"}document.documentElement.setAttribute("data-theme",t)}catch(e){}})();</script>
+  </head>
+  <body>
+    <div id="root"><!--FALLBACK--></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

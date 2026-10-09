@@ -1,0 +1,71 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Lint
+        run: npm run lint
+      - name: Contrast (WCAG AA, every theme)
+        run: npm run check:contrast
+      - name: Build
+        run: npm run build
+      - name: Content checks
+        run: npm run check:content
+      - name: Performance budget
+        run: npm run check:budget
+      # include-hidden-files: without it dist/.well-known silently vanishes.
+      - uses: actions/upload-artifact@v7
+        with:
+          name: dist
+          path: dist
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 7
+
+  deploy:
+    needs: verify
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://hsc-atar-calc.web.app
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      # Checkout is only for firebase.json/.firebaserc; dist comes from verify.
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: dist
+      - name: Assert the verified artifact is intact
+        run: |
+          test -f dist/index.html || { echo "::error::dist/index.html missing"; exit 1; }
+          test -f dist/.well-known/security.txt || { echo "::error::dist/.well-known/security.txt missing — hidden files dropped by the artifact"; exit 1; }
+      - uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: projects/649305346800/locations/global/workloadIdentityPools/github/providers/hsc-repo
+          service_account: github-deploy@hsc-atar-calc.iam.gserviceaccount.com
+      - name: Deploy to Firebase Hosting
+        run: npx --yes firebase-tools@15.30.0 deploy --only hosting --project hsc-atar-calc --non-interactive
