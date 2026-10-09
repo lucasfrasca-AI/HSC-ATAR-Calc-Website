@@ -4,8 +4,22 @@
 .ambient { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; background: hsl(var(--background)); }
 .ambient i { position: absolute; border-radius: 50%; filter: blur(70px); will-change: transform; }
 .ambient .a1 { width: 52vmax; height: 52vmax; left: -14vmax; top: -18vmax; background: radial-gradient(circle, hsl(var(--glow) / var(--glow-alpha)), transparent 68%);  }
-.ambient .a2 { width: 40vmax; height: 40vmax; right: -12vmax; top: 24vh; background: radial-gradient(circle, hsl(var(--foreground) / calc(var(--glow-alpha) * 0.45)), transparent 70%);  }
-.ambient .a3 { width: 34vmax; height: 34vmax; left: 30vw; bottom: -20vmax; background: radial-gradient(circle, hsl(var(--glow) / calc(var(--glow-alpha) * 0.6)), transparent 70%);  }
+.ambient .a2 { width: 40vmax; height: 40vmax; right: -12vmax; top: 24vh; background: radial-gradient(circle, hsl(var(--glow-2) / calc(var(--glow-alpha) * 0.9)), transparent 70%);  }
+.ambient .a3 { width: 34vmax; height: 34vmax; left: 30vw; bottom: -20vmax; background: radial-gradient(circle, hsl(var(--glow-3) / calc(var(--glow-alpha) * 0.85)), transparent 70%);  }
+.ambient::after { content: ""; position: absolute; inset: 0; background: radial-gradient(circle, hsl(var(--foreground) / var(--grid-alpha)) 1.1px, transparent 1.6px) 0 0 / 24px 24px; }
+
+/* ---------- WebGL liquid glass (src/lib/liquidGlass.ts) ----------
+   The scene canvas replaces the CSS ambient; each panel gets a canvas behind its content
+   (z -2, below the sheen) that draws tint, refraction, rim and shadow, so the CSS material
+   steps aside on [data-lg] panels only. Contrast theme and print keep the CSS surfaces. */
+.lg-backdrop { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none; }
+.lg-panel { position: absolute; left: -25px; top: -25px; width: calc(100% + 50px); height: calc(100% + 50px); z-index: -2; pointer-events: none; border-radius: 0; }
+:root.lg:not([data-theme="contrast"]) .ambient { display: none; }
+:root.lg:not([data-theme="contrast"]) [data-lg] {
+  background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; border-color: transparent; box-shadow: none;
+}
+:root.lg:not([data-theme="contrast"]) [data-lg]::before { display: none; }
+:root[data-theme="contrast"] .lg-panel, :root[data-theme="contrast"] .lg-backdrop { display: none; }
 
 /* ---------- liquid glass ---------- */
 .glass {
@@ -106,7 +120,7 @@ input[type="checkbox"] { accent-color: hsl(var(--accent-fill)); width: 18px; hei
 .num { font-variant-numeric: tabular-nums; }
 
 /* ---------- headline ---------- */
-.atar-num { font-size: clamp(3.8rem, 13vw, 7rem); line-height: 0.86; font-weight: 600; letter-spacing: -0.045em; font-variant-numeric: tabular-nums; position: relative; display: inline-block; }
+.atar-num { font-size: clamp(4.2rem, 16vw, 8.6rem); line-height: 0.86; font-weight: 600; letter-spacing: -0.045em; font-variant-numeric: tabular-nums; position: relative; display: inline-block; }
 /* The one accent gradient on the page: the brand spectrum under the ATAR. */
 .atar-num::after { content: ""; position: absolute; left: 2px; right: 2px; bottom: -12px; height: 4px; border-radius: 4px; background: linear-gradient(90deg, hsl(var(--spectrum-1)), hsl(var(--spectrum-2)), hsl(var(--spectrum-3))); }
 .atar-num[data-indicative="true"]::after { background: hsl(var(--foreground-3) / 0.5); }
@@ -185,7 +199,7 @@ dialog.confirm[open] { animation: reveal 0.25s ease both; }
 .fallback h1 { font-size: 2rem; margin: 0 0 12px; }
 
 @media print {
-  .ambient, .no-print, .toast { display: none !important; }
+  .ambient, .no-print, .toast, .lg-panel, .lg-backdrop { display: none !important; }
   [hidden] { display: block !important; }
   .glass { backdrop-filter: none; box-shadow: none; background: transparent; }
 }

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // WCAG contrast gate. Zero dependencies. Reads the theme blocks from the
 // tokens CSS, composites glass surfaces over the page (worst case: over the
-// ambient glow at full strength) and fails if any pairing is under its floor.
+// backdrop scene at full strength) and fails if any pairing is under its floor.
 import { readFileSync } from "node:fs";
 
 const file = process.argv[2] ?? "src/styles/tokens.css";
@@ -76,8 +76,25 @@ for (const [name, t] of Object.entries(themes)) {
   const page = c("background");
   const glowAlpha = Number(t["glow-alpha"] ?? 0);
   const glassAlpha = Number(t["glass-alpha"] ?? 1);
-  // A glass surface can sit over the bare page or over the glow; check both.
-  const unders = [page, mix(c("glow"), page, glowAlpha)];
+  // The backdrop scene: three soft glows and a dot grid over the page. This mirrors scene()
+  // in src/lib/liquidGlass.ts (keep them in step) and takes the worst pixel over phone,
+  // laptop and desktop viewports, with a grid dot at full strength on top of it.
+  const gridAlpha = Number(t["grid-alpha"] ?? 0);
+  const blob = (x, y, cx, cy, r) => Math.exp(-(((x - cx) / r) ** 2 + ((y - cy) / r) ** 2) * 2.2);
+  const scene = (x, y, w, h) => {
+    const vm = Math.max(w, h);
+    let u = page;
+    u = mix(c("glow"), u, glowAlpha * blob(x, y, 0.12 * vm, 0.06 * vm, 0.3 * vm));
+    u = mix(c("glow-2"), u, glowAlpha * 0.9 * blob(x, y, w - 0.06 * vm, 0.3 * h + 0.12 * vm, 0.24 * vm));
+    u = mix(c("glow-3"), u, glowAlpha * 0.85 * blob(x, y, 0.34 * w + 0.1 * vm, h, 0.22 * vm));
+    return u;
+  };
+  const unders = [page];
+  for (const [w, h] of [[390, 844], [1440, 900], [1920, 1080], [820, 1180]])
+    for (let x = 0; x <= w; x += w / 40) for (let y = 0; y <= h; y += h / 40) {
+      const u = scene(x, y, w, h);
+      unders.push(u, mix(c("foreground"), u, gridAlpha));
+    }
   const bgs = (k) =>
     k === "page" ? unders : k === "glass" ? unders.map((u) => mix(c("surface"), u, glassAlpha)) : [c(k)];
   for (const [fg, bg, floor, label] of PAIRS) {

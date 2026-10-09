@@ -147,34 +147,34 @@ function Readout() {
   return (
     <Glass
       id="readout"
-      className="rise glass-hero glass-refract glass-spec mt-8 grid gap-6 p-6 sm:p-9 lg:grid-cols-[auto_1fr] lg:items-end"
+      className="rise glass-hero glass-refract glass-spec readout mt-10 flex flex-col items-center gap-7 px-5 pt-8 pb-7 text-center sm:px-10 sm:pt-10"
       onPointerEnter={(e: PointerEvent<HTMLDivElement>) => { if (!reduced) e.currentTarget.style.setProperty("--spec", "1"); }}
       onPointerLeave={(e: PointerEvent<HTMLDivElement>) => e.currentTarget.style.setProperty("--spec", "0")}
       onPointerMove={move}
     >
       {sweep > 0 && <span key={sweep} aria-hidden="true" className="sweep" />}
-      <div className="flex items-end gap-4">
+      <div className="flex flex-col items-center gap-4">
         <div>
-          <p className="kicker mb-3">{site.readout.atarLabel}</p>
+          <p className="kicker mb-2">{site.readout.atarLabel}</p>
           <p className="atar-num" data-indicative={!v.eligible}>
             {has ? <Odometer text={fmt(c.atar, 2)} /> : <span aria-hidden="true">{site.labels.dash}</span>}
             <span className="sr-only">{has ? fmt(c.atar, 2) : site.labels.dash}{!v.eligible && has ? ` ${site.readout.indicativeBadge}` : ""}</span>
           </p>
         </div>
-        <div className="mb-1 max-w-[26ch]">
-          <p className="text-[0.88rem] text-foreground-2">{cap}</p>
+        <div className="flex flex-col items-center">
+          <p className="max-w-[44ch] text-[0.92rem] text-foreground-2">{cap}</p>
           {has && (
-            <p className="mt-2.5 flex items-center gap-2.5 text-[0.78rem] text-foreground-3" title={t(site.readout.ring, { pct: Math.round(c.atar) })}>
+            <p className="mt-3 flex items-center justify-center gap-2.5 text-[0.78rem] text-foreground-3" title={t(site.readout.ring, { pct: Math.round(c.atar) })}>
               <PercentileRing atar={c.atar} />
               <span>{t(site.readout.ringShort, { pct: Math.round(c.atar) })}<span className="sr-only">. {t(site.readout.ring, { pct: Math.round(c.atar) })}</span></span>
             </p>
           )}
         </div>
       </div>
-      <div className="grid grid-cols-3 gap-3 sm:gap-6 lg:justify-self-end lg:gap-8">
-        <Stat className="border-l border-border/10 pl-3" value={<TweenNum value={c.aggregate} />} label={site.readout.stats.scaled} />
-        <Stat className="border-l border-border/10 pl-3" value={<TweenNum value={c.rawAggregate} />} label={site.readout.stats.raw} />
-        <Stat className="border-l border-border/10 pl-3" value={v.totalUnits} label={site.readout.stats.units} />
+      <div className="grid w-full max-w-[680px] grid-cols-3 divide-x divide-border/10 border-t border-border/10 pt-6">
+        <Stat className="px-2" value={<TweenNum value={c.aggregate} />} label={site.readout.stats.scaled} />
+        <Stat className="px-2" value={<TweenNum value={c.rawAggregate} />} label={site.readout.stats.raw} />
+        <Stat className="px-2" value={v.totalUnits} label={site.readout.stats.units} />
       </div>
     </Glass>
   );
@@ -264,9 +264,9 @@ export function AppBar({ tabs }: { tabs: React.ReactNode }) {
 export function Hero() {
   const { data } = useCalc();
   return (
-    <section className="hero pt-8 sm:pt-12" aria-labelledby="page-title">
-      <h1 id="page-title" className="text-[clamp(2rem,5.2vw,3.3rem)] leading-[1.03] font-semibold tracking-[-0.035em]">{site.meta.title}</h1>
-      <p className="mt-3 max-w-[62ch] text-[1rem] text-foreground-2">
+    <section className="hero pt-10 text-center sm:pt-16" aria-labelledby="page-title">
+      <h1 id="page-title" className="mx-auto max-w-[16ch] text-[clamp(2.3rem,6.4vw,4.4rem)] leading-[1.02] font-semibold tracking-[-0.04em] text-balance">{site.meta.title}</h1>
+      <p className="mx-auto mt-4 max-w-[58ch] text-[1.02rem] leading-relaxed text-foreground-2 sm:text-[1.08rem]">
         <strong className="font-semibold text-foreground">{data.name ? t(site.header.who.named, { name: data.name }) : site.header.who.anon}</strong>{" "}
         {site.header.intro}
       </p>

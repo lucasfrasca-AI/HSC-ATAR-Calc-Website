@@ -24,6 +24,14 @@ The `apple-design` skill (github.com/emilkowalski/skills, MIT; installed at `~/.
 - Hero: large title + intro + the thick `glass-hero` readout. Material order: hero > `.glass` > `.glass-sm`.
 - "Full breakdown" `<details>` holds Expected vs target, ten units and 250+250 (common path first); Plan is section 04.
 - Background is static (skill: no full-viewport moving backgrounds).
+- Hero is centred (title, intro, readout stacked; stats in a hairline-divided row).
+
+## Liquid glass (WebGL, `src/lib/liquidGlass.ts`)
+- Port of the refraction model in ybouane/liquidglass (MIT): rounded-rect SDF, biconvex bevel, dual-surface refraction, chromatic aberration, Fresnel, specular rim, inner stroke, drop shadow. Not the library itself: it rasterises the DOM with html-to-image (data: URIs, blocked by our CSP) and needs glass to be direct children of one root.
+- The backdrop is a GLSL `scene()` (three glows `--glow/-2/-3` at `--glow-alpha`, dot grid at `--grid-alpha`) painted to a fixed canvas; each top-level `.glass` gets a canvas child (z -2) that samples the same scene at its refracted position. One GL context, copied to 2D canvases. Runs only while something moves (scroll, input, DOM/animation events), redraws only panels whose rect changed, frees canvases far off screen.
+- Panels drawn by the shader get `data-lg`; CSS material steps aside only there. App bar, tab bar, dialogs, menus keep CSS backdrop blur (they sit over content, not the backdrop).
+- Off for reduced transparency (never started), the contrast theme (hidden), print, and no WebGL (CSS glass). Lazy chunk, in MUST_BE_LAZY, started on idle.
+- check-contrast mirrors `scene()` and takes the worst pixel over four viewports plus a grid dot. **Change one, change the other.** Panel centres get tint only (no highlights), so the composite is exact.
 
 ## Architecture
 - `src/lib/engine.ts`: the whole model, pure functions over `Data`; returns message *keys*, never copy. Golden test: the sample student (Maths Std 2 70, English Std 70, Business 64, Italian Beginners 66, SOR I 60, HMS 62 — the owner's chosen test data) gives raw 332.0, scaled 154.0, ATAR 48.64 with the SOR I unit outside the best 10; the original reference script gives the same. If a change moves those, the chain changed.
@@ -97,4 +105,4 @@ Its SHA-256 is in the CSP in `firebase.json`. Edit the script → build → `nod
 - Mathematics Extension 1 is published as 1/2 units (2 when taken with Extension 2). It defaults to 1; the engine emits an info message when Extension 2 is also listed.
 
 ## Credits
-Glass technique (SVG displacement refraction) informed by rdev/liquid-glass-react (MIT); the component here is an independent implementation.
+WebGL glass shader adapted from ybouane/liquidglass (MIT). Glass technique (SVG displacement refraction) informed by rdev/liquid-glass-react (MIT); the component here is an independent implementation.

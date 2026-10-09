@@ -1,7 +1,7 @@
 /* Theme tokens. HSL triplets, no wrapper: use as hsl(var(--x) / a).
    Token NAMES are identical in every theme. Adding a theme = one new block.
    --glass-alpha is the opacity of glass surfaces; contrast is checked against
-   the composited result, worst case (over --glow at full strength). */
+   the composited result, worst case (the backdrop scene's worst pixel, see check-contrast). */
 
 :root,
 :root[data-theme="violet-dark"] {
@@ -12,7 +12,10 @@
   --surface: 262 32% 11%;
   --glass-alpha: 0.62;
   --glow: 268 80% 45%;
-  --glow-alpha: 0.16;
+  --glow-alpha: 0.36;
+  --glow-2: 228 85% 52%;
+  --glow-3: 315 72% 44%;
+  --grid-alpha: 0.10;
   --border: 40 6% 95%;
   --input-border: 260 10% 46%;
   --accent: 270 95% 74%;
@@ -46,17 +49,20 @@
   --background: 40 12% 96%;
   --foreground: 262 40% 8%;
   --foreground-2: 262 12% 28%;
-  --foreground-3: 262 6% 38%;
+  --foreground-3: 262 8% 31%;
   --surface: 0 0% 100%;
   --glass-alpha: 0.66;
   --glow: 268 90% 70%;
-  --glow-alpha: 0.18;
+  --glow-alpha: 0.28;
+  --glow-2: 205 90% 74%;
+  --glow-3: 330 85% 76%;
+  --grid-alpha: 0.09;
   --border: 262 40% 8%;
   --input-border: 262 8% 52%;
-  --accent: 268 72% 46%;
+  --accent: 268 74% 40%;
   --accent-fill: 268 72% 46%;
   --on-accent: 0 0% 100%;
-  --ring: 268 72% 46%;
+  --ring: 268 74% 40%;
   --gain: 156 82% 24%;
   --loss: 2 72% 41%;
   --warn: 36 92% 28%;
@@ -71,7 +77,7 @@
   --spectrum-3: 40 96% 50%;
   --subject-1: 270 60% 38%;
   --subject-2: 210 60% 38%;
-  --subject-3: 160 60% 38%;
+  --subject-3: 160 64% 31%;
   --subject-4: 35 60% 38%;
   --subject-5: 340 60% 38%;
   --subject-6: 190 60% 38%;
@@ -85,17 +91,20 @@
   --background: 0 0% 2%;
   --foreground: 0 0% 96%;
   --foreground-2: 0 0% 80%;
-  --foreground-3: 0 0% 64%;
+  --foreground-3: 0 0% 70%;
   --surface: 216 12% 11%;
   --glass-alpha: 0.62;
   --glow: 211 100% 45%;
-  --glow-alpha: 0.14;
+  --glow-alpha: 0.30;
+  --glow-2: 190 90% 40%;
+  --glow-3: 240 75% 55%;
+  --grid-alpha: 0.10;
   --border: 0 0% 96%;
   --input-border: 216 6% 46%;
-  --accent: 208 100% 66%;
+  --accent: 206 100% 72%;
   --accent-fill: 211 100% 45%;
   --on-accent: 0 0% 100%;
-  --ring: 208 100% 66%;
+  --ring: 206 100% 72%;
   --gain: 145 60% 55%;
   --loss: 2 90% 70%;
   --warn: 45 96% 62%;
@@ -124,17 +133,20 @@
   --background: 0 0% 98%;
   --foreground: 0 0% 5%;
   --foreground-2: 0 0% 26%;
-  --foreground-3: 0 0% 38%;
+  --foreground-3: 0 0% 31%;
   --surface: 0 0% 100%;
   --glass-alpha: 0.68;
   --glow: 211 100% 60%;
-  --glow-alpha: 0.14;
+  --glow-alpha: 0.24;
+  --glow-2: 190 85% 58%;
+  --glow-3: 230 80% 70%;
+  --grid-alpha: 0.08;
   --border: 0 0% 5%;
   --input-border: 0 0% 52%;
-  --accent: 214 100% 40%;
+  --accent: 214 100% 34%;
   --accent-fill: 214 100% 42%;
   --on-accent: 0 0% 100%;
-  --ring: 214 100% 40%;
+  --ring: 214 100% 34%;
   --gain: 150 85% 24%;
   --loss: 2 75% 41%;
   --warn: 36 92% 28%;
@@ -149,7 +161,7 @@
   --spectrum-3: 235 75% 55%;
   --subject-1: 270 60% 38%;
   --subject-2: 210 60% 38%;
-  --subject-3: 160 60% 38%;
+  --subject-3: 160 64% 31%;
   --subject-4: 35 60% 38%;
   --subject-5: 340 60% 38%;
   --subject-6: 190 60% 38%;
@@ -168,6 +180,9 @@
   --glass-alpha: 1;
   --glow: 0 0% 0%;
   --glow-alpha: 0;
+  --glow-2: 0 0% 0%;
+  --glow-3: 0 0% 0%;
+  --grid-alpha: 0;
   --border: 0 0% 100%;
   --input-border: 0 0% 100%;
   --accent: 270 100% 84%;

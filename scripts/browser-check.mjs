@@ -349,6 +349,23 @@ await ev("document.querySelector('header a[href^=\"https://lucasfrasca.com\"]').
 await key("Enter", "Enter"); await sleep(2500);
 check((await ev("location.host")) === "lucasfrasca.com", "pressing Enter on the focused logo goes straight to lucasfrasca.com");
 
+// ---- WebGL liquid glass: on by default, steps aside for reduced transparency and contrast ----
+await setViewport(1440);
+await ev(`localStorage.setItem("hsc-theme", "violet-dark")`);
+await load(url.replace(/#.*$/, "")); await sleep(1500);
+const lg = await ev("({ on: document.documentElement.classList.contains('lg'), panels: document.querySelectorAll('[data-lg]').length, canvases: document.querySelectorAll('[data-lg] > canvas.lg-panel').length, backdrop: !!document.querySelector('canvas.lg-backdrop'), cssOff: getComputedStyle(document.querySelector('#readout')).backdropFilter })");
+check(lg.on && lg.backdrop && lg.panels > 0 && lg.panels === lg.canvases, "WebGL liquid glass draws the backdrop and every visible top-level panel", JSON.stringify(lg));
+check(lg.cssOff === "none", "glass panels drop the CSS blur once the shader draws them", lg.cssOff);
+const painted = await ev("(() => { const c = document.querySelector('#readout > canvas.lg-panel'); const d = c.getContext('2d').getImageData(c.width / 2, c.height / 2, 1, 1).data; return d[3]; })()");
+check(painted === 255, "the readout's glass canvas is actually painted (opaque centre)", String(painted));
+check(await ev("document.querySelectorAll('dialog [data-lg], .appbar [data-lg], .tabbar [data-lg]').length === 0"), "chrome over content (app bar, tab bar, dialogs) keeps CSS backdrop blur");
+await ev("document.documentElement.dataset.theme = 'contrast'"); await sleep(300);
+check(await ev("getComputedStyle(document.querySelector('canvas.lg-backdrop')).display === 'none' && getComputedStyle(document.querySelector('#readout')).backgroundColor !== 'rgba(0, 0, 0, 0)'"), "contrast theme hides the shader glass and keeps solid surfaces");
+await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-transparency", value: "reduce" }] });
+await load(url.replace(/#.*$/, "")); await sleep(1500);
+check(await ev("!document.documentElement.classList.contains('lg') && !document.querySelector('canvas.lg-panel, canvas.lg-backdrop')"), "reduced transparency never starts the WebGL glass");
+await send("Emulation.setEmulatedMedia", { features: [] });
+
 ws.close();
 console.log(failures ? `browser-check: ${failures} failure(s)` : "browser-check: all passed");
 process.exit(failures ? 1 : 0);
