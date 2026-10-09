@@ -597,11 +597,11 @@ export function Calculator() {
       {!data.subjects.length ? <EmptyState onTest={loadTest} /> : (
         <>
           <CurveSection />
-          <PlanSection />
           <ProjectionSection />
           <CompareSection />
           <UnitsSection />
           <SplitSection />
+          <PlanSection />
         </>
       )}
     </>
