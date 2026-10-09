@@ -11,7 +11,10 @@
       "named": "{name} — NSW HSC ATAR projection.",
       "anon": "Your NSW HSC ATAR projection."
     },
-    "intro": "Enter each course and its internal mark on the subjects page; add rank, tasks or scaling detail only if you have it."
+    "intro": "Enter each course and its internal mark on the subjects page; add rank, tasks or scaling detail only if you have it.",
+    "appTitle": "HSC ATAR",
+    "compactAtar": "ATAR",
+    "compactAtarLabel": "Projected ATAR {atar} — back to top"
   },
   "toolbar": {
     "export": "Export data",
@@ -27,7 +30,9 @@
     "nothingToUndo": "Nothing to undo",
     "nothingToRedo": "Nothing to redo",
     "shortcutsHint": "Tip: ⌘Z / Ctrl+Z undoes any change.",
-    "share": "Share"
+    "share": "Share",
+    "more": "More",
+    "moreLabel": "More actions"
   },
   "theme": {
     "label": "Theme",
@@ -203,15 +208,13 @@
   "kickers": {
     "curve": "01 · Projection",
     "projection": "02 · Exams",
-    "compare": "03 · Scenarios",
-    "units": "04 · Counting",
-    "split": "05 · Composition",
     "subjects": "Your list",
     "summary": "At a glance",
     "help": "Method",
     "scaling": "Reference",
     "syllabuses": "NESA syllabuses",
-    "plan": "06 · Plan"
+    "plan": "04 · Plan",
+    "breakdown": "03 · Breakdown"
   },
   "author": {
     "url": "https://lucasfrasca.com",

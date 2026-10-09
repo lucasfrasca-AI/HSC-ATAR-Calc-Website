@@ -21,9 +21,9 @@ function ThemePicker() {
   };
   return (
     <details className="relative">
-      <summary ref={summary} className="btn" aria-label={`${site.theme.label}: ${name}`}>
-        <span aria-hidden="true" className="inline-block h-3 w-3 rounded-full bg-accent-fill" />
-        {name}
+      <summary ref={summary} className="btn btn-icon lg:!w-auto lg:!px-3.5" aria-label={`${site.theme.label}: ${name}`}>
+        <span aria-hidden="true" className="inline-block h-3.5 w-3.5 rounded-full bg-accent-fill ring-2 ring-foreground/15" />
+        <span className="hidden lg:inline">{name}</span>
       </summary>
       <Glass as="fieldset" className="theme-menu glass-sm absolute right-0 z-20 mt-2 w-52 p-2">
         <legend className="sr-only">{site.theme.label}</legend>
@@ -64,24 +64,31 @@ function Toolbar() {
       toast(t(site.toasts.importFailed, { reason }));
     }
   };
+  const undoBtn = (
+    <button type="button" className="btn btn-icon" disabled={!canUndo} aria-label={site.toolbar.undoLabel} title={site.toolbar.shortcutsHint} onClick={() => { if (undo()) toast(site.toolbar.undone); }}>
+      <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 14 4 9l5-5" /><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" /></svg>
+    </button>
+  );
   return (
-    <div className="no-print flex flex-wrap items-center gap-2">
-      <div className="flex gap-1" role="group" aria-label={`${site.toolbar.undo} / ${site.toolbar.redo}`}>
-        <button type="button" className="btn !px-3" disabled={!canUndo} aria-label={site.toolbar.undoLabel} title={site.toolbar.shortcutsHint} onClick={() => { if (undo()) toast(site.toolbar.undone); }}>
-          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 14 4 9l5-5" /><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" /></svg>
-          <span className="sr-only sm:not-sr-only">{site.toolbar.undo}</span>
-        </button>
-        <button type="button" className="btn !px-3" disabled={!canRedo} aria-label={site.toolbar.redoLabel} onClick={() => { if (redo()) toast(site.toolbar.redone); }}>
-          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 14 5-5-5-5" /><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13" /></svg>
-          <span className="sr-only sm:not-sr-only">{site.toolbar.redo}</span>
-        </button>
-      </div>
+    <div id="appbar-actions" className="no-print flex items-center gap-1.5">
+      {undoBtn}
+      <button type="button" className="btn btn-icon hidden sm:inline-flex" disabled={!canRedo} aria-label={site.toolbar.redoLabel} onClick={() => { if (redo()) toast(site.toolbar.redone); }}>
+        <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 14 5-5-5-5" /><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13" /></svg>
+      </button>
       <ThemePicker />
       <ShareButton />
-      <button type="button" className="btn" onClick={exportData}>{site.toolbar.export}</button>
-      <button type="button" className="btn" onClick={() => file.current?.click()}>{site.toolbar.import}</button>
+      <details className="more relative">
+        <summary className="btn btn-icon" aria-label={site.toolbar.moreLabel}>
+          <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8" /><circle cx="12" cy="12" r="1.8" /><circle cx="19" cy="12" r="1.8" /></svg>
+        </summary>
+        <div className="menu glass-sm absolute right-0 z-30 mt-2 w-48 p-1.5" role="group" aria-label={site.toolbar.moreLabel}>
+          <button type="button" className="menu-item sm:hidden" disabled={!canRedo} onClick={() => { if (redo()) toast(site.toolbar.redone); }}>{site.toolbar.redo}</button>
+          <button type="button" className="menu-item" onClick={exportData}>{site.toolbar.export}</button>
+          <button type="button" className="menu-item" onClick={() => file.current?.click()}>{site.toolbar.import}</button>
+          <button type="button" className="menu-item" onClick={() => window.print()}>{site.toolbar.print}</button>
+        </div>
+      </details>
       <input ref={file} type="file" accept="application/json,.json" hidden aria-label={site.toolbar.importLabel} onChange={importData} />
-      <button type="button" className="btn" onClick={() => window.print()}>{site.toolbar.print}</button>
     </div>
   );
 }
@@ -139,7 +146,8 @@ function Readout() {
   const cap = !data.subjects.length ? site.readout.capEmpty : !v.eligible ? site.readout.capIndicative : site.readout.capOk;
   return (
     <Glass
-      className="rise glass-refract glass-spec mt-6 grid gap-6 p-5 sm:p-7 md:grid-cols-[auto_1fr] md:items-end"
+      id="readout"
+      className="rise glass-hero glass-refract glass-spec mt-8 grid gap-6 p-6 sm:p-9 lg:grid-cols-[auto_1fr] lg:items-end"
       onPointerEnter={(e: PointerEvent<HTMLDivElement>) => { if (!reduced) e.currentTarget.style.setProperty("--spec", "1"); }}
       onPointerLeave={(e: PointerEvent<HTMLDivElement>) => e.currentTarget.style.setProperty("--spec", "0")}
       onPointerMove={move}
@@ -163,7 +171,7 @@ function Readout() {
           )}
         </div>
       </div>
-      <div className="grid grid-cols-3 gap-3 md:justify-self-end md:gap-8">
+      <div className="grid grid-cols-3 gap-3 sm:gap-6 lg:justify-self-end lg:gap-8">
         <Stat className="border-l border-border/10 pl-3" value={<TweenNum value={c.aggregate} />} label={site.readout.stats.scaled} />
         <Stat className="border-l border-border/10 pl-3" value={<TweenNum value={c.rawAggregate} />} label={site.readout.stats.raw} />
         <Stat className="border-l border-border/10 pl-3" value={v.totalUnits} label={site.readout.stats.units} />
@@ -196,30 +204,73 @@ function Monogram() {
   };
   useEffect(() => () => window.clearTimeout(timer.current), []);
   return (
-    <a href={site.author.url} aria-label={site.author.linkLabel} onClick={onClick} className="monogram -ml-2 -mt-1 shrink-0 rounded-full">
-      <img src={mark} alt="" width={56} height={56} className="mark" draggable={false} />
+    <a href={site.author.url} aria-label={site.author.linkLabel} onClick={onClick} className="monogram -ml-1 shrink-0 rounded-full">
+      <img src={mark} alt="" width={40} height={40} className="mark" draggable={false} />
     </a>
   );
 }
 
-export function Header() {
-  const { data } = useCalc();
+/** Compact ATAR that materialises in the app bar once the hero number scrolls away. */
+function CompactAtar() {
+  const { c } = useCalc();
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    const el = document.getElementById("readout");
+    if (!el) return;
+    const io = new IntersectionObserver(([e]) => setShow(!e!.isIntersecting), { rootMargin: "-72px 0px 0px 0px", threshold: 0 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+  const has = c.counted.length > 0;
+  if (!has) return null;
   return (
-    <header className="pt-5 sm:pt-8">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="flex items-center gap-3">
+    <button
+      type="button" className="compact-atar" data-show={show} tabIndex={show ? 0 : -1} aria-hidden={!show}
+      aria-label={t(site.header.compactAtarLabel, { atar: fmt(c.atar, 2) })}
+      onClick={() => window.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" })}
+    >
+      <span className="text-foreground-3">{site.header.compactAtar}</span> <b className="num">{fmt(c.atar, 2)}</b>
+    </button>
+  );
+}
+
+/** Frosted app bar: content scrolls underneath (Apple §12). Tabs sit in the middle on
+ *  wide screens and become a bottom tab bar on phones (see CSS). */
+export function AppBar({ tabs }: { tabs: React.ReactNode }) {
+  useEffect(() => {
+    const bar = document.getElementById("appbar");
+    if (!bar) return;
+    let raf = 0;
+    const on = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => { bar.dataset.stuck = String(window.scrollY > 4); }); };
+    on();
+    window.addEventListener("scroll", on, { passive: true });
+    return () => { window.removeEventListener("scroll", on); cancelAnimationFrame(raf); };
+  }, []);
+  return (
+    <header id="appbar" className="appbar no-print">
+      <div className="mx-auto flex h-16 max-w-[1200px] items-center gap-3 px-4 sm:px-6">
+        <div className="flex min-w-0 items-center gap-2.5">
           <Monogram />
-          <div>
-            <h1 className="text-[1.05rem] font-semibold tracking-[-0.01em]">{site.meta.title}</h1>
-            <p className="max-w-[56ch] text-[0.84rem] text-foreground-2">
-              <strong className="font-semibold text-foreground">{data.name ? t(site.header.who.named, { name: data.name }) : site.header.who.anon}</strong>{" "}
-              {site.header.intro}
-            </p>
-          </div>
+          <span className="hidden truncate text-[0.95rem] font-semibold tracking-[-0.01em] xl:inline">{site.header.appTitle}</span>
+          <CompactAtar />
         </div>
+        <div className="flex min-w-0 flex-1 justify-center">{tabs}</div>
         <Toolbar />
       </div>
-      <Readout />
     </header>
+  );
+}
+
+export function Hero() {
+  const { data } = useCalc();
+  return (
+    <section className="hero pt-8 sm:pt-12" aria-labelledby="page-title">
+      <h1 id="page-title" className="text-[clamp(2rem,5.2vw,3.3rem)] leading-[1.03] font-semibold tracking-[-0.035em]">{site.meta.title}</h1>
+      <p className="mt-3 max-w-[62ch] text-[1rem] text-foreground-2">
+        <strong className="font-semibold text-foreground">{data.name ? t(site.header.who.named, { name: data.name }) : site.header.who.anon}</strong>{" "}
+        {site.header.intro}
+      </p>
+      <Readout />
+    </section>
   );
 }

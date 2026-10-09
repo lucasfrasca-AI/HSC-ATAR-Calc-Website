@@ -37,9 +37,9 @@ export function ShareButton() {
 
   return (
     <>
-      <button type="button" className="btn" onClick={show}>
+      <button type="button" className="btn btn-icon sm:!w-auto sm:!px-3.5" aria-label={site.toolbar.share} onClick={show}>
         <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7" /><path d="m16 6-4-4-4 4" /><path d="M12 2v13" /></svg>
-        {site.toolbar.share}
+        <span className="hidden sm:inline">{site.toolbar.share}</span>
       </button>
       <dialog ref={dialog} className="confirm" aria-labelledby="share-title" onClose={() => setOpen(false)}>
         <div className="glass p-5 sm:p-6">

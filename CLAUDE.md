@@ -18,6 +18,13 @@ Fonts: system stack first (`-apple-system` renders SF Pro on Apple devices — S
 ## Design reference
 The `apple-design` skill (github.com/emilkowalski/skills, MIT; installed at `~/.claude/skills/apple-design`) is the motion and interaction reference. Applied: critically damped springs that keep velocity on retarget (`useSpring`), grab offset and rubber-banding on the pin with release-velocity handoff, 100 ms press states, menus and dialogs that materialise from their trigger and exit the same way, a scroll-edge fade under the floating tab bar, rem-based body type with size-specific tracking, reduced motion as gentle cross-fades rather than nothing, and undo toasts instead of confirmations for anything undoable.
 
+## Layout (Apple pass 2, branch design/apple-fluid)
+- Frosted sticky app bar (`AppBar`): monogram, compact ATAR (appears via IntersectionObserver once `#readout` scrolls away), segmented-control tabs in the bar's flex row, actions (Undo, Redo ≥sm, Theme, Share, More → Export/Import/Print). Title text only ≥xl so the bar never overlaps; browser-check measures it at six widths.
+- Phones/tablets (<900px): the same tablist renders *outside* the bar as an iOS-style bottom tab bar with icons (`usePhoneLayout`).
+- Hero: large title + intro + the thick `glass-hero` readout. Material order: hero > `.glass` > `.glass-sm`.
+- "Full breakdown" `<details>` holds Expected vs target, ten units and 250+250 (common path first); Plan is section 04.
+- Background is static (skill: no full-viewport moving backgrounds).
+
 ## Architecture
 - `src/lib/engine.ts`: the whole model, pure functions over `Data`; returns message *keys*, never copy. Golden test: the sample student (Maths Std 2 70, English Std 70, Business 64, Italian Beginners 66, SOR I 60, HMS 62 — the owner's chosen test data) gives raw 332.0, scaled 154.0, ATAR 48.64 with the SOR I unit outside the best 10; the original reference script gives the same. If a change moves those, the chain changed.
 - `src/lib/state.tsx`: one store. All writes go through `update(fn)`, which clones, mutates and sets synchronously via a ref (drags fire many times per frame). Drags snapshot a baseline at start (`beginDrag`) so moves never compound.
@@ -54,6 +61,8 @@ Verify every deploy against production with curl, not the emulator.
 Its SHA-256 is in the CSP in `firebase.json`. Edit the script → build → `node scripts/check-content.mjs` prints the new hash → replace it in `firebase.json`.
 
 ## Traps (each one has happened)
+- `backdrop-filter` (and `filter`/`transform`) on an ancestor becomes the containing block for `position: fixed` descendants: a bottom tab bar inside the frosted app bar rendered at the top. Render it outside.
+- Centring the tabs absolutely over the bar overlapped the actions as labels/widths changed; keep them in the flex row and measure gaps in CI.
 - Grouping undo by `document.activeElement` merged a button press into the previous typing: scripted clicks and Safari clicks don't move focus to the button. Continuity is now marked at the input event (`typing()`), never inferred from focus.
 - `Page.navigate` to the same URL with only a different `#fragment` is a same-document navigation: React state survives, `localStorage.clear()` doesn't reset it. Debug scripts must load a fresh document.
 - A global reduced-motion rule that zeroes every transition also kills colour/opacity feedback; restrict it to movement properties instead.

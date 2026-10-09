@@ -485,7 +485,7 @@ function CompareSection() {
   const show = (x: typeof E, key: "agg" | "atar", d: number) => (x ? `${fmt(x[key], d)}${x.partial ? "*" : ""}` : site.labels.dash);
   const set = (uid: string, f: GoalField, v: number | null) => update((d) => { d.subjects.find((s) => s.uid === uid)![f] = v; });
   return (
-    <Section id="compare" kicker={site.kickers.compare} title={k.title} intro={k.intro}>
+    <Section id="compare" title={k.title} intro={k.intro}>
       <Glass className="glass-sm tscroll">
         <table className="datatable min-w-[640px]">
           <thead><tr>{Object.values(k.cols).map((h) => <th key={h} scope="col">{h}</th>)}</tr></thead>
@@ -523,7 +523,7 @@ function UnitsSection() {
   const strip = c.counted.slice().sort((a, b) => b.value - a.value);
   const empty = COUNTING_UNITS - strip.length;
   return (
-    <Section id="units" kicker={site.kickers.units}>
+    <Section id="units">
       <Glass className="p-4 sm:p-5">
         <h3 className="text-[1.1rem] font-semibold">{u.title}</h3>
         <p className="mt-1 mb-3.5 text-[0.82rem] text-foreground-3">{u.hint}</p>
@@ -565,7 +565,7 @@ function SplitSection() {
     </div>
   );
   return (
-    <Section id="split" kicker={site.kickers.split} title={s.title} intro={s.intro}>
+    <Section id="split" title={s.title} intro={s.intro}>
       <Glass className="p-4 sm:p-5">
         <div className="grid gap-3.5 sm:grid-cols-2">
           {half("border-t-internal internal", s.internal, c.rawInternal, n < 10 ? t(n === 1 ? s.intFewUnits1 : s.intFewUnits, { n, cap: capPts }) : t(s.intFull, { pct: fmt(c.rawInternal / 2.5) }))}
@@ -579,6 +579,32 @@ function SplitSection() {
         </div>
       </Glass>
     </Section>
+  );
+}
+
+/** Common path first (Apple: simplicity, not minimalism): the detailed tables live one level deeper. */
+function Breakdown() {
+  const b = calc.breakdown;
+  return (
+    <section className="mb-14" aria-labelledby="breakdown-h">
+      <p className="kicker mb-2 flex items-center gap-2.5"><span aria-hidden="true" className="inline-block h-px w-6 bg-accent/70" />{site.kickers.breakdown}</p>
+      <details className="breakdown group">
+        <summary className="glass lift flex items-center justify-between gap-4 p-5 sm:p-6">
+          <span>
+            <span id="breakdown-h" className="block text-[clamp(1.35rem,2.6vw,1.75rem)] font-semibold tracking-[-0.025em]">{b.title}</span>
+            <span className="mt-1 block max-w-[62ch] text-[0.92rem] text-foreground-2">{b.summary}</span>
+          </span>
+          <span className="chev grid h-9 w-9 shrink-0 place-items-center rounded-full bg-foreground/[0.07]" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
+          </span>
+        </summary>
+        <div className="pt-8">
+          <CompareSection />
+          <UnitsSection />
+          <SplitSection />
+        </div>
+      </details>
+    </section>
   );
 }
 
@@ -598,9 +624,7 @@ export function Calculator() {
         <>
           <CurveSection />
           <ProjectionSection />
-          <CompareSection />
-          <UnitsSection />
-          <SplitSection />
+          <Breakdown />
           <PlanSection />
         </>
       )}

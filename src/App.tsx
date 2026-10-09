@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type KeyboardEvent } from "react";
 import { flushSync } from "react-dom";
 import type React from "react";
 import site from "../content/site.json";
 import { Backdrop } from "./components/Backdrop.tsx";
 import { Calculator } from "./components/Calculator.tsx";
 import { FeedbackProvider } from "./components/Feedback.tsx";
-import { Header } from "./components/Header.tsx";
+import { AppBar, Hero } from "./components/Header.tsx";
 import { Suspense, lazy } from "react";
 import { decodeShare, readShareFromLocation } from "./lib/share.ts";
 const Syllabuses = lazy(() => import("./components/Syllabuses.tsx"));
@@ -27,11 +27,19 @@ import { CalculatorProvider, useCalc } from "./lib/state.tsx";
 import { t } from "./lib/text.ts";
 
 const ORDER: TabKey[] = ["calc", "subj", "syl", "help"];
+// Tab icons, shown on the phone tab bar (SF Symbols-like line icons, inline SVG).
+const ICON: Record<TabKey, string> = {
+  calc: "M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm2 4h10M8 12h.01M12 12h.01M16 12h.01M8 16h.01M12 16h.01M16 16h.01",
+  subj: "M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01",
+  syl: "M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5v14Zm0 0A2.5 2.5 0 0 0 6.5 22H20v-5",
+  help: "M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Zm-2.9-13a3 3 0 0 1 5.8 1c0 2-3 3-3 3m.1 4h.01",
+};
+
 const fromHash = (): TabKey => ORDER.find((k) => `#${site.tabs[k].hash}` === window.location.hash) ?? "calc";
 const motion = (): ScrollBehavior => (window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth");
 
 /** Gliding pill under the selected tab; measured, so it follows any label width. */
-function useGlider(tab: TabKey, refs: React.RefObject<Record<TabKey, HTMLButtonElement | null>>) {
+function useGlider(tab: TabKey, refs: React.RefObject<Record<TabKey, HTMLButtonElement | null>>, layout: unknown) {
   const [box, setBox] = useState<{ x: number; w: number } | null>(null);
   useLayoutEffect(() => {
     const el = refs.current[tab];
@@ -41,32 +49,25 @@ function useGlider(tab: TabKey, refs: React.RefObject<Record<TabKey, HTMLButtonE
     const ro = new ResizeObserver(measure);
     ro.observe(el.parentElement!);
     return () => ro.disconnect();
-  }, [tab, refs]);
+  }, [tab, refs, layout]);
   return box;
 }
+
+const PHONE = "(max-width: 899px)";
+const subscribePhone = (cb: () => void) => { const m = window.matchMedia(PHONE); m.addEventListener("change", cb); return () => m.removeEventListener("change", cb); };
+/** Phone layout: bottom tab bar instead of the segmented control in the app bar. */
+const usePhoneLayout = () => useSyncExternalStore(subscribePhone, () => window.matchMedia(PHONE).matches, () => false);
 
 function Shell() {
   const { data, v, undo, redo, replace } = useCalc();
   const { toast, confirm } = useFeedback();
   const [tab, setTab] = useState<TabKey>(fromHash);
   const tabRefs = useRef<Record<TabKey, HTMLButtonElement | null>>({ calc: null, subj: null, syl: null, help: null });
-  const glide = useGlider(tab, tabRefs);
+  const phone = usePhoneLayout();
+  const glide = useGlider(tab, tabRefs, phone);
   // Lazy tabs stay mounted once visited, so their local state (open panels) survives tab switches.
   const [visited, setVisited] = useState<Set<TabKey>>(() => new Set([fromHash()]));
   if (!visited.has(tab)) setVisited(new Set(visited).add(tab));
-  // Scroll edge effect only while the tab bar is actually floating over content.
-  useEffect(() => {
-    const nav = document.getElementById("tabs");
-    if (!nav) return;
-    let raf = 0;
-    const onScroll = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => { nav.dataset.stuck = String(nav.getBoundingClientRect().top <= 13 && window.scrollY > 0); });
-    };
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => { window.removeEventListener("scroll", onScroll); cancelAnimationFrame(raf); };
-  }, []);
   // Fetch the other tabs while the browser is idle, so switching is instant.
   useEffect(() => {
     const idle = (cb: () => void) => (typeof window.requestIdleCallback === "function" ? window.requestIdleCallback(cb, { timeout: 3000 }) : globalThis.setTimeout(cb, 1500));
@@ -123,7 +124,7 @@ function Shell() {
   const nav: Nav = useMemo(() => ({
     go: (k, focusId) => {
       select(k);
-      document.getElementById("tabs")?.scrollIntoView({ block: "start", behavior: motion() });
+      document.getElementById("main")?.scrollIntoView({ block: "start", behavior: motion() });
       if (focusId) whenElement(focusId, (el) => el.focus({ preventScroll: true }));
     },
     jumpToSubject: (uid) => {
@@ -144,14 +145,9 @@ function Shell() {
     e.preventDefault(); select(next); tabRefs.current[next]?.focus();
   };
   const subjErr = v.issues.some((i) => i.level === "error" && i.uid);
-
-  return (
-    <NavCtx.Provider value={nav}>
-      <a href="#main" className="skip">{site.skipLink}</a>
-      <div className="mx-auto max-w-[1200px] px-4 pb-10 sm:px-6">
-        <Header />
-        <nav id="tabs" aria-label={site.tabs.label} className="no-print sticky top-3 z-10 my-6 flex scroll-mt-3 sm:justify-start">
-          <div role="tablist" aria-label={site.tabs.label} className="glass tabs max-w-full" data-glide={glide !== null}>
+  const tabsNav = (
+        <nav id="tabs" aria-label={site.tabs.label} className="tabbar no-print">
+          <div role="tablist" aria-label={site.tabs.label} className="tabs" data-glide={glide !== null}>
             {glide && <span aria-hidden="true" className="tab-glider" style={{ width: glide.w, transform: `translateX(${glide.x}px)` }} />}
             {ORDER.map((k) => (
               <button
@@ -159,8 +155,8 @@ function Shell() {
                 aria-selected={tab === k} aria-controls={`panel-${k}`} tabIndex={tab === k ? 0 : -1}
                 onClick={() => select(k)} onKeyDown={onKey}
               >
-                <span className="sm:hidden">{site.tabs[k].short}</span>
-                <span className="hidden sm:inline">{site.tabs[k].label}</span>
+                <svg aria-hidden="true" className="tab-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d={ICON[k]} /></svg>
+                <span className="tab-label">{site.tabs[k].short}</span>
                 {k === "subj" && (
                   <span className="count num" data-error={subjErr}>
                     <span aria-hidden="true">{data.subjects.length}</span>
@@ -171,6 +167,18 @@ function Shell() {
             ))}
           </div>
         </nav>
+  );
+
+  return (
+    <NavCtx.Provider value={nav}>
+      <a href="#main" className="skip">{site.skipLink}</a>
+      <AppBar tabs={phone ? null : tabsNav} />
+      {/* On phones the tabs render outside the frosted bar: backdrop-filter makes an ancestor
+          the containing block for position:fixed, which would pin the bottom bar inside it. */}
+      {phone && tabsNav}
+      <div className="mx-auto max-w-[1200px] px-4 pb-10 sm:px-6">
+        <Hero />
+        <div className="h-10" aria-hidden="true" />
         <main id="main" tabIndex={-1} className="outline-none">
           <div role="tabpanel" id="panel-calc" aria-labelledby="tab-calc" hidden={tab !== "calc"}><Calculator /></div>
           <div role="tabpanel" id="panel-subj" aria-labelledby="tab-subj" hidden={tab !== "subj"}>{visited.has("subj") && <Suspense fallback={null}><Subjects /></Suspense>}</div>

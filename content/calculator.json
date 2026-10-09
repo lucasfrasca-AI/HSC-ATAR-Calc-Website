@@ -170,5 +170,11 @@
     "listLabel": "Planned exam marks by subject",
     "needTicked": "Tick at least one subject in “Subjects the pin moves”.",
     "estimate": "estimate"
+  },
+  "breakdown": {
+    "title": "The full breakdown",
+    "summary": "Expected vs target side by side, the ten units that count, and how the 250 + 250 raw points split.",
+    "show": "Show",
+    "hide": "Hide"
   }
 }

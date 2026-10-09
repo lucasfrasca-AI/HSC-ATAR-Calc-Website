@@ -71,9 +71,25 @@ check(await ev("location.origin") === new URL(url).origin, "double-clicking the 
 await sleep(400);
 const atar = await ev("document.querySelector('.atar-num .sr-only').textContent.trim()");
 check(atar.startsWith("48.64"), "sample student ATAR matches the reference", atar);
-const stats = await ev("[...document.querySelectorAll('header .num')].map(n => (n.querySelector('.sr-only') ?? n).textContent)");
+const stats = await ev("[...document.querySelectorAll('#readout .num')].map(n => (n.querySelector('.sr-only') ?? n).textContent)");
 check(stats[0] === "154.0" && stats[1] === "332.0", "scaled 154.0 / raw 332.0 in the readout", stats.join(", "));
+check(await ev("!document.querySelector('.breakdown').open"), "the full breakdown starts folded away (common path first)");
+await ev("document.querySelector('.breakdown > summary').click()"); await sleep(400);
+check(await ev("document.querySelector('.breakdown').open && !!document.querySelector('#compare table')"), "the breakdown opens to the comparison, counting units and 250 + 250 split");
 check(await ev("document.body.innerText.includes('Studies of Religion I — 1 unit')"), "Studies of Religion I unit shown as not counted");
+
+// ---- app layout ---------------------------------------------------------------
+const lay = await ev(`(() => { const bar = document.getElementById('appbar').getBoundingClientRect(), tabs = document.querySelector('#tabs [role=tablist]').getBoundingClientRect();
+  return { tabsInBar: tabs.top >= bar.top && tabs.bottom <= bar.bottom, barTop: bar.top, sticky: getComputedStyle(document.getElementById('appbar')).position }; })()`);
+check(lay.tabsInBar && lay.sticky === "sticky", "desktop: tabs sit as a segmented control inside the sticky app bar", JSON.stringify(lay));
+check(await ev("document.querySelector('.compact-atar').dataset.show") === "false", "compact ATAR is hidden while the big number is on screen");
+await ev("scrollTo(0, 1400)"); await sleep(500);
+check(await ev("document.querySelector('.compact-atar').dataset.show === 'true' && document.querySelector('.compact-atar').textContent.includes(document.querySelector('.atar-num .sr-only').textContent.trim())"), "scrolling past the hero shows the ATAR in the bar");
+await ev("scrollTo(0, 0)"); await sleep(300);
+await ev("document.querySelector('details.more > summary').click()"); await sleep(200);
+check(await ev("['Export data','Import data','Print'].every(l => [...document.querySelectorAll('details.more[open] .menu-item')].some(b => b.textContent.trim() === l))"), "Export, Import and Print live in the More menu");
+await ev("document.querySelector('details.more > summary').click()");
+check(await ev("[...document.querySelectorAll('.ambient i')].every(i => getComputedStyle(i).animationName === 'none')"), "the background is still (no full-viewport motion)");
 await shot("02-sample-desktop");
 
 // ---- the pin: keyboard slider moves the aggregate --------------------------
@@ -270,8 +286,19 @@ check(seen.length > 40, "Tab walks through the page", `${seen.length} stops`);
 check(invisible === 0, "every focus stop has a visible ring", `${invisible} without`);
 check(seen.some((s) => s.includes("Skip to content")), "skip link is the first stop", seen[0]);
 
+// ---- the app bar never overlaps itself, at any desktop width -----------------
+for (const w of [1440, 1280, 1100, 1024, 920, 900]) {
+  await setViewport(w); await load(url.replace(/#.*$/, "")); await ev("scrollTo(0, 1400)"); await sleep(500);
+  const o = await ev(`(() => { const r = e => e.getBoundingClientRect(); const tabs = r(document.querySelector('#tabs [role=tablist]')), acts = r(document.getElementById('appbar-actions')), left = r(document.querySelector('#appbar .compact-atar') ?? document.querySelector('#appbar .monogram'));
+    return { gapRight: Math.round(acts.left - tabs.right), gapLeft: Math.round(tabs.left - left.right) }; })()`);
+  check(o.gapRight >= 0 && o.gapLeft >= 0, `${w}px: tabs, title and actions in the app bar never overlap`, JSON.stringify(o));
+}
+
 // ---- 390px: no horizontal scroll, every tab ------------------------------
 await setViewport(390, 844);
+await sleep(500);
+const tb = await ev("(() => { const r = document.querySelector('#tabs').getBoundingClientRect(); return { bottom: Math.round(r.bottom), vh: innerHeight, top: Math.round(r.top) }; })()");
+check(Math.abs(tb.bottom - tb.vh) <= 1 && tb.top > tb.vh - 120, "phone: tabs become a bottom tab bar within thumb reach", JSON.stringify(tb));
 for (const h of ["", "#subjects", "#syllabuses", "#how-it-works"]) {
   await load(url.replace(/#.*$/, "") + h); await sleep(400);
   const w = await ev("({ s: document.documentElement.scrollWidth, i: innerWidth })");

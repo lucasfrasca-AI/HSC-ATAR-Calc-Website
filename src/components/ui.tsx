@@ -12,10 +12,10 @@ export function Glass<T extends ElementType = "div">({ as, className = "", child
 
 export function Section({ id, title, intro, kicker, children, className = "" }: { id?: string; title?: string; intro?: ReactNode; kicker?: string; children: ReactNode; className?: string }) {
   return (
-    <section id={id} aria-labelledby={id && title ? `${id}-h` : undefined} className={`mb-14 scroll-mt-24 ${className}`}>
+    <section id={id} aria-labelledby={id && title ? `${id}-h` : undefined} className={`mb-20 scroll-mt-24 ${className}`}>
       {kicker && <p className="kicker mb-2 flex items-center gap-2.5"><span aria-hidden="true" className="inline-block h-px w-6 bg-accent/70" />{kicker}</p>}
-      {title && <h2 id={id ? `${id}-h` : undefined} className="text-[clamp(1.45rem,3vw,2rem)] font-semibold tracking-[-0.025em]">{title}</h2>}
-      {intro && <p className="mt-1.5 mb-5 max-w-[74ch] text-[0.92rem] text-foreground-2">{intro}</p>}
+      {title && <h2 id={id ? `${id}-h` : undefined} className="font-semibold">{title}</h2>}
+      {intro && <p className="mt-2.5 mb-6 max-w-[68ch] text-[1rem] leading-relaxed text-foreground-2">{intro}</p>}
       {children}
     </section>
   );

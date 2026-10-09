@@ -3,13 +3,9 @@
 /* ---------- ambient backdrop: gives the glass something to bend ---------- */
 .ambient { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; background: hsl(var(--background)); }
 .ambient i { position: absolute; border-radius: 50%; filter: blur(70px); will-change: transform; }
-.ambient .a1 { width: 52vmax; height: 52vmax; left: -14vmax; top: -18vmax; background: radial-gradient(circle, hsl(var(--glow) / var(--glow-alpha)), transparent 68%); animation: drift-a 46s ease-in-out infinite alternate; }
-.ambient .a2 { width: 40vmax; height: 40vmax; right: -12vmax; top: 24vh; background: radial-gradient(circle, hsl(var(--foreground) / calc(var(--glow-alpha) * 0.45)), transparent 70%); animation: drift-b 58s ease-in-out infinite alternate; }
-.ambient .a3 { width: 34vmax; height: 34vmax; left: 30vw; bottom: -20vmax; background: radial-gradient(circle, hsl(var(--glow) / calc(var(--glow-alpha) * 0.6)), transparent 70%); animation: drift-c 64s ease-in-out infinite alternate; }
-@keyframes drift-a { to { transform: translate3d(9vw, 7vh, 0) scale(1.08); } }
-@keyframes drift-b { to { transform: translate3d(-10vw, -6vh, 0) scale(0.94); } }
-@keyframes drift-c { to { transform: translate3d(-6vw, -10vh, 0) scale(1.1); } }
-@media (prefers-reduced-motion: reduce) { .ambient .a1, .ambient .a2, .ambient .a3 { animation: none; } }
+.ambient .a1 { width: 52vmax; height: 52vmax; left: -14vmax; top: -18vmax; background: radial-gradient(circle, hsl(var(--glow) / var(--glow-alpha)), transparent 68%);  }
+.ambient .a2 { width: 40vmax; height: 40vmax; right: -12vmax; top: 24vh; background: radial-gradient(circle, hsl(var(--foreground) / calc(var(--glow-alpha) * 0.45)), transparent 70%);  }
+.ambient .a3 { width: 34vmax; height: 34vmax; left: 30vw; bottom: -20vmax; background: radial-gradient(circle, hsl(var(--glow) / calc(var(--glow-alpha) * 0.6)), transparent 70%);  }
 
 /* ---------- liquid glass ---------- */
 .glass {
@@ -19,7 +15,7 @@
   -webkit-backdrop-filter: blur(22px) saturate(170%);
   backdrop-filter: blur(22px) saturate(170%);
   border: 1px solid hsl(var(--border) / 0.09);
-  border-radius: 22px;
+  border-radius: 26px;
   box-shadow:
     inset 0 1px 0 hsl(var(--border) / 0.13),
     inset 0 -1px 0 hsl(var(--border) / 0.04),
@@ -33,7 +29,7 @@
   -webkit-mask-composite: xor;
   mask: linear-gradient(hsl(var(--background)) 0 0) content-box exclude, linear-gradient(hsl(var(--background)) 0 0);
 }
-.glass-sm { border-radius: 16px; }
+.glass-sm { border-radius: 18px; -webkit-backdrop-filter: blur(14px) saturate(160%); backdrop-filter: blur(14px) saturate(160%); box-shadow: inset 0 1px 0 hsl(var(--border) / 0.1), 0 10px 24px -18px hsl(var(--background) / 0.8); }
 .glass-inset { background: hsl(var(--background) / 0.28); border: 1px solid hsl(var(--border) / 0.07); border-radius: 14px; }
 
 /* Refraction (Chromium only; class set by feature detection in Backdrop.tsx). */
@@ -123,13 +119,8 @@ input[type="checkbox"] { accent-color: hsl(var(--accent-fill)); width: 18px; hei
 .tab[aria-selected="true"]::after { content: ""; position: absolute; left: 30%; right: 30%; bottom: 3px; height: 2px; border-radius: 2px; background: hsl(var(--accent)); }
 .count { font-size: 0.72rem; border: 1px solid hsl(var(--input-border)); border-radius: 999px; padding: 0 7px; margin-left: 6px; font-weight: 500; }
 .count[data-error="true"] { background: hsl(var(--loss)); border-color: hsl(var(--loss)); color: hsl(var(--on-fill)); }
-@media (max-width: 639px) {
-  .tabs { display: flex; width: 100%; }
-  .tab { flex: 1 1 auto; white-space: nowrap; padding: 8px 6px; font-size: 0.76rem; line-height: 1.2; text-align: center; }
-  .tab .count { margin-left: 3px; padding: 0 5px; }
-}
-/* The sticky tab bar floats over content: keep it legible over anything. */
-nav#tabs .tabs { background: hsl(var(--surface) / 0.9); }
+
+
 
 /* ---------- panel / disclosure animation (progressive) ---------- */
 @supports (interpolate-size: allow-keywords) {
@@ -346,16 +337,6 @@ dialog.confirm::backdrop { transition: opacity 0.25s ease, overlay 0.25s allow-d
 dialog.confirm[open]::backdrop { opacity: 1; }
 @starting-style { dialog.confirm[open]::backdrop { opacity: 0; } }
 
-/* Scroll edge effect: where content slides under the floating tab bar, fade it out
-   softly instead of drawing a hard line. Only while the bar is actually floating. */
-nav#tabs::before {
-  content: ""; position: absolute; left: -100vw; right: -100vw; top: -12px; height: 84px; z-index: -1; pointer-events: none;
-  background: linear-gradient(hsl(var(--background) / 0.92), hsl(var(--background) / 0.6) 55%, transparent);
-  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
-  -webkit-mask-image: linear-gradient(hsl(var(--background)) 55%, transparent); mask-image: linear-gradient(hsl(var(--background)) 55%, transparent);
-  opacity: 0; transition: opacity 0.3s ease;
-}
-nav#tabs[data-stuck="true"]::before { opacity: 1; }
 
 /* Size-specific tracking (Apple §15): tighten as type grows, open up the smallest text. */
 h2 { line-height: 1.08; text-wrap: balance; }
@@ -376,3 +357,85 @@ h3 { letter-spacing: -0.012em; line-height: 1.25; }
 /* Monogram: answers the press instantly, like every other control. */
 .monogram .mark { transition: transform 0.25s cubic-bezier(.2, .9, .3, 1); }
 .monogram:active .mark { transform: scale(0.92); transition: transform 100ms ease-out; }
+
+/* =====================================================================
+   Apple layout pass — app bar, segmented control, phone tab bar, materials
+   ===================================================================== */
+
+/* Material hierarchy (§12): the hero is the thickest surface. */
+.glass-hero {
+  border-radius: 32px;
+  -webkit-backdrop-filter: blur(34px) saturate(185%); backdrop-filter: blur(34px) saturate(185%);
+  box-shadow: inset 0 1px 0 hsl(var(--border) / 0.16), inset 0 -1px 0 hsl(var(--border) / 0.05), 0 40px 80px -48px hsl(var(--background)), 0 18px 36px -28px hsl(var(--background) / 0.9);
+}
+
+/* Frosted app bar; content scrolls underneath. A soft edge appears only once something is under it. */
+.appbar {
+  position: sticky; top: 0; z-index: 40;
+  background: hsl(var(--background) / 0.62);
+  -webkit-backdrop-filter: blur(24px) saturate(180%); backdrop-filter: blur(24px) saturate(180%);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+.appbar[data-stuck="true"] { background: hsl(var(--background) / 0.74); box-shadow: 0 1px 0 hsl(var(--border) / 0.07), 0 12px 24px -20px hsl(var(--background)); }
+:root[data-theme="contrast"] .appbar { background: hsl(var(--background)); -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: 0 1px 0 hsl(var(--border)); }
+@media (prefers-reduced-transparency: reduce) { .appbar { background: hsl(var(--background)); -webkit-backdrop-filter: none; backdrop-filter: none; } }
+.appbar .mark { width: 40px; height: 40px; }
+
+/* Icon buttons in the bar: 40px targets, quiet until hovered. */
+.btn-icon { width: 40px; min-height: 40px; padding: 0; border-color: transparent; background: hsl(var(--foreground) / 0.06); color: hsl(var(--foreground-2)); }
+.btn-icon:hover { background: hsl(var(--foreground) / 0.1); color: hsl(var(--foreground)); border-color: transparent; }
+.appbar .btn:not(.btn-icon) { min-height: 40px; border-color: transparent; background: hsl(var(--foreground) / 0.06); }
+.appbar .btn:not(.btn-icon):hover { background: hsl(var(--foreground) / 0.1); }
+
+/* More menu */
+.menu { background: hsl(var(--surface)) !important; transform-origin: top right; animation: materialize 0.24s cubic-bezier(.2, .9, .3, 1) both; }
+.menu-item { display: block; width: 100%; text-align: left; padding: 9px 12px; border-radius: 12px; font-size: 0.9rem; color: hsl(var(--foreground)); }
+.menu-item:hover:not(:disabled) { background: hsl(var(--foreground) / 0.07); }
+.menu-item:disabled { opacity: 0.45; }
+.menu-item:active:not(:disabled) { transform: scale(0.98); transition: transform 100ms ease-out; }
+
+/* Compact ATAR that materialises in the bar once the hero scrolls away. */
+.compact-atar {
+  white-space: nowrap; font-size: 0.86rem; padding: 6px 12px; border-radius: 999px; background: hsl(var(--foreground) / 0.07);
+  opacity: 0; transform: scale(0.9); filter: blur(4px); pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.35s cubic-bezier(.2, .9, .3, 1), filter 0.3s ease;
+}
+.compact-atar[data-show="true"] { opacity: 1; transform: none; filter: none; pointer-events: auto; }
+.compact-atar b { font-weight: 650; color: hsl(var(--foreground)); }
+@media (max-width: 479px) { .compact-atar { font-size: 0.8rem; padding: 5px 10px; } .appbar .gap-1\.5 { gap: 4px; } }
+
+/* Segmented control, in the app bar's flex row on desktop (cannot overlap the actions). */
+.tabbar .tabs { display: inline-flex; gap: 2px; padding: 3px; border-radius: 12px; background: hsl(var(--foreground) / 0.07); position: relative; }
+.tabbar .tab { border-radius: 9px; padding: 6px 14px; font-size: 0.86rem; display: inline-flex; align-items: center; gap: 6px; }
+.tabbar .tab-icon { display: none; }
+.tabbar .tab-glider { top: 3px; bottom: 3px; border-radius: 9px; background: hsl(var(--surface)); box-shadow: 0 1px 2px hsl(var(--background) / 0.4), 0 3px 10px -4px hsl(var(--background) / 0.6), inset 0 1px 0 hsl(var(--border) / 0.12); }
+.tabbar .tab-glider::after { display: none; }
+
+/* Phones: the same tablist becomes an iOS-style bottom tab bar within thumb reach. */
+@media (max-width: 899px) {
+  .tabbar {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 45;
+    padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px));
+    background: hsl(var(--background) / 0.78);
+    -webkit-backdrop-filter: blur(24px) saturate(180%); backdrop-filter: blur(24px) saturate(180%);
+    box-shadow: 0 -1px 0 hsl(var(--border) / 0.08);
+  }
+  :root[data-theme="contrast"] .tabbar { background: hsl(var(--background)); backdrop-filter: none; box-shadow: 0 -1px 0 hsl(var(--border)); }
+  .tabbar .tabs { display: flex; width: 100%; background: transparent; padding: 0; }
+  .tabbar .tab { flex: 1 1 0; flex-direction: column; gap: 2px; padding: 6px 2px 4px; font-size: 0.68rem; font-weight: 500; position: relative; }
+  .tabbar .tab-icon { display: block; }
+  .tabbar .tab[aria-selected="true"] { color: hsl(var(--accent)); font-weight: 600; }
+  .tabbar .tab-glider { display: none; }
+  .tabbar .tab .count { position: absolute; top: 2px; left: calc(50% + 6px); margin: 0; padding: 0 5px; font-size: 0.62rem; background: hsl(var(--surface)); }
+  body { padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px)); }
+  .toast { bottom: calc(88px + env(safe-area-inset-bottom, 0px)); }
+}
+.tabbar .tab[aria-selected="true"] { background: transparent; box-shadow: none; }
+.tabbar .tab[aria-selected="true"]::after { display: none; }
+
+/* Breakdown disclosure */
+.breakdown > summary .chev { transition: transform 0.3s cubic-bezier(.2, .9, .3, 1); }
+.breakdown[open] > summary .chev { transform: rotate(180deg); }
+
+/* Larger, Apple-like type scale (§15). */
+section > h2 { font-size: clamp(1.7rem, 3.4vw, 2.4rem); letter-spacing: -0.032em; line-height: 1.06; }
