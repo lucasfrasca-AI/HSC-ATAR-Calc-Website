@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import sample from "../../content/sample-student.json" with { type: "json" };
 import {
-  blankData, compute, sanitise, solveShift, baseline, subjectFrom, validate, atarToAgg,
+  blankData, compute, examImpact, sanitise, solveShift, baseline, subjectFrom, validate, atarToAgg,
   type Data, type Subject,
 } from "./engine.ts";
 
@@ -97,4 +97,19 @@ test("sanitise rejects junk and bounds hostile input", () => {
   assert.equal(d.subjects[0]!.courseId, "custom");
   assert.equal(d.subjects[0]!.internalMark, 70);
   assert.deepEqual(d.subjects[0]!.anchors, [[1e9, null]]);
+});
+
+test("examImpact: ranked, never negative, zero at the 100 cap, and consistent with compute", () => {
+  const d = sanitise(sample);
+  const imp = examImpact(d, 5);
+  assert.equal(imp.length, d.subjects.length);
+  for (let i = 1; i < imp.length; i++) assert.ok(imp[i - 1]!.atarDelta >= imp[i]!.atarDelta);
+  for (const x of imp) assert.ok(x.atarDelta >= 0);
+  const top = imp[0]!, s = d.subjects.find((x) => x.uid === top.uid)!;
+  const bumped = structuredClone(d);
+  bumped.subjects.find((x) => x.uid === top.uid)!.exam = (s.exam ?? 0) + 5;
+  assert.ok(Math.abs(compute(bumped).atar - compute(d).atar - top.atarDelta) < 1e-9);
+  const capped = structuredClone(d);
+  capped.subjects[0]!.exam = 100;
+  assert.equal(examImpact(capped).find((x) => x.uid === capped.subjects[0]!.uid)!.atarDelta, 0);
 });

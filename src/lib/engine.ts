@@ -385,3 +385,23 @@ export function sanitise(d: unknown): Data {
   }
   return out;
 }
+
+/* ---------- where marks matter most ---------- */
+export interface Impact { uid: string; added: number; atarDelta: number; aggDelta: number }
+/**
+ * For each subject with a usable internal mark: the change in ATAR if only that
+ * subject's what-if exam mark rose by `step` (capped at 100), all else equal.
+ * Sorted biggest gain first. Built on the same estimates as everything else.
+ */
+export function examImpact(data: Data, step = 5): Impact[] {
+  const base = compute(data);
+  const out: Impact[] = [];
+  for (const s of data.subjects) {
+    const internal = usedInternal(data.settings, s, internalInfo(s)).mark;
+    if (internal === null) continue;
+    const cur = examOf(s, internal), next = Math.min(100, cur + step);
+    const c = computeFrom(data, (x, i) => (x.uid === s.uid ? next : examOf(x, i)));
+    out.push({ uid: s.uid, added: next - cur, atarDelta: c.atar - base.atar, aggDelta: c.aggregate - base.aggregate });
+  }
+  return out.sort((a, b) => b.atarDelta - a.atarDelta);
+}

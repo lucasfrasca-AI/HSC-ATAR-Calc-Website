@@ -29,3 +29,23 @@ export function useTween(value: number, ms = 650): number {
   }, [value, ms, reduced]);
   return reduced || !Number.isFinite(value) ? value : shown;
 }
+
+type VTDoc = Document & { startViewTransition?: (cb: () => void) => { finished: Promise<void> } };
+/**
+ * Runs a DOM-changing callback inside a View Transition when the browser has
+ * one and motion is allowed; otherwise just runs it. `kind` picks the CSS
+ * animation (html[data-vt]). Progressive enhancement only — zero bytes of library.
+ */
+export function withTransition(kind: "tab" | "theme", change: () => void, origin?: { x: number; y: number }) {
+  const doc = document as VTDoc;
+  if (!doc.startViewTransition || window.matchMedia("(prefers-reduced-motion: reduce)").matches) { change(); return; }
+  const root = document.documentElement;
+  root.dataset.vt = kind;
+  if (origin) {
+    const r = Math.hypot(Math.max(origin.x, innerWidth - origin.x), Math.max(origin.y, innerHeight - origin.y));
+    root.style.setProperty("--vt-x", `${origin.x}px`);
+    root.style.setProperty("--vt-y", `${origin.y}px`);
+    root.style.setProperty("--vt-r", `${r}px`);
+  }
+  doc.startViewTransition(change).finished.finally(() => { delete root.dataset.vt; });
+}

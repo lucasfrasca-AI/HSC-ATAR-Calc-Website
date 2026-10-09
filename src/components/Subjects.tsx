@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import site from "../../content/site.json";
 import sub from "../../content/subjects.json";
-import { CATALOG, COHORT_LEVELS, TIERS, courseById, isLevel, isTier, type TierKey } from "../lib/catalog.ts";
+import { CATALOG, COHORT_LEVELS, TIERS, courseById, isLevel, isTier, type Course, type TierKey } from "../lib/catalog.ts";
+import { CourseSearch } from "./CourseSearch.tsx";
 import {
   bandOf, blankData, blankTask, displayName, fmt, inRange, internalInfo, subjectFrom, taskMark, usedInternal,
   type Data, type Subject, type Task,
@@ -72,7 +73,7 @@ function SubjectCard({ s, i }: { s: Subject; i: number }) {
   };
 
   return (
-    <Glass as="article" id={`card-${s.uid}`} aria-labelledby={`cn-${s.uid}`} className={`glass-sm mb-3.5 scroll-mt-24 overflow-hidden border-l-4 ${hasErr ? "!border-loss" : ""}`} style={hasErr ? undefined : { borderLeftColor: `hsl(var(--subject-${(i % 8) + 1}))` }}>
+    <Glass as="article" id={`card-${s.uid}`} aria-labelledby={`cn-${s.uid}`} className={`rise glass-sm mb-3.5 scroll-mt-24 overflow-hidden border-l-4 ${hasErr ? "!border-loss" : ""}`} style={{ ...(hasErr ? {} : { borderLeftColor: `hsl(var(--subject-${(i % 8) + 1}))` }), "--i": i } as CSSProperties}>
       <h3 id={`cn-${s.uid}`} className="sr-only">{name}</h3>
       <div className="grid items-start gap-3 p-4 pb-2 md:grid-cols-[minmax(200px,2fr)_minmax(140px,1fr)_minmax(200px,1.2fr)_auto] grid-cols-[1fr_1fr_auto]">
         <label className="field col-span-2 md:col-span-1">{sub.card.course}
@@ -228,15 +229,16 @@ function SubjectCard({ s, i }: { s: Subject; i: number }) {
 function AddBar() {
   const { data, update, replace } = useCalc();
   const { toast, confirm } = useFeedback();
-  const [pick, setPick] = useState("biology");
-  const add = () => {
-    const c = courseById(pick);
-    if (pick !== "custom" && data.subjects.some((s) => s.courseId === pick)) { toast(t(site.toasts.already, { name: c.name })); return; }
-    const s = subjectFrom(pick);
+  const add = (c: Course) => {
+    if (c.id !== "custom" && data.subjects.some((s) => s.courseId === c.id)) { toast(t(site.toasts.already, { name: c.name })); return; }
+    const s = subjectFrom(c.id);
     update((d: Data) => { d.subjects.push(s); });
+    toast(t(sub.add.added, { name: c.name }));
+    // Keep focus in the search so a whole subject list can be typed in one go;
+    // bring the new card into view without stealing focus.
     requestAnimationFrame(() => {
-      document.getElementById(`card-${s.uid}`)?.scrollIntoView({ block: "center", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
-      document.getElementById(pick === "custom" ? `cname-${s.uid}` : `im-${s.uid}`)?.focus({ preventScroll: true });
+      document.getElementById(`card-${s.uid}`)?.scrollIntoView({ block: "nearest", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+      if (c.id === "custom") document.getElementById(`cname-${s.uid}`)?.focus({ preventScroll: true });
     });
   };
   const test = async () => {
@@ -248,13 +250,15 @@ function AddBar() {
     replace(blankData()); toast(site.toasts.cleared);
   };
   return (
-    <div className="flex flex-wrap items-end gap-2.5 rounded-[16px] border border-dashed border-input-border p-4">
-      <label className="field flex-[1_1_280px]">{sub.add.label}
-        <select id="addCourse" className="input" value={pick} onChange={(e) => setPick(e.target.value)}><CourseOptions /></select>
-      </label>
-      <button type="button" className="btn btn-primary" onClick={add}>{sub.add.button}</button>
-      <button type="button" className="btn" onClick={() => void test()}>{sub.add.test}</button>
-      <button type="button" className="btn btn-danger" onClick={() => void clear()}>{sub.add.clear}</button>
+    <div className="flex flex-wrap items-start gap-2.5 rounded-[16px] border border-dashed border-input-border p-4">
+      <div className="field flex-[1_1_320px]">
+        <label htmlFor="addCourse">{sub.add.label}</label>
+        <CourseSearch inputId="addCourse" onPick={add} />
+      </div>
+      <div className="flex flex-wrap gap-2.5 sm:mt-[22px]">
+        <button type="button" className="btn" onClick={() => void test()}>{sub.add.test}</button>
+        <button type="button" className="btn btn-danger" onClick={() => void clear()}>{sub.add.clear}</button>
+      </div>
     </div>
   );
 }

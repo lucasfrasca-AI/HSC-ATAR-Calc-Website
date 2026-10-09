@@ -3,6 +3,7 @@
 import { useMemo, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
 import calc from "../../content/calculator.json";
 import { MAX_AGGREGATE, aggregateToAtar, density, fmt } from "../lib/engine.ts";
+import { useTween } from "../lib/motion.ts";
 import { useCalc } from "../lib/state.tsx";
 import { t } from "../lib/text.ts";
 
@@ -16,6 +17,10 @@ export function CurveChart({ expected, target }: { expected: number | null; targ
   const [dragging, setDragging] = useState(false);
   const has = c.counted.length > 0;
   const agg = c.aggregate;
+  // Drawn position: follows the pointer exactly while dragging, eases otherwise.
+  const eased = useTween(agg, 420);
+  const at = dragging ? agg : eased;
+  const expEased = useTween(expected ?? 0, 420), tgtEased = useTween(target ?? 0, 420);
 
   const curve = useMemo(() => {
     const pts: string[] = [];
@@ -25,10 +30,10 @@ export function CurveChart({ expected, target }: { expected: number | null; targ
   const shade = useMemo(() => {
     if (!has) return "";
     const pts: string[] = [];
-    for (let a = 0; a <= agg; a += 4) pts.push(`${x(a).toFixed(1)},${y(density(a)).toFixed(1)}`);
-    pts.push(`${x(agg).toFixed(1)},${y(density(agg)).toFixed(1)}`);
-    return `M${x(0)},${y(0)}L${pts.join("L")}L${x(agg)},${y(0)}Z`;
-  }, [agg, has]);
+    for (let a = 0; a <= at; a += 4) pts.push(`${x(a).toFixed(1)},${y(density(a)).toFixed(1)}`);
+    pts.push(`${x(at).toFixed(1)},${y(density(at)).toFixed(1)}`);
+    return `M${x(0)},${y(0)}L${pts.join("L")}L${x(at)},${y(0)}Z`;
+  }, [at, has]);
 
   const aggFrom = (e: PointerEvent<SVGSVGElement>) => {
     const r = svg.current!.getBoundingClientRect();
@@ -74,8 +79,8 @@ export function CurveChart({ expected, target }: { expected: number | null; targ
       <path className="curve-fill" d={curve.fill} aria-hidden="true" />
       {has && <path className="shade" d={shade} aria-hidden="true" />}
       <path className="curve-line" d={curve.line} aria-hidden="true" />
-      {marker(expected, "m-expected", calc.curve.legend.expected)}
-      {marker(target, "m-target", calc.curve.legend.target)}
+      {marker(expected === null ? null : expEased, "m-expected", calc.curve.legend.expected)}
+      {marker(target === null ? null : tgtEased, "m-target", calc.curve.legend.target)}
       {has && (
         <g
           className="pin-group" tabIndex={0} role="slider" aria-label={calc.curve.pinLabel}
@@ -83,9 +88,9 @@ export function CurveChart({ expected, target }: { expected: number | null; targ
           aria-valuetext={t(calc.curve.pinValueText, { agg: fmt(agg), atar: fmt(aggregateToAtar(agg), 2) })}
           onKeyDown={key}
         >
-          <line className="pin-stem" x1={x(agg)} x2={x(agg)} y1={y(density(agg))} y2={y(0)} />
-          <circle className="pin-halo" cx={x(agg)} cy={y(density(agg))} r={dragging ? 22 : 17} />
-          <circle className="pin" cx={x(agg)} cy={y(density(agg))} r={10} />
+          <line className="pin-stem" x1={x(at)} x2={x(at)} y1={y(density(at))} y2={y(0)} />
+          <circle className="pin-halo" cx={x(at)} cy={y(density(at))} r={dragging ? 22 : 17} />
+          <circle className="pin" cx={x(at)} cy={y(density(at))} r={dragging ? 11 : 10} />
         </g>
       )}
     </svg>

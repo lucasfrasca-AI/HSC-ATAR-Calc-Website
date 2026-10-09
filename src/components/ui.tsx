@@ -1,4 +1,7 @@
-import { useEffect, useRef, useState, type ComponentPropsWithoutRef, type ElementType, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ComponentPropsWithoutRef, type CSSProperties, type ElementType, type ReactNode } from "react";
+import site from "../../content/site.json";
+import { fmt } from "../lib/engine.ts";
+import { useTween } from "../lib/motion.ts";
 
 type GlassProps<T extends ElementType> = { as?: T; className?: string; children?: ReactNode } & Omit<ComponentPropsWithoutRef<T>, "as" | "className" | "children">;
 export function Glass<T extends ElementType = "div">({ as, className = "", children, ...rest }: GlassProps<T>) {
@@ -58,4 +61,17 @@ export function Stat({ value, label, className = "" }: { value: ReactNode; label
       <span className="block text-[0.7rem] leading-tight text-foreground-3 sm:text-[0.76rem]">{label}</span>
     </div>
   );
+}
+
+/** A number that counts to its new value (rAF, reduced-motion aware). Screen readers get the final value only. */
+export function TweenNum({ value, digits = 1, suffix = "" }: { value: number | null; digits?: number; suffix?: string }) {
+  const shown = useTween(value ?? 0);
+  if (value === null || !Number.isFinite(value)) return <>{site.labels.dash}</>;
+  return <><span aria-hidden="true">{fmt(shown, digits)}{suffix}</span><span className="sr-only">{fmt(value, digits)}{suffix}</span></>;
+}
+
+/** Native range input with the glass thumb and an accent fill up to the value. */
+export function Range({ value, min, max, className = "", ...rest }: { value: number; min: number; max: number } & Omit<ComponentPropsWithoutRef<"input">, "type" | "value" | "min" | "max">) {
+  const pct = max > min ? ((value - min) / (max - min)) * 100 : 0;
+  return <input {...rest} type="range" min={min} max={max} value={value} className={`glide ${className}`} style={{ "--fill": `${Math.max(0, Math.min(100, pct))}%` } as CSSProperties} />;
 }

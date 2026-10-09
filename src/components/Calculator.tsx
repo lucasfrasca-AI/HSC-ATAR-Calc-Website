@@ -1,7 +1,7 @@
 import calc from "../../content/calculator.json";
 import site from "../../content/site.json";
 import {
-  aggregateToAtar, atarToAgg, displayName, examOf, fmt, inRange, isEstimate, scenarioAgg, COUNTING_UNITS, MAX_AGGREGATE,
+  aggregateToAtar, atarToAgg, displayName, examImpact, examOf, fmt, inRange, isEstimate, scenarioAgg, COUNTING_UNITS, MAX_AGGREGATE,
   type Subject,
 } from "../lib/engine.ts";
 import { useNav } from "../lib/nav.ts";
@@ -9,7 +9,8 @@ import { sampleData, useCalc, type GoalField } from "../lib/state.tsx";
 import { cap, msg, signed, t } from "../lib/text.ts";
 import { CurveChart } from "./CurveChart.tsx";
 import { useFeedback } from "./Feedback.tsx";
-import { Glass, NumInput, Section, Stat } from "./ui.tsx";
+import { useMemo, type CSSProperties } from "react";
+import { Glass, NumInput, Range, Section, Stat, TweenNum } from "./ui.tsx";
 
 const subjectColour = (i: number) => `hsl(var(--subject-${(i % 8) + 1}))`;
 const unitsLabel = (n: number) => (n === 1 ? site.labels.units1 : site.labels.units2);
@@ -38,7 +39,8 @@ function Steps() {
         <li key={s.k}>
           <button
             type="button" onClick={s.go} aria-current={next === s.k ? "step" : undefined}
-            className={`glass glass-sm flex h-full w-full items-start gap-3 p-3.5 text-left transition-colors ${next === s.k ? "!border-accent/60" : ""}`}
+            style={{ "--i": s.k } as CSSProperties}
+            className={`rise lift glass glass-sm flex h-full w-full items-start gap-3 p-3.5 text-left ${next === s.k ? "!border-accent/60" : ""}`}
           >
             <span aria-hidden="true" className={`grid h-7 w-7 shrink-0 place-items-center rounded-full border-2 text-[0.85rem] font-bold ${s.done ? "border-gain bg-gain text-on-fill" : next === s.k ? "border-accent text-accent" : "border-input-border text-foreground-2"}`}>
               {s.done ? "✓" : s.k}
@@ -171,8 +173,8 @@ function CurveSection() {
           <CurveChart expected={E?.agg ?? null} target={T?.agg ?? null} />
           <div className="mt-2 flex items-center gap-3 border-t border-border/10 px-1 pt-3">
             <label htmlFor="aggRange" className="text-[0.8rem] whitespace-nowrap text-foreground-3">{calc.curve.aggregateLabel}</label>
-            <input
-              id="aggRange" type="range" min={0} max={MAX_AGGREGATE} step={0.5} value={c.aggregate.toFixed(1)} disabled={!has}
+            <Range
+              id="aggRange" min={0} max={MAX_AGGREGATE} step={0.5} value={Number(c.aggregate.toFixed(1))} disabled={!has}
               onPointerDown={() => calcState.beginDrag()} onPointerUp={() => calcState.endDrag()}
               onChange={(e) => calcState.driveTo(Number(e.target.value))}
               onKeyUp={() => calcState.endDrag()}
@@ -230,6 +232,44 @@ function CurveSection() {
   );
 }
 
+/* ---------------- where marks matter most ---------------- */
+function ImpactSection() {
+  const { data, c } = useCalc();
+  const k = calc.impact;
+  const impact = useMemo(() => examImpact(data, k.step), [data, k.step]);
+  const max = Math.max(0.01, ...impact.map((x) => x.atarDelta));
+  return (
+    <Section id="impact" title={k.title} intro={k.intro}>
+      <Glass className="rise p-4 sm:p-5">
+        {!impact.length ? <p className="text-[0.86rem] text-foreground-3">{k.empty}</p> : (
+          <ol aria-label={k.listLabel} className="space-y-3">
+            {impact.map((x, rank) => {
+              const s = data.subjects.find((y) => y.uid === x.uid)!;
+              const i = data.subjects.indexOf(s);
+              const mostlyOut = x.added > 0 && x.atarDelta < max * 0.4 && (c.countedBy[s.uid] ?? 0) < s.units;
+              return (
+                <li key={x.uid} className="impact-row grid grid-cols-[1.6rem_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5">
+                  <span aria-hidden="true" className="text-[0.78rem] text-foreground-3 num">{rank + 1}</span>
+                  <span className="flex min-w-0 items-center gap-2">
+                    <i aria-hidden="true" className="inline-block h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: subjectColour(i) }} />
+                    <span className="truncate text-[0.9rem]">{displayName(s)}</span>
+                    <span className="hidden text-[0.75rem] text-foreground-3 sm:inline">{x.added > 0 ? t(k.row, { added: fmt(x.added, x.added % 1 ? 1 : 0) }) : k.none}</span>
+                  </span>
+                  <span className="text-right text-[0.9rem] font-semibold num">{t(k.gain, { atar: fmt(x.atarDelta, 2) })}</span>
+                  <span aria-hidden="true" />
+                  <span className="impact-bar col-span-2"><i style={{ transform: `scaleX(${Math.max(0, x.atarDelta) / max})` }} /></span>
+                  {mostlyOut && <span className="col-start-2 col-end-4 text-[0.74rem] text-dropped">{k.notCounted}</span>}
+                </li>
+              );
+            })}
+          </ol>
+        )}
+        <p className="mt-4 text-[0.76rem] text-foreground-3"><span className="flag !ml-0">{k.estimate}</span></p>
+      </Glass>
+    </Section>
+  );
+}
+
 /* ---------------- projection ---------------- */
 function ProjectionCard({ s, i }: { s: Subject; i: number }) {
   const { c, update } = useCalc();
@@ -242,7 +282,7 @@ function ProjectionCard({ s, i }: { s: Subject; i: number }) {
   const diff = r.valid ? r.scaled100 - r.blended : 0;
   const share = r.valid && r.used.mark! + r.external > 0 ? (r.used.mark! / (r.used.mark! + r.external)) * 100 : 50;
   return (
-    <Glass as="article" className={`glass-sm border-t-[3px] p-4 ${!r.valid ? "opacity-70" : ""} ${r.valid && cnt < s.units ? "!border-dashed" : ""}`} style={{ borderTopColor: subjectColour(i) }} aria-label={name}>
+    <Glass as="article" className={`rise lift glass-sm border-t-[3px] p-4 ${!r.valid ? "opacity-70" : ""} ${r.valid && cnt < s.units ? "!border-dashed" : ""}`} style={{ borderTopColor: subjectColour(i), "--i": i } as CSSProperties} aria-label={name}>
       <div className="flex items-baseline justify-between gap-2">
         <span className="font-semibold">{name}</span>
         <span className="text-[0.78rem] whitespace-nowrap text-foreground-3">{unitsLabel(s.units)}</span>
@@ -263,7 +303,7 @@ function ProjectionCard({ s, i }: { s: Subject; i: number }) {
         </>
       )}
       <div className="flex items-center gap-3">
-        <input type="range" min={0} max={100} step={0.5} disabled={!r.valid} value={r.valid ? r.external : 0}
+        <Range min={0} max={100} step={0.5} disabled={!r.valid} value={r.valid ? r.external : 0}
           aria-label={t(p.examLabel, { name })} onChange={(e) => setExam(Number(e.target.value))} />
         <NumInput aria-label={t(p.examLabel, { name })} className="input-sm" min={0} max={100} step={0.5} disabled={!r.valid}
           value={r.valid ? Math.round(r.external * 10) / 10 : null} onValue={(v) => { if (v !== null && v >= 0 && v <= 100) setExam(v); }} onCommit={(v) => setExam(v)} />
@@ -321,21 +361,21 @@ function ProjectionSection() {
   };
   return (
     <Section id="projection" title={p.title} intro={p.intro}>
-      <Glass className="glass-sm mb-4 flex flex-wrap items-center justify-between gap-3.5 border-l-4 !border-l-accent-fill px-4 py-3.5">
+      <Glass className="glass-sm mb-4 flex flex-wrap items-center justify-between gap-3.5 px-4 py-3.5">
         <p className="max-w-[50ch] text-[0.86rem] text-foreground-2"><b className="text-foreground">{p.scenLead}</b> {p.scenText.replace(p.scenLead, "").trim()}</p>
         <div className="flex flex-wrap gap-2">
-          <button type="button" className="btn btn-primary" onClick={() => void save("expected")}>{p.saveExp}</button>
-          <button type="button" className="btn btn-primary" onClick={() => void save("target")}>{p.saveTgt}</button>
+          <button type="button" className="btn" onClick={() => void save("expected")}>{p.saveExp}</button>
+          <button type="button" className="btn" onClick={() => void save("target")}>{p.saveTgt}</button>
           <button type="button" className="btn" onClick={() => load("expected")}>{p.loadExp}</button>
           <button type="button" className="btn" onClick={() => load("target")}>{p.loadTgt}</button>
           <button type="button" className="btn" onClick={() => { update((d) => d.subjects.forEach((s) => (s.exam = null))); clearDrag(); toast(site.toasts.reset); }}>{p.reset}</button>
         </div>
       </Glass>
       <Glass className="glass-sm mb-4 grid grid-cols-2 gap-px overflow-hidden !p-0 md:grid-cols-4">
-        <Stat className="p-4" value={fmt(c.aggregate)} label={p.stats.agg} />
-        <Stat className="p-4" value={c.counted.length ? fmt(c.atar, 2) : site.labels.dash} label={p.stats.atar} />
-        <Stat className="p-4" value={fmt(c.rawInternal)} label={p.stats.banked} />
-        <Stat className="p-4" value={fmt(c.rawExam)} label={p.stats.fromExams} />
+        <Stat className="p-4" value={<TweenNum value={c.aggregate} />} label={p.stats.agg} />
+        <Stat className="p-4" value={<TweenNum value={c.counted.length ? c.atar : null} digits={2} />} label={p.stats.atar} />
+        <Stat className="p-4" value={<TweenNum value={c.rawInternal} />} label={p.stats.banked} />
+        <Stat className="p-4" value={<TweenNum value={c.rawExam} />} label={p.stats.fromExams} />
       </Glass>
       <div className="grid gap-3.5 [grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))]">
         {data.subjects.map((s, i) => <ProjectionCard key={s.uid} s={s} i={i} />)}
@@ -463,6 +503,7 @@ export function Calculator() {
       {!data.subjects.length ? <EmptyState onTest={() => void loadTest()} /> : (
         <>
           <CurveSection />
+          <ImpactSection />
           <ProjectionSection />
           <CompareSection />
           <UnitsSection />

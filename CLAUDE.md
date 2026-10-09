@@ -19,6 +19,10 @@ Fonts: system stack first (`-apple-system` renders SF Pro on Apple devices — S
 - `src/lib/engine.ts`: the whole model, pure functions over `Data`; returns message *keys*, never copy. Golden test: the sample student gives raw 366.5, scaled 223.1, ATAR 63.14 with the Studies of Religion I unit outside the best 10 (the original reference script, run without its six UAC-derived anchors, gives the same). If a change moves those, the chain changed.
 - `src/lib/state.tsx`: one store. All writes go through `update(fn)`, which clones, mutates and sets synchronously via a ref (drags fire many times per frame). Drags snapshot a baseline at start (`beginDrag`) so moves never compound.
 - `src/components/*`: render only. `NumInput` keeps typed text while focused, so a recompute never interrupts typing.
+- Motion: `useTween` (rAF number easing), `withTransition` (View Transitions for tab cross-fade and the circular theme reveal; skipped when unsupported or reduced motion), the gliding tab pill, `.rise` entrance on mount only, `.lift` hover. Every one is off under `prefers-reduced-motion`; browser-check asserts the theme switch is instant there.
+- Undo/redo: `update` coalesces bursts (700 ms) into one step; `beginDrag`/`endDrag`/`setAggregate` and `replace` are hard boundaries. Cmd/Ctrl+Z is ignored inside text fields so native undo still works.
+- `examImpact` ("Where marks matter most"): ATAR change from +5 exam marks in one subject, others held. Same estimates as everything else; labelled.
+- Accent discipline in practice: slider fills, chips and secondary buttons are neutral; accent only on the pin, focus ring, tab underline, top impact bar, links and the ATAR spectrum underline.
 - `ScalingTable` is lazy (How it works tab) and listed in `check-budget` MUST_BE_LAZY.
 
 ## Checks (all run in CI `verify`; run locally with `npm run verify`)
@@ -40,6 +44,9 @@ Verify every deploy against production with curl, not the emulator.
 Its SHA-256 is in the CSP in `firebase.json`. Edit the script → build → `node scripts/check-content.mjs` prints the new hash → replace it in `firebase.json`.
 
 ## Traps (each one has happened)
+- Time-only undo coalescing merged a keyboard pin move with the preceding drag; gestures need explicit boundaries.
+- A `.glass` dropdown (backdrop-filter + isolation) let later content paint through it; popovers use a solid surface, no backdrop-filter, and an explicit z-index on the wrapper.
+- In Perl substitutions `$1[` is an array element; write `${1}[`.
 - `"__proto__" in obj` is true for any object literal. Lookups keyed by untrusted strings (imported JSON) must use `Object.hasOwn`. The reference had this bug; a sanitiser test covers it.
 - React Compiler lint rules forbid mutating locals during render and setState directly in effects; derive with map/reduce, animate via rAF callbacks.
 - A `@media (prefers-reduced-motion)` override must out-specify the rule it overrides (`.ambient i` lost to `.ambient .a1`). browser-check asserts the computed `animation-name`.

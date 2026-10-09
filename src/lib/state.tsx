@@ -1,7 +1,7 @@
 // Single source of truth for the calculator. Every change goes through
 // `update`, which clones, mutates the clone and re-derives everything — the
 // React equivalent of the reference's refresh()/rebuild().
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import sample from "../../content/sample-student.json" with { type: "json" };
 import {
   atarToAgg, baseline, blankData, compute, inRange, sanitise, solveShift, validate,
@@ -30,14 +30,46 @@ function useCalculatorState() {
   const dataRef = useRef(data);
   useEffect(() => write(STORE_KEY, JSON.stringify(data)), [data]);
 
+  // ---- undo / redo ----------------------------------------------------------
+  // A burst of changes (a drag, typing a number) is one undo step: a snapshot is
+  // pushed only when the previous change was more than GAP ms ago.
+  const GAP = 700, LIMIT = 60;
+  const past = useRef<Data[]>([]), future = useRef<Data[]>([]), lastChange = useRef(0);
+  const [hist, setHist] = useState({ undo: 0, redo: 0 });
+  const syncHist = () => setHist({ undo: past.current.length, redo: future.current.length });
+  const commit = useCallback((next: Data, coalesce: boolean) => {
+    const now = performance.now();
+    if (!coalesce || now - lastChange.current > GAP) {
+      past.current.push(dataRef.current);
+      if (past.current.length > LIMIT) past.current.shift();
+    }
+    lastChange.current = now;
+    future.current = [];
+    dataRef.current = next;
+    setData(next);
+    syncHist();
+  }, []);
+
   const update = useCallback((fn: (d: Data) => void): Data => {
     const next = structuredClone(dataRef.current);
     fn(next);
-    dataRef.current = next;
-    setData(next);
+    commit(next, true);
     return next;
+  }, [commit]);
+  /** Whole-document changes (import, test data, start fresh) are always their own undo step. */
+  const replace = useCallback((d: Data) => commit(d, false), [commit]);
+  const travel = useCallback((from: React.RefObject<Data[]>, to: React.RefObject<Data[]>) => {
+    const prev = from.current.pop();
+    if (!prev) return false;
+    to.current.push(dataRef.current);
+    dataRef.current = prev;
+    lastChange.current = 0;
+    setData(prev);
+    syncHist();
+    return true;
   }, []);
-  const replace = useCallback((d: Data) => { dataRef.current = d; setData(d); }, []);
+  const undo = useCallback(() => travel(past, future), [travel]);
+  const redo = useCallback(() => travel(future, past), [travel]);
 
   const v: Validation = useMemo(() => validate(data), [data]);
   const c: Result = useMemo(() => compute(data), [data]);
@@ -46,8 +78,9 @@ function useCalculatorState() {
   // The exam marks when a drag starts are the baseline, so moves never compound.
   const dragBase = useRef<Record<string, number> | null>(null);
   const [lastDrag, setLastDrag] = useState<LastDrag | null>(null);
-  const beginDrag = useCallback(() => { dragBase.current = baseline(dataRef.current); }, []);
-  const endDrag = useCallback(() => { dragBase.current = null; }, []);
+  // Each drag (or keyboard/typed pin move) is exactly one undo step.
+  const beginDrag = useCallback(() => { dragBase.current = baseline(dataRef.current); lastChange.current = 0; }, []);
+  const endDrag = useCallback(() => { dragBase.current = null; lastChange.current = 0; }, []);
   const driveTo = useCallback((targetAgg: number) => {
     const d = dataRef.current;
     if (!dragBase.current) dragBase.current = baseline(d);
@@ -58,7 +91,7 @@ function useCalculatorState() {
     const next = update((n) => { for (const s of n.subjects) if (ids.has(s.uid)) s.exam = r.marks[s.uid]!; });
     setLastDrag({ ...r, sig: examSig(next) });
   }, [update]);
-  const setAggregate = useCallback((agg: number) => { beginDrag(); driveTo(agg); endDrag(); }, [beginDrag, driveTo, endDrag]);
+  const setAggregate = useCallback((agg: number) => { beginDrag(); driveTo(agg); endDrag(); lastChange.current = 0; }, [beginDrag, driveTo, endDrag]);
 
   // ---- expected / target sets from a typed ATAR ---------------------------
   const [goal, setGoal] = useState<GoalMsg | null>(null);
@@ -79,6 +112,7 @@ function useCalculatorState() {
 
   return {
     data, v, c, update, replace,
+    undo, redo, canUndo: hist.undo > 0, canRedo: hist.redo > 0,
     beginDrag, endDrag, driveTo, setAggregate,
     lastDrag: lastDrag && lastDrag.sig === examSig(data) ? lastDrag : null,
     clearDrag: () => setLastDrag(null),

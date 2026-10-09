@@ -64,7 +64,7 @@ await ev("[...document.querySelectorAll('button')].find(b => b.textContent.trim(
 await sleep(900);
 const atar = await ev("document.querySelector('.atar-num .sr-only').textContent.trim()");
 check(atar.startsWith("63.14"), "sample student ATAR matches the reference", atar);
-const stats = await ev("[...document.querySelectorAll('header .num')].map(n => n.textContent)");
+const stats = await ev("[...document.querySelectorAll('header .num')].map(n => (n.querySelector('.sr-only') ?? n).textContent)");
 check(stats[0] === "223.1" && stats[1] === "366.5", "scaled 223.1 / raw 366.5 in the readout", stats.join(", "));
 check(await ev("document.body.innerText.includes('Studies of Religion I — 1 unit')"), "Studies of Religion I unit shown as not counted");
 await shot("02-sample-desktop");
@@ -89,11 +89,46 @@ const dragged = await ev("Number(document.querySelector('[role=slider]').getAttr
 check(Math.abs(dragged - after) > 5, "dragging the chart moves the pin and the marks", `${after} → ${dragged}`);
 check(await ev("document.body.innerText.includes('moved')"), "drag note explains how far subjects moved");
 
+// ---- where marks matter most ---------------------------------------------
+const impact = await ev("[...document.querySelectorAll('#impact li')].map(li => parseFloat(li.querySelector('.num:last-of-type, .text-right')?.textContent.replace('+','')))");
+check(impact.length === 6 && impact.every((v, i) => i === 0 || impact[i - 1] >= v), "impact panel ranks all 6 subjects by ATAR gain", impact.join(", "));
+
+// ---- undo / redo -----------------------------------------------------------
+const atarBefore = await ev("document.querySelector('.atar-num .sr-only').textContent.trim()");
+await ev("document.querySelector('[role=slider]').focus()");
+await key("End", "End"); await sleep(250);
+const atarMoved = await ev("document.querySelector('.atar-num .sr-only').textContent.trim()");
+await ev("document.activeElement.blur()");
+await sleep(800);
+await send("Input.dispatchKeyEvent", { type: "keyDown", key: "z", code: "KeyZ", windowsVirtualKeyCode: 90, modifiers: 4 /* meta */ });
+await send("Input.dispatchKeyEvent", { type: "keyUp", key: "z", code: "KeyZ", modifiers: 4 });
+await sleep(300);
+const atarUndone = await ev("document.querySelector('.atar-num .sr-only').textContent.trim()");
+check(atarMoved !== atarBefore && atarUndone === atarBefore, "Cmd+Z undoes a pin move", `${atarBefore} → ${atarMoved} → ${atarUndone}`);
+await ev("document.querySelector('[aria-label=Redo]').click()"); await sleep(300);
+check(await ev("document.querySelector('.atar-num .sr-only').textContent.trim()") === atarMoved, "Redo button restores it");
+
+// ---- course search combobox ----------------------------------------------
+await ev("location.hash = '#subjects'"); await sleep(500);
+await ev("document.getElementById('addCourse').focus()");
+await send("Input.insertText", { text: "chem" }); await sleep(250);
+const opts = await ev("[...document.querySelectorAll('[role=listbox] [role=option]')].map(o => o.textContent)");
+check(opts.length >= 1 && opts[0].startsWith("Chemistry"), "typing 'chem' lists Chemistry first", opts.slice(0, 3).join(" | "));
+check(await ev("document.getElementById('addCourse').getAttribute('aria-activedescendant')?.length > 0"), "combobox exposes the active option to screen readers");
+const n0 = await ev("document.querySelectorAll('article[id^=card-]').length");
+await key("Enter", "Enter"); await sleep(400);
+check(await ev("document.querySelectorAll('article[id^=card-]').length") === n0 + 1 && await ev("document.activeElement.id === 'addCourse' && document.activeElement.value === ''"),
+  "Enter adds the course and keeps focus in the search for the next one");
+await ev("location.hash = '#calculator'"); await sleep(400);
+
 // ---- tabs: keyboard + hash + back -----------------------------------------
 await ev("document.querySelector('#tab-calc').focus()");
 await key("ArrowRight", "ArrowRight");
 await sleep(300);
 check(await ev("location.hash === '#subjects' && document.activeElement.id === 'tab-subj' && !document.querySelector('#panel-subj').hidden"), "ArrowRight moves to the Subjects tab and updates the URL");
+await sleep(500);
+const glider = await ev("(() => { const g = document.querySelector('.tab-glider'), t = document.getElementById('tab-subj'); return g ? Math.abs(g.getBoundingClientRect().left - t.getBoundingClientRect().left) : -1; })()");
+check(glider >= 0 && glider < 2, "tab indicator glides under the selected tab", `${glider}px off`);
 await key("ArrowRight", "ArrowRight");
 await sleep(900);
 check(await ev("document.querySelectorAll('#panel-help tbody tr').length > 100"), "How it works lazy-loads the full course table", `${await ev("document.querySelectorAll('#panel-help tbody tr').length")} rows`);
@@ -145,6 +180,9 @@ await key("End", "End");
 await sleep(30);
 const jumped = await ev("document.querySelector('.atar-num [aria-hidden]').textContent === document.querySelector('.atar-num .sr-only').textContent.slice(0, document.querySelector('.atar-num [aria-hidden]').textContent.length)");
 check(jumped, "reduced motion: the ATAR jumps to its value instead of counting");
+await ev("document.querySelector('details summary.btn').click()"); await sleep(100);
+await ev("document.querySelector('input[name=theme][value=blue-light]').click()"); await sleep(60);
+check(await ev("document.documentElement.dataset.theme === 'blue-light' && !document.documentElement.dataset.vt"), "reduced motion: theme switches instantly, no view transition");
 await send("Emulation.setEmulatedMedia", { features: [] });
 
 // ---- every theme renders --------------------------------------------------

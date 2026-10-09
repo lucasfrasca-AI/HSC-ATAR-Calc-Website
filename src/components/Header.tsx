@@ -2,19 +2,24 @@ import { useRef, useState, type ChangeEvent, type PointerEvent } from "react";
 import site from "../../content/site.json";
 import mark from "../assets/lf-mark.png";
 import { fmt, sanitise } from "../lib/engine.ts";
-import { useReducedMotion, useTween } from "../lib/motion.ts";
+import { useReducedMotion, useTween, withTransition } from "../lib/motion.ts";
 import { useCalc } from "../lib/state.tsx";
 import { t } from "../lib/text.ts";
 import { THEMES, currentTheme, setTheme, type ThemeId } from "../lib/theme.ts";
 import { useFeedback } from "./Feedback.tsx";
-import { Glass, Stat } from "./ui.tsx";
+import { Glass, Stat, TweenNum } from "./ui.tsx";
 
 function ThemePicker() {
   const [theme, set] = useState<ThemeId>(currentTheme);
+  const summary = useRef<HTMLElement>(null);
   const name = THEMES.find((x) => x.id === theme)?.name;
+  const choose = (id: ThemeId) => {
+    const r = summary.current?.getBoundingClientRect();
+    withTransition("theme", () => { setTheme(id); set(id); }, r ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : undefined);
+  };
   return (
     <details className="relative">
-      <summary className="btn" aria-label={`${site.theme.label}: ${name}`}>
+      <summary ref={summary} className="btn" aria-label={`${site.theme.label}: ${name}`}>
         <span aria-hidden="true" className="inline-block h-3 w-3 rounded-full bg-accent-fill" />
         {name}
       </summary>
@@ -22,7 +27,7 @@ function ThemePicker() {
         <legend className="sr-only">{site.theme.label}</legend>
         {THEMES.map((o) => (
           <label key={o.id} className="flex cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2 text-sm hover:bg-foreground/5">
-            <input type="radio" name="theme" value={o.id} checked={theme === o.id} onChange={() => { setTheme(o.id); set(o.id); }} />
+            <input type="radio" name="theme" value={o.id} checked={theme === o.id} onChange={() => choose(o.id)} />
             <span data-theme-swatch={o.id}>{o.name}</span>
           </label>
         ))}
@@ -32,7 +37,7 @@ function ThemePicker() {
 }
 
 function Toolbar() {
-  const { data, replace } = useCalc();
+  const { data, replace, undo, redo, canUndo, canRedo } = useCalc();
   const { toast } = useFeedback();
   const file = useRef<HTMLInputElement>(null);
   const exportData = () => {
@@ -59,6 +64,16 @@ function Toolbar() {
   };
   return (
     <div className="no-print flex flex-wrap items-center gap-2">
+      <div className="flex gap-1" role="group" aria-label={`${site.toolbar.undo} / ${site.toolbar.redo}`}>
+        <button type="button" className="btn !px-3" disabled={!canUndo} aria-label={site.toolbar.undoLabel} title={site.toolbar.shortcutsHint} onClick={() => { if (undo()) toast(site.toolbar.undone); }}>
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 14 4 9l5-5" /><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" /></svg>
+          <span className="sr-only sm:not-sr-only">{site.toolbar.undo}</span>
+        </button>
+        <button type="button" className="btn !px-3" disabled={!canRedo} aria-label={site.toolbar.redoLabel} onClick={() => { if (redo()) toast(site.toolbar.redone); }}>
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 14 5-5-5-5" /><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13" /></svg>
+          <span className="sr-only sm:not-sr-only">{site.toolbar.redo}</span>
+        </button>
+      </div>
       <ThemePicker />
       <button type="button" className="btn" onClick={exportData}>{site.toolbar.export}</button>
       <button type="button" className="btn" onClick={() => file.current?.click()}>{site.toolbar.import}</button>
@@ -83,7 +98,7 @@ function Readout() {
   const cap = !data.subjects.length ? site.readout.capEmpty : !v.eligible ? site.readout.capIndicative : site.readout.capOk;
   return (
     <Glass
-      className="glass-refract glass-spec mt-6 grid gap-6 p-5 sm:p-7 md:grid-cols-[auto_1fr] md:items-end"
+      className="rise glass-refract glass-spec mt-6 grid gap-6 p-5 sm:p-7 md:grid-cols-[auto_1fr] md:items-end"
       onPointerEnter={(e: PointerEvent<HTMLDivElement>) => { if (!reduced) e.currentTarget.style.setProperty("--spec", "1"); }}
       onPointerLeave={(e: PointerEvent<HTMLDivElement>) => e.currentTarget.style.setProperty("--spec", "0")}
       onPointerMove={move}
@@ -99,8 +114,8 @@ function Readout() {
         <p className="mb-1 max-w-[24ch] text-[0.88rem] text-foreground-2">{cap}</p>
       </div>
       <div className="grid grid-cols-3 gap-3 md:justify-self-end md:gap-8">
-        <Stat className="border-l border-border/10 pl-3" value={fmt(c.aggregate)} label={site.readout.stats.scaled} />
-        <Stat className="border-l border-border/10 pl-3" value={fmt(c.rawAggregate)} label={site.readout.stats.raw} />
+        <Stat className="border-l border-border/10 pl-3" value={<TweenNum value={c.aggregate} />} label={site.readout.stats.scaled} />
+        <Stat className="border-l border-border/10 pl-3" value={<TweenNum value={c.rawAggregate} />} label={site.readout.stats.raw} />
         <Stat className="border-l border-border/10 pl-3" value={v.totalUnits} label={site.readout.stats.units} />
       </div>
     </Glass>

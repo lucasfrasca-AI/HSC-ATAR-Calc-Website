@@ -8,18 +8,50 @@
   "skipLink": "Skip to content",
   "header": {
     "logoAlt": "Lucas Frasca monogram",
-    "who": { "named": "{name} — NSW HSC ATAR projection.", "anon": "Your NSW HSC ATAR projection." },
+    "who": {
+      "named": "{name} — NSW HSC ATAR projection.",
+      "anon": "Your NSW HSC ATAR projection."
+    },
     "intro": "Enter each course and its internal mark on the subjects page; add rank, tasks or scaling detail only if you have it."
   },
-  "toolbar": { "export": "Export data", "import": "Import data", "print": "Print", "importLabel": "Import a saved JSON file" },
+  "toolbar": {
+    "export": "Export data",
+    "import": "Import data",
+    "print": "Print",
+    "importLabel": "Import a saved JSON file",
+    "undo": "Undo",
+    "redo": "Redo",
+    "undoLabel": "Undo last change",
+    "redoLabel": "Redo",
+    "undone": "Undone",
+    "redone": "Redone",
+    "nothingToUndo": "Nothing to undo",
+    "nothingToRedo": "Nothing to redo",
+    "shortcutsHint": "Tip: ⌘Z / Ctrl+Z undoes any change."
+  },
   "theme": {
     "label": "Theme",
     "options": [
-      { "id": "violet-dark", "name": "Violet" },
-      { "id": "violet-light", "name": "Violet light" },
-      { "id": "blue-dark", "name": "Midnight" },
-      { "id": "blue-light", "name": "Paper" },
-      { "id": "contrast", "name": "High contrast" }
+      {
+        "id": "violet-dark",
+        "name": "Violet"
+      },
+      {
+        "id": "violet-light",
+        "name": "Violet light"
+      },
+      {
+        "id": "blue-dark",
+        "name": "Midnight"
+      },
+      {
+        "id": "blue-light",
+        "name": "Paper"
+      },
+      {
+        "id": "contrast",
+        "name": "High contrast"
+      }
     ]
   },
   "readout": {
@@ -28,20 +60,53 @@
     "capIndicative": "Indicative only — not yet eligible for an ATAR. See the checks below.",
     "capOk": "Projected ATAR at the what-if marks.",
     "indicativeBadge": "Indicative",
-    "stats": { "scaled": "Scaled aggregate / 500", "raw": "Raw aggregate / 500", "units": "ATAR units entered" }
+    "stats": {
+      "scaled": "Scaled aggregate / 500",
+      "raw": "Raw aggregate / 500",
+      "units": "ATAR units entered"
+    }
   },
   "tabs": {
     "label": "Sections",
-    "calc": { "label": "ATAR calculator", "hash": "calculator" },
-    "subj": { "label": "Subjects & internal marks", "hash": "subjects", "countLabel": "{n} subjects", "errorLabel": "has errors" },
-    "help": { "label": "How it works", "hash": "how-it-works" }
+    "calc": {
+      "label": "ATAR calculator",
+      "hash": "calculator"
+    },
+    "subj": {
+      "label": "Subjects & internal marks",
+      "hash": "subjects",
+      "countLabel": "{n} subjects",
+      "errorLabel": "has errors"
+    },
+    "help": {
+      "label": "How it works",
+      "hash": "how-it-works"
+    }
   },
   "steps": {
     "label": "What to do",
-    "s1": { "title": "Add subjects and internal marks", "empty": "The course and final mark is all you need", "ok": "{n} subjects · ATAR-eligible", "ok1": "1 subject · ATAR-eligible", "bad": "{n} subjects · {reason}", "bad1": "1 subject · {reason}", "fallback": "some entries need fixing" },
-    "s2": { "title": "Set your exam marks", "detail": "Drag the pin, type an ATAR, or move the sliders" },
-    "s3": { "title": "Save expected and target", "none": "A realistic set and a stretch set", "some": "Expected {e} · target {t}", "saved": "saved", "notSaved": "not saved" },
-    "doneLabel": "Done", "nextLabel": "Next step"
+    "s1": {
+      "title": "Add subjects and internal marks",
+      "empty": "The course and final mark is all you need",
+      "ok": "{n} subjects · ATAR-eligible",
+      "ok1": "1 subject · ATAR-eligible",
+      "bad": "{n} subjects · {reason}",
+      "bad1": "1 subject · {reason}",
+      "fallback": "some entries need fixing"
+    },
+    "s2": {
+      "title": "Set your exam marks",
+      "detail": "Drag the pin, type an ATAR, or move the sliders"
+    },
+    "s3": {
+      "title": "Save expected and target",
+      "none": "A realistic set and a stretch set",
+      "some": "Expected {e} · target {t}",
+      "saved": "saved",
+      "notSaved": "not saved"
+    },
+    "doneLabel": "Done",
+    "nextLabel": "Next step"
   },
   "checks": {
     "regionLabel": "Eligibility checks",
@@ -50,7 +115,12 @@
     "needsFix": "Some entries need fixing — see below.",
     "fix": "Fix",
     "more": "{n} more on the subjects page.",
-    "levels": { "error": "Error", "warn": "Warning", "info": "Note", "ok": "OK" }
+    "levels": {
+      "error": "Error",
+      "warn": "Warning",
+      "info": "Note",
+      "ok": "OK"
+    }
   },
   "empty": {
     "title": "Add your subjects to start",
@@ -64,7 +134,8 @@
     "credit": "Lucas Frasca"
   },
   "dialogs": {
-    "confirm": "Confirm", "cancel": "Cancel",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
     "remove": "Remove {name}?",
     "replaceWithTest": "Replace everything you've entered with the test data?",
     "clearAll": "Clear every subject and start a new student?",
@@ -89,5 +160,14 @@
     "importNoSubjects": "This file doesn't contain any subjects.",
     "importBadJson": "the file isn't valid JSON"
   },
-  "labels": { "expected": "expected", "target": "target", "unnamed": "Unnamed course", "thisCourse": "this course", "estimate": "estimate", "units1": "1 unit", "units2": "2 units", "dash": "—" }
+  "labels": {
+    "expected": "expected",
+    "target": "target",
+    "unnamed": "Unnamed course",
+    "thisCourse": "this course",
+    "estimate": "estimate",
+    "units1": "1 unit",
+    "units2": "2 units",
+    "dash": "—"
+  }
 }
