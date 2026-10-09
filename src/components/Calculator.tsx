@@ -167,7 +167,7 @@ function CurveSection() {
   const legend = (x: typeof E) => (x ? t(calc.curve.legend.value, { agg: fmt(x.agg), atar: fmt(x.atar, 2) }) : calc.curve.legend.notSaved);
 
   return (
-    <Section id="curve" title={calc.curve.title} intro={calc.curve.intro}>
+    <Section id="curve" kicker={site.kickers.curve} title={calc.curve.title} intro={calc.curve.intro}>
       <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
         <Glass className="p-3 sm:p-4">
           <CurveChart expected={E?.agg ?? null} target={T?.agg ?? null} />
@@ -239,7 +239,7 @@ function ImpactSection() {
   const impact = useMemo(() => examImpact(data, k.step), [data, k.step]);
   const max = Math.max(0.01, ...impact.map((x) => x.atarDelta));
   return (
-    <Section id="impact" title={k.title} intro={k.intro}>
+    <Section id="impact" kicker={site.kickers.impact} title={k.title} intro={k.intro}>
       <Glass className="rise p-4 sm:p-5">
         {!impact.length ? <p className="text-[0.86rem] text-foreground-3">{k.empty}</p> : (
           <ol aria-label={k.listLabel} className="space-y-3">
@@ -360,7 +360,7 @@ function ProjectionSection() {
     toast(t(site.toasts.loaded, { label }));
   };
   return (
-    <Section id="projection" title={p.title} intro={p.intro}>
+    <Section id="projection" kicker={site.kickers.projection} title={p.title} intro={p.intro}>
       <Glass className="glass-sm mb-4 flex flex-wrap items-center justify-between gap-3.5 px-4 py-3.5">
         <p className="max-w-[50ch] text-[0.86rem] text-foreground-2"><b className="text-foreground">{p.scenLead}</b> {p.scenText.replace(p.scenLead, "").trim()}</p>
         <div className="flex flex-wrap gap-2">
@@ -392,7 +392,7 @@ function CompareSection() {
   const show = (x: typeof E, key: "agg" | "atar", d: number) => (x ? `${fmt(x[key], d)}${x.partial ? "*" : ""}` : site.labels.dash);
   const set = (uid: string, f: GoalField, v: number | null) => update((d) => { d.subjects.find((s) => s.uid === uid)![f] = v; });
   return (
-    <Section id="compare" title={k.title} intro={k.intro}>
+    <Section id="compare" kicker={site.kickers.compare} title={k.title} intro={k.intro}>
       <Glass className="glass-sm tscroll">
         <table className="table min-w-[640px]">
           <thead><tr>{Object.values(k.cols).map((h) => <th key={h} scope="col">{h}</th>)}</tr></thead>
@@ -430,7 +430,7 @@ function UnitsSection() {
   const strip = c.counted.slice().sort((a, b) => b.value - a.value);
   const empty = COUNTING_UNITS - strip.length;
   return (
-    <Section id="units">
+    <Section id="units" kicker={site.kickers.units}>
       <Glass className="p-4 sm:p-5">
         <h3 className="text-[1.1rem] font-semibold">{u.title}</h3>
         <p className="mt-1 mb-3.5 text-[0.82rem] text-foreground-3">{u.hint}</p>
@@ -472,7 +472,7 @@ function SplitSection() {
     </div>
   );
   return (
-    <Section id="split" title={s.title} intro={s.intro}>
+    <Section id="split" kicker={site.kickers.split} title={s.title} intro={s.intro}>
       <Glass className="p-4 sm:p-5">
         <div className="grid gap-3.5 sm:grid-cols-2">
           {half("border-t-internal internal", s.internal, c.rawInternal, n < 10 ? t(n === 1 ? s.intFewUnits1 : s.intFewUnits, { n, cap: capPts }) : t(s.intFull, { pct: fmt(c.rawInternal / 2.5) }))}

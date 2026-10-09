@@ -2,7 +2,7 @@
 @import "@fontsource-variable/geist";
 @import "@fontsource-variable/geist-mono";
 @import "./tokens.css";
-@import "./components.css";
+@import "./components.css" layer(components);
 
 /* Token -> Tailwind bridge. Components use these utilities or hsl(var(--x) / a);
    no colour literal appears outside tokens.css (asserted by check-content). */
@@ -37,6 +37,7 @@
   :root { --glass-alpha: 1; }
 }
 
+@layer base {
 html { background: hsl(var(--background)); color: hsl(var(--foreground)); }
 body {
   margin: 0;
@@ -48,6 +49,7 @@ body {
 }
 :focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: 2px; border-radius: 4px; }
 a { color: hsl(var(--accent)); }
+}
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }

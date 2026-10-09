@@ -131,9 +131,41 @@ const glider = await ev("(() => { const g = document.querySelector('.tab-glider'
 check(glider >= 0 && glider < 2, "tab indicator glides under the selected tab", `${glider}px off`);
 await key("ArrowRight", "ArrowRight");
 await sleep(900);
+check(await ev("location.hash === '#syllabuses' && document.querySelectorAll('#panel-syl a[href^=\"https://\"]').length > 100"), "Syllabuses tab lazy-loads its links", `${await ev("document.querySelectorAll('#panel-syl a[href^=\"https://\"]').length")} links`);
+await key("End", "End");
+await sleep(900);
 check(await ev("document.querySelectorAll('#panel-help tbody tr').length > 100"), "How it works lazy-loads the full course table", `${await ev("document.querySelectorAll('#panel-help tbody tr').length")} rows`);
-await ev("history.back()"); await sleep(300);
-check(await ev("location.hash === '#subjects' && !document.querySelector('#panel-subj').hidden"), "browser Back returns to the previous tab");
+await ev("history.back()"); await sleep(400);
+check(await ev("location.hash === '#syllabuses' && !document.querySelector('#panel-syl').hidden"), "browser Back returns to the previous tab");
+
+// ---- syllabuses ------------------------------------------------------------
+const syl = await ev(`(() => { const cards = [...document.querySelectorAll('#panel-syl li.rise')];
+  const links = [...document.querySelectorAll('#panel-syl a[href^="https://"]')];
+  return { cards: cards.length, safe: links.every(a => a.target === '_blank' && a.rel.includes('noopener') && a.rel.includes('noreferrer')),
+    hosts: [...new Set(links.map(a => new URL(a.href).host))] }; })()`);
+check(syl.cards === 115, "every course has a syllabus card", `${syl.cards} cards`);
+check(syl.safe, "syllabus links open in a new tab with noopener noreferrer");
+check(syl.hosts.every((h) => ["curriculum.nsw.edu.au", "www.nsw.gov.au"].includes(h)), "syllabus links only point at NESA hosts", syl.hosts.join(", "));
+await ev("document.querySelector('#panel-syl input[type=search]').focus()");
+await send("Input.insertText", { text: "physics" }); await sleep(300);
+check(await ev("document.querySelectorAll('#panel-syl li.rise').length") === 1, "syllabus search narrows to Physics");
+
+// ---- share link: create, open in a fresh visit, confirm, compare -----------
+await ev("location.hash = '#calculator'"); await sleep(300);
+const sharedAtar = await ev("document.querySelector('.atar-num .sr-only').textContent.trim()");
+const sharedN = await ev("JSON.parse(localStorage.getItem('hsc-atar-calculator-v4')).subjects.length");
+await ev("[...document.querySelectorAll('button')].find(b => b.textContent.trim() === 'Share').click()"); await sleep(600);
+const link = await ev("document.getElementById('share-link').value");
+check(link.includes("#share=v1.") && !link.includes("Sample"), "share link is built in the fragment, without the name by default", `${link.length} chars`);
+await ev("document.querySelector('dialog[open] .btn-primary').click()");
+await ev("localStorage.clear()");
+await load(link); await sleep(500);
+check(await ev("!!document.querySelector('dialog.confirm[open]') && document.getElementById('confirm-q').textContent.includes('" + sharedN + " subjects')"), "opening a share link asks before replacing anything", `${sharedN} subjects`);
+check(await ev("!location.hash.includes('share=')"), "the shared marks are cleared from the address bar immediately");
+await ev("document.querySelector('dialog.confirm[open] .btn-primary').click()"); await sleep(900);
+check(await ev("document.querySelector('.atar-num .sr-only').textContent.trim()") === sharedAtar, "the opened projection reproduces the same ATAR", sharedAtar);
+await load(url.replace(/#.*$/, "") + "#share=v1.!!broken!!"); await sleep(500);
+check(await ev("!document.querySelector('dialog.confirm[open]') && document.querySelector('.toast').textContent.includes('damaged')"), "a damaged share link is refused with a message");
 await shot("03-subjects-desktop");
 
 // ---- keyboard-only: everything reachable, focus visible --------------------
@@ -161,7 +193,7 @@ check(seen.some((s) => s.includes("Skip to content")), "skip link is the first s
 
 // ---- 390px: no horizontal scroll, every tab ------------------------------
 await setViewport(390, 844);
-for (const h of ["", "#subjects", "#how-it-works"]) {
+for (const h of ["", "#subjects", "#syllabuses", "#how-it-works"]) {
   await load(url.replace(/#.*$/, "") + h); await sleep(400);
   const w = await ev("({ s: document.documentElement.scrollWidth, i: innerWidth })");
   check(w.s <= w.i, `390px ${h || "#calculator"}: no horizontal page scroll`, `${w.s} vs ${w.i}`);

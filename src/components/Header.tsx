@@ -1,4 +1,4 @@
-import { useRef, useState, type ChangeEvent, type PointerEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type PointerEvent } from "react";
 import site from "../../content/site.json";
 import mark from "../assets/lf-mark.png";
 import { fmt, sanitise } from "../lib/engine.ts";
@@ -7,6 +7,7 @@ import { useCalc } from "../lib/state.tsx";
 import { t } from "../lib/text.ts";
 import { THEMES, currentTheme, setTheme, type ThemeId } from "../lib/theme.ts";
 import { useFeedback } from "./Feedback.tsx";
+import { ShareButton } from "./ShareDialog.tsx";
 import { Glass, Stat, TweenNum } from "./ui.tsx";
 
 function ThemePicker() {
@@ -75,6 +76,7 @@ function Toolbar() {
         </button>
       </div>
       <ThemePicker />
+      <ShareButton />
       <button type="button" className="btn" onClick={exportData}>{site.toolbar.export}</button>
       <button type="button" className="btn" onClick={() => file.current?.click()}>{site.toolbar.import}</button>
       <input ref={file} type="file" accept="application/json,.json" hidden aria-label={site.toolbar.importLabel} onChange={importData} />
@@ -88,6 +90,14 @@ function Readout() {
   const reduced = useReducedMotion();
   const has = data.subjects.length > 0 && c.counted.length > 0;
   const atar = useTween(has ? c.atar : 0);
+  // A light sweep across the card once the projection settles on a new value.
+  const [sweep, setSweep] = useState(0);
+  const settled = has ? c.atar.toFixed(2) : "";
+  useEffect(() => {
+    if (!settled || reduced) return;
+    const id = window.setTimeout(() => setSweep((n) => n + 1), 260);
+    return () => window.clearTimeout(id);
+  }, [settled, reduced]);
   const raf = useRef(0);
   const move = (e: PointerEvent<HTMLDivElement>) => {
     if (reduced) return;
@@ -103,6 +113,7 @@ function Readout() {
       onPointerLeave={(e: PointerEvent<HTMLDivElement>) => e.currentTarget.style.setProperty("--spec", "0")}
       onPointerMove={move}
     >
+      {sweep > 0 && <span key={sweep} aria-hidden="true" className="sweep" />}
       <div className="flex items-end gap-4">
         <div>
           <p className="kicker mb-3">{site.readout.atarLabel}</p>

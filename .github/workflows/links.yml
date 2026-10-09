@@ -1,0 +1,21 @@
+name: syllabus-links
+
+# External NESA pages can move. Checked weekly and on demand; never blocks a deploy.
+on:
+  schedule:
+    - cron: "17 21 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Every syllabus link resolves (404s and home-page redirects fail)
+        run: node scripts/build-syllabuses.mjs --check

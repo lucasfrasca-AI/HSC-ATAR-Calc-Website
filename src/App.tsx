@@ -7,6 +7,9 @@ import { Calculator } from "./components/Calculator.tsx";
 import { FeedbackProvider } from "./components/Feedback.tsx";
 import { Header } from "./components/Header.tsx";
 import { HowItWorks } from "./components/HowItWorks.tsx";
+import { Suspense, lazy } from "react";
+import { decodeShare, readShareFromLocation } from "./lib/share.ts";
+const Syllabuses = lazy(() => import("./components/Syllabuses.tsx"));
 import { Subjects } from "./components/Subjects.tsx";
 import { withTransition } from "./lib/motion.ts";
 import { NavCtx, type Nav, type TabKey } from "./lib/nav.ts";
@@ -14,7 +17,7 @@ import { useFeedback } from "./components/Feedback.tsx";
 import { CalculatorProvider, useCalc } from "./lib/state.tsx";
 import { t } from "./lib/text.ts";
 
-const ORDER: TabKey[] = ["calc", "subj", "help"];
+const ORDER: TabKey[] = ["calc", "subj", "syl", "help"];
 const fromHash = (): TabKey => ORDER.find((k) => `#${site.tabs[k].hash}` === window.location.hash) ?? "calc";
 const motion = (): ScrollBehavior => (window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth");
 
@@ -34,11 +37,31 @@ function useGlider(tab: TabKey, refs: React.RefObject<Record<TabKey, HTMLButtonE
 }
 
 function Shell() {
-  const { data, v, undo, redo } = useCalc();
-  const { toast } = useFeedback();
+  const { data, v, undo, redo, replace } = useCalc();
+  const { toast, confirm } = useFeedback();
   const [tab, setTab] = useState<TabKey>(fromHash);
-  const tabRefs = useRef<Record<TabKey, HTMLButtonElement | null>>({ calc: null, subj: null, help: null });
+  const tabRefs = useRef<Record<TabKey, HTMLButtonElement | null>>({ calc: null, subj: null, syl: null, help: null });
   const glide = useGlider(tab, tabRefs);
+
+  // Opening a share link: decode (hostile input), ask, replace (undoable), then
+  // clear the fragment so the marks don't linger in the address bar or history.
+  useEffect(() => {
+    const open = () => {
+      const payload = readShareFromLocation();
+      if (!payload) return;
+      history.replaceState(null, "", `${location.pathname}#${site.tabs.calc.hash}`);
+      setTab("calc");
+      decodeShare(payload).then(async (d) => {
+        const n = d.subjects.length;
+        if (!n) { toast(site.share.bad); return; }
+        if (await confirm(n === 1 ? site.share.openConfirm1 : t(site.share.openConfirm, { n }))) { replace(d); toast(site.share.opened); }
+      }).catch((e: unknown) => toast(e instanceof Error && e.message === "too-large" ? site.share.tooLarge : site.share.bad));
+    };
+    open();
+    // A share link pasted into a tab that already has the site open only changes the fragment.
+    window.addEventListener("hashchange", open);
+    return () => window.removeEventListener("hashchange", open);
+  }, [confirm, replace, toast]);
 
   // Cmd/Ctrl+Z undo, Shift+Cmd/Ctrl+Z or Ctrl+Y redo — except inside text fields,
   // which keep their own native undo.
@@ -87,7 +110,8 @@ function Shell() {
 
   const onKey = (e: KeyboardEvent<HTMLButtonElement>) => {
     const i = ORDER.indexOf(tab);
-    const next = { ArrowRight: ORDER[(i + 1) % 3], ArrowLeft: ORDER[(i + 2) % 3], Home: ORDER[0], End: ORDER[2] }[e.key];
+    const n = ORDER.length;
+    const next = { ArrowRight: ORDER[(i + 1) % n], ArrowLeft: ORDER[(i + n - 1) % n], Home: ORDER[0], End: ORDER[n - 1] }[e.key];
     if (!next) return;
     e.preventDefault(); select(next); tabRefs.current[next]?.focus();
   };
@@ -107,7 +131,8 @@ function Shell() {
                 aria-selected={tab === k} aria-controls={`panel-${k}`} tabIndex={tab === k ? 0 : -1}
                 onClick={() => select(k)} onKeyDown={onKey}
               >
-                {site.tabs[k].label}
+                <span className="sm:hidden">{site.tabs[k].short}</span>
+                <span className="hidden sm:inline">{site.tabs[k].label}</span>
                 {k === "subj" && (
                   <span className="count num" data-error={subjErr}>
                     <span aria-hidden="true">{data.subjects.length}</span>
@@ -121,6 +146,7 @@ function Shell() {
         <main id="main" tabIndex={-1} className="outline-none">
           <div role="tabpanel" id="panel-calc" aria-labelledby="tab-calc" hidden={tab !== "calc"}><Calculator /></div>
           <div role="tabpanel" id="panel-subj" aria-labelledby="tab-subj" hidden={tab !== "subj"}><Subjects /></div>
+          <div role="tabpanel" id="panel-syl" aria-labelledby="tab-syl" hidden={tab !== "syl"}>{tab === "syl" && <Suspense fallback={null}><Syllabuses /></Suspense>}</div>
           <div role="tabpanel" id="panel-help" aria-labelledby="tab-help" hidden={tab !== "help"}>{tab === "help" && <HowItWorks />}</div>
         </main>
         <footer className="mt-6 border-t border-border/10 pt-5 text-[0.8rem] text-foreground-3">

@@ -1,0 +1,953 @@
+{
+  "source": "Syllabus and Industry Curriculum Framework pages linked from NESA's NSW Curriculum website (curriculum.nsw.edu.au) and nsw.gov.au/nesa. Links only; content remains © NSW Education Standards Authority.",
+  "syllabuses": {
+    "aboriginal": [
+      {
+        "title": "Aboriginal Studies Stage 6 (2010)",
+        "year": 2010,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/hsie/aboriginal-studies-stage-6-2010"
+      }
+    ],
+    "agriculture": [
+      {
+        "title": "Agriculture 11–12 (2026)",
+        "year": 2026,
+        "url": "https://curriculum.nsw.edu.au/learning-areas/tas/agriculture-11-12-2026/overview"
+      },
+      {
+        "title": "Agriculture Stage 6 (2013)",
+        "year": 2013,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/tas/agriculture-stage-6-2013"
+      }
+    ],
+    "ancient": [
+      {
+        "title": "Ancient History 11–12 (2024)",
+        "year": 2024,
+        "url": "https://curriculum.nsw.edu.au/learning-areas/hsie/ancient-history-11-12-2024/overview"
+      },
+      {
+        "title": "Ancient History Stage 6 (2017)",
+        "year": 2017,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/hsie/ancient-history-stage-6-2017"
+      }
+    ],
+    "vet-auto": [
+      {
+        "title": "Automotive — Industry Curriculum Framework",
+        "year": null,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/vet/stage-6-industry-curriculum-frameworks/automotive",
+        "kind": "framework"
+      }
+    ],
+    "biology": [
+      {
+        "title": "Biology 11–12 (2025)",
+        "year": 2025,
+        "url": "https://curriculum.nsw.edu.au/learning-areas/science/biology-11-12-2025/overview"
+      },
+      {
+        "title": "Biology Stage 6 (2017)",
+        "year": 2017,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/science/biology-stage-6-2017"
+      }
+    ],
+    "vet-business": [
+      {
+        "title": "Business Services — Industry Curriculum Framework",
+        "year": null,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/vet/stage-6-industry-curriculum-frameworks/business-services",
+        "kind": "framework"
+      }
+    ],
+    "business": [
+      {
+        "title": "Business Studies Stage 6 (2010)",
+        "year": 2010,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/hsie/business-studies-stage-6-2010"
+      }
+    ],
+    "chemistry": [
+      {
+        "title": "Chemistry 11–12 (2025)",
+        "year": 2025,
+        "url": "https://curriculum.nsw.edu.au/learning-areas/science/chemistry-11-12-2025/overview"
+      },
+      {
+        "title": "Chemistry Stage 6 (2017)",
+        "year": 2017,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/science/chemistry-stage-6-2017"
+      }
+    ],
+    "cafs": [
+      {
+        "title": "Community and Family Studies Stage 6 (2022)",
+        "year": 2022,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/pdhpe/cafs-stage-6-2022"
+      }
+    ],
+    "vet-construction": [
+      {
+        "title": "Construction — Industry Curriculum Framework",
+        "year": null,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/vet/stage-6-industry-curriculum-frameworks/construction",
+        "kind": "framework"
+      }
+    ],
+    "dance": [
+      {
+        "title": "Dance 11–12 (2025)",
+        "year": 2025,
+        "url": "https://curriculum.nsw.edu.au/learning-areas/creative-arts/dance-11-12-2025/overview"
+      },
+      {
+        "title": "Dance Stage 6 (2009)",
+        "year": 2009,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/creative-arts/dance-stage-6-2009"
+      }
+    ],
+    "dt": [
+      {
+        "title": "Design and Technology Stage 6 (2013)",
+        "year": 2013,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/tas/design-and-technology-stage-6-2013"
+      }
+    ],
+    "drama": [
+      {
+        "title": "Drama 11–12 (2025)",
+        "year": 2025,
+        "url": "https://curriculum.nsw.edu.au/learning-areas/creative-arts/drama-11-12-2025/overview"
+      },
+      {
+        "title": "Drama Stage 6 (2009)",
+        "year": 2009,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/creative-arts/drama-stage-6-2009"
+      }
+    ],
+    "ees": [
+      {
+        "title": "Earth and Environmental Science 11–12 (2025)",
+        "year": 2025,
+        "url": "https://curriculum.nsw.edu.au/learning-areas/science/earth-and-environmental-science-11-12-2025/overview"
+      },
+      {
+        "title": "Earth and Environmental Science Stage 6 (2017)",
+        "year": 2017,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/science/earth-and-environmental-science-stage-6-2017"
+      }
+    ],
+    "economics": [
+      {
+        "title": "Economics 11–12 (2025)",
+        "year": 2025,
+        "url": "https://curriculum.nsw.edu.au/learning-areas/hsie/economics-11-12-2025/overview"
+      },
+      {
+        "title": "Economics Stage 6 (2009)",
+        "year": 2009,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/hsie/economics-stage-6-2009"
+      }
+    ],
+    "vet-electro": [
+      {
+        "title": "Electrotechnology — Industry Curriculum Framework",
+        "year": null,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/vet/stage-6-industry-curriculum-frameworks/electrotechnology",
+        "kind": "framework"
+      }
+    ],
+    "engineering": [
+      {
+        "title": "Engineering Studies Stage 6 (2011)",
+        "year": 2011,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/tas/engineering-studies-stage-6-2011"
+      }
+    ],
+    "eng-eald": [
+      {
+        "title": "English EAL/D 11–12 (2024)",
+        "year": 2024,
+        "url": "https://curriculum.nsw.edu.au/learning-areas/english/english-eald-11-12-2024/overview"
+      },
+      {
+        "title": "English EAL/D Stage 6 (2017)",
+        "year": 2017,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/english/english-eald-stage-6-2017"
+      }
+    ],
+    "eng-std": [
+      {
+        "title": "English Standard 11–12 (2024)",
+        "year": 2024,
+        "url": "https://curriculum.nsw.edu.au/learning-areas/english/english-standard-11-12-2024/overview"
+      },
+      {
+        "title": "English Standard Stage 6 (2017)",
+        "year": 2017,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/english/english-standard-stage-6-2017"
+      }
+    ],
+    "eng-studies": [
+      {
+        "title": "English Studies 11–12 (2024)",
+        "year": 2024,
+        "url": "https://curriculum.nsw.edu.au/learning-areas/english/english-studies-11-12-2024/overview"
+      },
+      {
+        "title": "English Studies Stage 6 (2017)",
+        "year": 2017,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/english/english-studies-stage-6-2017"
+      }
+    ],
+    "eng-adv": [
+      {
+        "title": "English Advanced 11–12 (2024)",
+        "year": 2024,
+        "url": "https://curriculum.nsw.edu.au/learning-areas/english/english-advanced-11-12-2024/overview"
+      },
+      {
+        "title": "English Advanced Stage 6 (2017)",
+        "year": 2017,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/english/english-advanced-stage-6-2017"
+      }
+    ],
+    "eng-ext1": [
+      {
+        "title": "English Extension 11–12 (2024)",
+        "year": 2024,
+        "url": "https://curriculum.nsw.edu.au/learning-areas/english/english-extension-11-12-2024/overview"
+      },
+      {
+        "title": "English Extension Stage 6 (2017)",
+        "year": 2017,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/english/english-extension-stage-6-2017"
+      }
+    ],
+    "eng-ext2": [
+      {
+        "title": "English Extension 11–12 (2024)",
+        "year": 2024,
+        "url": "https://curriculum.nsw.edu.au/learning-areas/english/english-extension-11-12-2024/overview"
+      },
+      {
+        "title": "English Extension Stage 6 (2017)",
+        "year": 2017,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/english/english-extension-stage-6-2017"
+      }
+    ],
+    "enterprise": [
+      {
+        "title": "Enterprise Computing 11–12 (2022)",
+        "year": 2022,
+        "url": "https://curriculum.nsw.edu.au/learning-areas/tas/enterprise-computing-11-12-2022/overview"
+      }
+    ],
+    "vet-entertain": [
+      {
+        "title": "Entertainment Industry — Industry Curriculum Framework",
+        "year": null,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/vet/stage-6-industry-curriculum-frameworks/entertainment-industry",
+        "kind": "framework"
+      }
+    ],
+    "vet-financial-services": [
+      {
+        "title": "Financial Services — Industry Curriculum Framework",
+        "year": null,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/vet/stage-6-industry-curriculum-frameworks/financial-services",
+        "kind": "framework"
+      }
+    ],
+    "food-tech": [
+      {
+        "title": "Food Technology Stage 6 (2013)",
+        "year": 2013,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/tas/food-technology-stage-6-2013"
+      }
+    ],
+    "geography": [
+      {
+        "title": "Geography 11–12 (2022)",
+        "year": 2022,
+        "url": "https://curriculum.nsw.edu.au/learning-areas/hsie/geography-11-12-2022/overview"
+      }
+    ],
+    "hms": [
+      {
+        "title": "Health and Movement Science 11–12 (2023)",
+        "year": 2023,
+        "url": "https://curriculum.nsw.edu.au/learning-areas/pdhpe/health-and-movement-science-11-12-2023/overview"
+      }
+    ],
+    "hist-ext": [
+      {
+        "title": "History Extension 11–12 (2024)",
+        "year": 2024,
+        "url": "https://curriculum.nsw.edu.au/learning-areas/hsie/history-extension-11-12-2024/overview"
+      },
+      {
+        "title": "History Extension Stage 6 (2017)",
+        "year": 2017,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/hsie/history-extension-stage-6-2017"
+      }
+    ],
+    "vet-hospitality": [
+      {
+        "title": "Hospitality — Industry Curriculum Framework",
+        "year": null,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/vet/stage-6-industry-curriculum-frameworks/hospitality",
+        "kind": "framework"
+      }
+    ],
+    "vet-hospitality-kitchen": [
+      {
+        "title": "Hospitality — Industry Curriculum Framework",
+        "year": null,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/vet/stage-6-industry-curriculum-frameworks/hospitality",
+        "kind": "framework"
+      }
+    ],
+    "vet-human": [
+      {
+        "title": "Human Services — Industry Curriculum Framework",
+        "year": null,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/vet/stage-6-industry-curriculum-frameworks/human-services",
+        "kind": "framework"
+      }
+    ],
+    "ind-tech": [
+      {
+        "title": "Industrial Technology Stage 6 (2013)",
+        "year": 2013,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/tas/industrial-technology-stage-6-2013"
+      }
+    ],
+    "vet-idt": [
+      {
+        "title": "Information and Digital Technology — Industry Curriculum Framework",
+        "year": null,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/vet/stage-6-industry-curriculum-frameworks/information-and-digital-technology",
+        "kind": "framework"
+      }
+    ],
+    "inv-sci": [
+      {
+        "title": "Investigating Science Stage 6 (2017)",
+        "year": 2017,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/science/investigating-science-stage-6-2017"
+      }
+    ],
+    "legal": [
+      {
+        "title": "Legal Studies 11–12 (2025)",
+        "year": 2025,
+        "url": "https://curriculum.nsw.edu.au/learning-areas/hsie/legal-studies-11-12-2025/overview"
+      },
+      {
+        "title": "Legal Studies Stage 6 (2009)",
+        "year": 2009,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/hsie/legal-studies-stage-6-2009"
+      }
+    ],
+    "maths-std1": [
+      {
+        "title": "Mathematics Standard 11–12 (2024)",
+        "year": 2024,
+        "url": "https://curriculum.nsw.edu.au/learning-areas/mathematics/mathematics-standard-11-12-2024/overview"
+      },
+      {
+        "title": "Mathematics Standard Stage 6 (2017)",
+        "year": 2017,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/mathematics/mathematics-standard-stage-6-2017"
+      }
+    ],
+    "maths-std2": [
+      {
+        "title": "Mathematics Standard 11–12 (2024)",
+        "year": 2024,
+        "url": "https://curriculum.nsw.edu.au/learning-areas/mathematics/mathematics-standard-11-12-2024/overview"
+      },
+      {
+        "title": "Mathematics Standard Stage 6 (2017)",
+        "year": 2017,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/mathematics/mathematics-standard-stage-6-2017"
+      }
+    ],
+    "maths-adv": [
+      {
+        "title": "Mathematics Advanced 11–12 (2024)",
+        "year": 2024,
+        "url": "https://curriculum.nsw.edu.au/learning-areas/mathematics/mathematics-advanced-11-12-2024/overview"
+      },
+      {
+        "title": "Mathematics Advanced Stage 6 (2017)",
+        "year": 2017,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/mathematics/mathematics-advanced-stage-6-2017"
+      }
+    ],
+    "maths-ext1": [
+      {
+        "title": "Mathematics Extension 1 11–12 (2024)",
+        "year": 2024,
+        "url": "https://curriculum.nsw.edu.au/learning-areas/mathematics/mathematics-extension-1-11-12-2024/overview"
+      },
+      {
+        "title": "Mathematics Extension 1 Stage 6 (2017)",
+        "year": 2017,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/mathematics/mathematics-extension-1-stage-6-2017"
+      }
+    ],
+    "maths-ext2": [
+      {
+        "title": "Mathematics Extension 2 11–12 (2024)",
+        "year": 2024,
+        "url": "https://curriculum.nsw.edu.au/learning-areas/mathematics/mathematics-extension-2-11-12-2024/overview"
+      },
+      {
+        "title": "Mathematics Extension 2 Stage 6 (2017)",
+        "year": 2017,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/mathematics/mathematics-extension-2-stage-6-2017"
+      }
+    ],
+    "modern": [
+      {
+        "title": "Modern History 11–12 (2024)",
+        "year": 2024,
+        "url": "https://curriculum.nsw.edu.au/learning-areas/hsie/modern-history-11-12-2024/overview"
+      },
+      {
+        "title": "Modern History Stage 6 (2017)",
+        "year": 2017,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/hsie/modern-history-stage-6-2017"
+      }
+    ],
+    "music1": [
+      {
+        "title": "Music 1 11–12 (2025)",
+        "year": 2025,
+        "url": "https://curriculum.nsw.edu.au/learning-areas/creative-arts/music-1-11-12-2025/overview"
+      },
+      {
+        "title": "Music 1 Stage 6 (2009)",
+        "year": 2009,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/creative-arts/music-1-stage-6-2009"
+      }
+    ],
+    "music2": [
+      {
+        "title": "Music 2 11–12 (2025)",
+        "year": 2025,
+        "url": "https://curriculum.nsw.edu.au/learning-areas/creative-arts/music-2-11-12-2025/overview"
+      },
+      {
+        "title": "Music 2 Stage 6 (2009)",
+        "year": 2009,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/creative-arts/music-2-stage-6-2009"
+      }
+    ],
+    "music-ext": [
+      {
+        "title": "Music Extension 11–12 (2025)",
+        "year": 2025,
+        "url": "https://curriculum.nsw.edu.au/learning-areas/creative-arts/music-extension-11-12-2025/overview"
+      },
+      {
+        "title": "Music Extension Stage 6 (2009)",
+        "year": 2009,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/creative-arts/music-extension-stage-6-2009"
+      }
+    ],
+    "vet-primary": [
+      {
+        "title": "Primary Industries — Industry Curriculum Framework",
+        "year": null,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/vet/stage-6-industry-curriculum-frameworks/primary-industries",
+        "kind": "framework"
+      }
+    ],
+    "physics": [
+      {
+        "title": "Physics 11–12 (2025)",
+        "year": 2025,
+        "url": "https://curriculum.nsw.edu.au/learning-areas/science/physics-11-12-2025/overview"
+      },
+      {
+        "title": "Physics Stage 6 (2017)",
+        "year": 2017,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/science/physics-stage-6-2017"
+      }
+    ],
+    "vet-retail": [
+      {
+        "title": "Retail Services — Industry Curriculum Framework",
+        "year": null,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/vet/stage-6-industry-curriculum-frameworks/retail-services",
+        "kind": "framework"
+      }
+    ],
+    "sci-ext": [
+      {
+        "title": "Science Extension Stage 6 (2017)",
+        "year": 2017,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/science/science-extension-stage-6-2017"
+      }
+    ],
+    "soc-cult": [
+      {
+        "title": "Society and Culture Stage 6 (2013)",
+        "year": 2013,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/hsie/society-and-culture-stage-6-2013"
+      }
+    ],
+    "software": [
+      {
+        "title": "Software Engineering 11–12 (2022)",
+        "year": 2022,
+        "url": "https://curriculum.nsw.edu.au/learning-areas/tas/software-engineering-11-12-2022/overview"
+      }
+    ],
+    "sor1": [
+      {
+        "title": "Studies of Religion I Stage 6 (2009)",
+        "year": 2009,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/hsie/studies-of-religion-1-stage-6-2009"
+      }
+    ],
+    "sor2": [
+      {
+        "title": "Studies of Religion II Stage 6 (2009)",
+        "year": 2009,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/hsie/studies-of-religion-2-stage-6-2009"
+      }
+    ],
+    "textiles": [
+      {
+        "title": "Textiles and Design Stage 6 (2013)",
+        "year": 2013,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/tas/textiles-and-design-stage-6-2013"
+      }
+    ],
+    "vet-tourism": [
+      {
+        "title": "Tourism Travel and Events — Industry Curriculum Framework",
+        "year": null,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/vet/stage-6-industry-curriculum-frameworks/tourism-travel-and-events",
+        "kind": "framework"
+      }
+    ],
+    "visual-arts": [
+      {
+        "title": "Visual Arts Stage 6 (2016)",
+        "year": 2016,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/creative-arts/visual-arts-stage-6-2016"
+      }
+    ],
+    "arabic-continuers": [
+      {
+        "title": "Arabic Continuers Stage 6 (2009)",
+        "year": 2009,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/continuers/arabic-stage-6-2009"
+      }
+    ],
+    "arabic-extension": [
+      {
+        "title": "Arabic Extension Stage 6 (2009)",
+        "year": 2009,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/extension/arabic-stage-6-2009"
+      }
+    ],
+    "armenian-continuers": [
+      {
+        "title": "Armenian Continuers Stage 6 (2023)",
+        "year": 2023,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/continuers/armenian-stage-6-2023"
+      }
+    ],
+    "chinese-beginners": [
+      {
+        "title": "Chinese Beginners Stage 6 (2009)",
+        "year": 2009,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/beginners/chinese-stage-6-2009"
+      }
+    ],
+    "chinese-continuers": [
+      {
+        "title": "Chinese Continuers Stage 6 (2009)",
+        "year": 2009,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/continuers/chinese-stage-6-2009"
+      }
+    ],
+    "chinese-in-context": [
+      {
+        "title": "Chinese in Context Stage 6 (2023)",
+        "year": 2023,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/in-context/chinese-stage-6-2023"
+      }
+    ],
+    "chinese-and-literature": [
+      {
+        "title": "Chinese and Literature Stage 6 (2012)",
+        "year": 2012,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/literature/chinese-stage-6-2012"
+      }
+    ],
+    "chinese-extension": [
+      {
+        "title": "Chinese Extension Stage 6 (2009)",
+        "year": 2009,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/extension/chinese-stage-6-2009"
+      }
+    ],
+    "classical-greek-continuers": [
+      {
+        "title": "Classical Greek Continuers Stage 6 (2013)",
+        "year": 2013,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/continuers/classical-greek-stage-6-2013"
+      }
+    ],
+    "classical-greek-extension": [
+      {
+        "title": "Classical Greek Extension Stage 6 (2013)",
+        "year": 2013,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/extension/classical-greek-stage-6-2013"
+      }
+    ],
+    "classical-hebrew-continuers": [
+      {
+        "title": "Classical Hebrew Continuers Stage 6 (2013)",
+        "year": 2013,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/continuers/classical-hebrew-stage-6-2013"
+      }
+    ],
+    "classical-hebrew-extension": [
+      {
+        "title": "Classical Hebrew Extension Stage 6 (2013)",
+        "year": 2013,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/extension/classical-hebrew-stage-6-2013"
+      }
+    ],
+    "croatian-continuers": [
+      {
+        "title": "Croatian Continuers Stage 6 (2023)",
+        "year": 2023,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/continuers/croatian-stage-6-2023"
+      }
+    ],
+    "dutch-continuers": [
+      {
+        "title": "Dutch Continuers Stage 6 (2023)",
+        "year": 2023,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/continuers/dutch-stage-6-2023"
+      }
+    ],
+    "filipino-continuers": [
+      {
+        "title": "Filipino Continuers Stage 6 (2023)",
+        "year": 2023,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/continuers/filipino-stage-6-2023"
+      }
+    ],
+    "french-beg": [
+      {
+        "title": "French Beginners Stage 6 (2009)",
+        "year": 2009,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/beginners/french-stage-6-2009"
+      }
+    ],
+    "french-cont": [
+      {
+        "title": "French Continuers Stage 6 (2009)",
+        "year": 2009,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/continuers/french-stage-6-2009"
+      }
+    ],
+    "french-extension": [
+      {
+        "title": "French Extension Stage 6 (2009)",
+        "year": 2009,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/extension/french-stage-6-2009"
+      }
+    ],
+    "german-beginners": [
+      {
+        "title": "German Beginners Stage 6 (2009)",
+        "year": 2009,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/beginners/german-stage-6-2009"
+      }
+    ],
+    "german-cont": [
+      {
+        "title": "German Continuers Stage 6 (2009)",
+        "year": 2009,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/continuers/german-stage-6-2009"
+      }
+    ],
+    "german-extension": [
+      {
+        "title": "German Extension Stage 6 (2009)",
+        "year": 2009,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/extension/german-stage-6-2009"
+      }
+    ],
+    "hindi-continuers": [
+      {
+        "title": "Hindi Continuers Stage 6 (2023)",
+        "year": 2023,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/continuers/hindi-stage-6-2023"
+      }
+    ],
+    "hungarian-continuers": [
+      {
+        "title": "Hungarian Continuers Stage 6 (2023)",
+        "year": 2023,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/continuers/hungarian-stage-6-2023"
+      }
+    ],
+    "indonesian-beginners": [
+      {
+        "title": "Indonesian Beginners Stage 6 (2009)",
+        "year": 2009,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/beginners/indonesian-stage-6-2009"
+      }
+    ],
+    "indonesian-continuers": [
+      {
+        "title": "Indonesian Continuers Stage 6 (2009)",
+        "year": 2009,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/continuers/indonesian-stage-6-2009"
+      }
+    ],
+    "indonesian-extension": [
+      {
+        "title": "Indonesian Extension Stage 6 (2009)",
+        "year": 2009,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/extension/indonesian-stage-6-2009"
+      }
+    ],
+    "italian-beg": [
+      {
+        "title": "Italian Beginners Stage 6 (2009)",
+        "year": 2009,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/beginners/italian-stage-6-2009"
+      }
+    ],
+    "italian-cont": [
+      {
+        "title": "Italian Continuers Stage 6 (2009)",
+        "year": 2009,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/continuers/italian-stage-6-2009"
+      }
+    ],
+    "italian-extension": [
+      {
+        "title": "Italian Extension Stage 6 (2009)",
+        "year": 2009,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/extension/italian-stage-6-2009"
+      }
+    ],
+    "japanese-beg": [
+      {
+        "title": "Japanese Beginners Stage 6 (2009)",
+        "year": 2009,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/beginners/japanese-stage-6-2009"
+      }
+    ],
+    "japanese-cont": [
+      {
+        "title": "Japanese Continuers Stage 6 (2009)",
+        "year": 2009,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/continuers/japanese-stage-6-2009"
+      }
+    ],
+    "japanese-in-context": [
+      {
+        "title": "Japanese in Context Stage 6 (2023)",
+        "year": 2023,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/in-context/japanese-stage-6-2023"
+      }
+    ],
+    "japanese-extension": [
+      {
+        "title": "Japanese Extension Stage 6 (2009)",
+        "year": 2009,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/extension/japanese-stage-6-2009"
+      }
+    ],
+    "khmer-continuers": [
+      {
+        "title": "Khmer Continuers Stage 6 (2023)",
+        "year": 2023,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/continuers/khmer-stage-6-2023"
+      }
+    ],
+    "korean-beginners": [
+      {
+        "title": "Korean Beginners Stage 6 (2015)",
+        "year": 2015,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/beginners/korean-stage-6-2015"
+      }
+    ],
+    "korean-continuers": [
+      {
+        "title": "Korean Continuers Stage 6 (2010)",
+        "year": 2010,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/continuers/korean-stage-6-2010"
+      }
+    ],
+    "korean-in-context": [
+      {
+        "title": "Korean in Context Stage 6 (2023)",
+        "year": 2023,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/in-context/korean-stage-6-2023"
+      }
+    ],
+    "korean-and-literature": [
+      {
+        "title": "Korean and Literature Stage 6 (2012)",
+        "year": 2012,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/literature/korean-stage-6-2012"
+      }
+    ],
+    "latin-continuers": [
+      {
+        "title": "Latin Continuers Stage 6 (2014)",
+        "year": 2014,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/continuers/latin-stage-6-2014"
+      }
+    ],
+    "latin-extension": [
+      {
+        "title": "Latin Extension Stage 6 (2014)",
+        "year": 2014,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/extension/latin-stage-6-2014"
+      }
+    ],
+    "macedonian-continuers": [
+      {
+        "title": "Macedonian Continuers Stage 6 (2023)",
+        "year": 2023,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/continuers/macedonian-stage-6-2023"
+      }
+    ],
+    "modern-greek-beginners": [
+      {
+        "title": "Modern Greek Beginners Stage 6 (2009)",
+        "year": 2009,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/beginners/modern-greek-stage-6-2009"
+      }
+    ],
+    "modern-greek-continuers": [
+      {
+        "title": "Modern Greek Continuers Stage 6 (2009)",
+        "year": 2009,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/continuers/modern-greek-stage-6-2009"
+      }
+    ],
+    "modern-greek-extension": [
+      {
+        "title": "Modern Greek Extension Stage 6 (2009)",
+        "year": 2009,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/extension/modern-greek-stage-6-2009"
+      }
+    ],
+    "modern-hebrew-continuers": [
+      {
+        "title": "Modern Hebrew Continuers Stage 6 (2009)",
+        "year": 2009,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/continuers/modern-hebrew-stage-6-2009"
+      }
+    ],
+    "persian-continuers": [
+      {
+        "title": "Persian Continuers Stage 6 (2023)",
+        "year": 2023,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/continuers/persian-stage-6-2023"
+      }
+    ],
+    "polish-continuers": [
+      {
+        "title": "Polish Continuers Stage 6 (2023)",
+        "year": 2023,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/continuers/polish-stage-6-2023"
+      }
+    ],
+    "portuguese-continuers": [
+      {
+        "title": "Portuguese Continuers Stage 6 (2023)",
+        "year": 2023,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/continuers/portuguese-stage-6-2023"
+      }
+    ],
+    "punjabi-continuers": [
+      {
+        "title": "Punjabi Continuers Stage 6 (2023)",
+        "year": 2023,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/continuers/punjabi-stage-6-2023"
+      }
+    ],
+    "russian-continuers": [
+      {
+        "title": "Russian Continuers Stage 6 (2023)",
+        "year": 2023,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/continuers/russian-stage-6-2023"
+      }
+    ],
+    "serbian-continuers": [
+      {
+        "title": "Serbian Continuers Stage 6 (2023)",
+        "year": 2023,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/continuers/serbian-stage-6-2023"
+      }
+    ],
+    "spanish-beg": [
+      {
+        "title": "Spanish Beginners Stage 6 (2009)",
+        "year": 2009,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/beginners/spanish-stage-6-2009"
+      }
+    ],
+    "spanish-cont": [
+      {
+        "title": "Spanish Continuers Stage 6 (2009)",
+        "year": 2009,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/continuers/spanish-stage-6-2009"
+      }
+    ],
+    "spanish-extension": [
+      {
+        "title": "Spanish Extension Stage 6 (2009)",
+        "year": 2009,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/extension/spanish-stage-6-2009"
+      }
+    ],
+    "swedish-continuers": [
+      {
+        "title": "Swedish Continuers Stage 6 (2023)",
+        "year": 2023,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/continuers/swedish-stage-6-2023"
+      }
+    ],
+    "tamil-continuers": [
+      {
+        "title": "Tamil Continuers Stage 6 (2023)",
+        "year": 2023,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/continuers/tamil-stage-6-2023"
+      }
+    ],
+    "turkish-continuers": [
+      {
+        "title": "Turkish Continuers Stage 6 (2023)",
+        "year": 2023,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/continuers/turkish-stage-6-2023"
+      }
+    ],
+    "vietnamese-continuers": [
+      {
+        "title": "Vietnamese Continuers Stage 6 (2009)",
+        "year": 2009,
+        "url": "https://www.nsw.gov.au/education-and-training/nesa/curriculum/languages/continuers/vietnamese-stage-6-2009"
+      }
+    ]
+  }
+}

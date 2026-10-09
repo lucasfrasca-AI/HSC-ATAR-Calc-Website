@@ -33,6 +33,7 @@ t "UAC anchors without permission" content/courses.json 's/("id": "chemistry",.*
 t "theme id drift" content/site.json 's/"id": "contrast"/"id": "hc"/' "$B"
 t "budget: lazy module made static" src/App.tsx 's|^|import "./ScalingTable.ts";\n|' "echo 'export const x=1; console.log(x)' > src/ScalingTable.ts; npx vite build >/dev/null 2>&1; node scripts/check-budget.mjs; r=\$?; rm src/ScalingTable.ts; exit \$r"
 t "budget: lazy chunk statically imported" src/App.tsx 's|^|import { x } from "./ScalingTable.ts";\nconsole.log(x);\n|' "printf 'export const x = [1,2,3].map(String);\\n' > src/ScalingTable.ts; npx vite build >/dev/null 2>&1; node scripts/check-budget.mjs; r=\$?; rm src/ScalingTable.ts; exit \$r"
+t "budget: syllabus tab made static" src/App.tsx 's/const Syllabuses = lazy\(\(\) => import\("\.\/components\/Syllabuses\.tsx"\)\);/import Syllabuses from ".\/components\/Syllabuses.tsx";/' "npx vite build >/dev/null 2>&1; node scripts/check-budget.mjs"
 t "budget: over ceiling" scripts/check-budget.mjs 's/js: 110_000/js: 50_000/' "npx vite build >/dev/null 2>&1; node scripts/check-budget.mjs"
 t "typecheck: type error" src/App.tsx 's/export function App\(\) \{/export function App() {\n  const n: number = "x"; void n;/' "npx tsc -b"
 t "lint: hook in condition" src/App.tsx 's/export function App\(\) \{/import { useState } from "react";\nexport function App() {\n  if (Math.random()) useState(0);/' "npx eslint ."

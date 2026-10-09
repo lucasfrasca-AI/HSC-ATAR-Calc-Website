@@ -27,7 +27,8 @@
     "redone": "Redone",
     "nothingToUndo": "Nothing to undo",
     "nothingToRedo": "Nothing to redo",
-    "shortcutsHint": "Tip: ⌘Z / Ctrl+Z undoes any change."
+    "shortcutsHint": "Tip: ⌘Z / Ctrl+Z undoes any change.",
+    "share": "Share"
   },
   "theme": {
     "label": "Theme",
@@ -70,17 +71,25 @@
     "label": "Sections",
     "calc": {
       "label": "ATAR calculator",
-      "hash": "calculator"
+      "hash": "calculator",
+      "short": "Calculator"
     },
     "subj": {
       "label": "Subjects & internal marks",
       "hash": "subjects",
       "countLabel": "{n} subjects",
-      "errorLabel": "has errors"
+      "errorLabel": "has errors",
+      "short": "Subjects"
     },
     "help": {
       "label": "How it works",
-      "hash": "how-it-works"
+      "hash": "how-it-works",
+      "short": "Guide"
+    },
+    "syl": {
+      "label": "Syllabuses",
+      "short": "Syllabuses",
+      "hash": "syllabuses"
     }
   },
   "steps": {
@@ -169,5 +178,38 @@
     "units1": "1 unit",
     "units2": "2 units",
     "dash": "—"
+  },
+  "share": {
+    "title": "Share this projection",
+    "body": "The link holds your courses and marks, packed into the link itself. Nothing is uploaded or stored anywhere — but anyone you send the link to can see those marks.",
+    "includeName": "Include my name",
+    "includeNameHelp": "Off by default. Only your courses and marks are in the link.",
+    "linkLabel": "Share link",
+    "copy": "Copy link",
+    "copied": "Link copied",
+    "native": "Share…",
+    "close": "Done",
+    "copyFailed": "Couldn't copy — select the link and copy it yourself.",
+    "making": "Making link…",
+    "chars": "{n} characters",
+    "openConfirm": "Open the shared projection? It has {n} subjects and replaces what's in your calculator now. You can undo afterwards.",
+    "openConfirm1": "Open the shared projection? It has 1 subject and replaces what's in your calculator now. You can undo afterwards.",
+    "opened": "Shared projection opened — undo to go back",
+    "bad": "That share link is damaged or incomplete.",
+    "tooLarge": "That share link is too large to open.",
+    "empty": "Add some subjects first — there's nothing to share yet."
+  },
+  "kickers": {
+    "curve": "01 · Projection",
+    "impact": "02 · Leverage",
+    "projection": "03 · Exams",
+    "compare": "04 · Scenarios",
+    "units": "05 · Counting",
+    "split": "06 · Composition",
+    "subjects": "Your list",
+    "summary": "At a glance",
+    "help": "Method",
+    "scaling": "Reference",
+    "syllabuses": "NESA syllabuses"
   }
 }

@@ -45,8 +45,12 @@ export type Level = "error" | "warn" | "info";
 export interface Issue { level: Level; key: string; vars: Record<string, string | number>; uid?: string }
 
 /* ---------- small helpers ---------- */
-export const num = (v: unknown): number | null =>
-  v === null || v === undefined || v === "" || Number.isNaN(Number(v)) ? null : Number(v);
+/** A finite number, or null for blank/invalid/±Infinity (e.g. "1e999" in a crafted import). */
+export const num = (v: unknown): number | null => {
+  if (v === null || v === undefined || v === "" || typeof v === "boolean") return null;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+};
 export const inRange = (v: unknown, lo: number, hi: number): number | null => {
   const n = num(v);
   return n === null || n < lo || n > hi ? null : n;

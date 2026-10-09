@@ -1,5 +1,6 @@
 import { Suspense, lazy } from "react";
 import help from "../../content/help.json";
+import site from "../../content/site.json";
 import { fmt } from "../lib/engine.ts";
 import { useCalc } from "../lib/state.tsx";
 import { t } from "../lib/text.ts";
@@ -13,7 +14,7 @@ export function HowItWorks() {
   const quote = c.counted.length ? t(e.quoteLive, { agg: fmt(c.aggregate), pct: fmt(c.aggregate / 5), atar: fmt(c.atar, 1) }) : e.quoteDefault;
   return (
     <>
-      <Section>
+      <Section kicker={site.kickers.help}>
         <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
           <Glass className="p-5 sm:p-6">
             <h2 className="text-[1.15rem] font-semibold">{e.title}</h2>
@@ -32,7 +33,7 @@ export function HowItWorks() {
           </Glass>
         </div>
       </Section>
-      <Section id="scaleRef" title={help.scaling.title} intro={help.scaling.intro}>
+      <Section id="scaleRef" kicker={site.kickers.scaling} title={help.scaling.title} intro={help.scaling.intro}>
         <Suspense fallback={<p className="text-foreground-3" role="status">{help.scaling.loading}</p>}>
           <ScalingTable />
         </Suspense>

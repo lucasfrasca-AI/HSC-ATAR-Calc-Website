@@ -23,6 +23,8 @@ Fonts: system stack first (`-apple-system` renders SF Pro on Apple devices — S
 - Undo/redo: `update` coalesces bursts (700 ms) into one step; `beginDrag`/`endDrag`/`setAggregate` and `replace` are hard boundaries. Cmd/Ctrl+Z is ignored inside text fields so native undo still works.
 - `examImpact` ("Where marks matter most"): ATAR change from +5 exam marks in one subject, others held. Same estimates as everything else; labelled.
 - Accent discipline in practice: slider fills, chips and secondary buttons are neutral; accent only on the pin, focus ring, tab underline, top impact bar, links and the ATAR spectrum underline.
+- Share links (`src/lib/share.ts`): data is deflate-compressed into the URL **fragment** (`#share=v1.…`), never sent to a server or in Referer. Name excluded unless opted in. Decoding is hostile-input: payload and decompressed-size caps (zip-bomb test), then `sanitise`. Opening asks first, is undoable, and the fragment is cleared immediately. Handled on load *and* `hashchange` (pasting a link into an open tab doesn't reload).
+- Syllabuses tab: `content/syllabuses.json` from `scripts/build-syllabuses.mjs` (links only, never NESA content). `--check` verifies every URL; curriculum.nsw.edu.au answers dead links with a 200 redirect to `/`, so the checker treats a home-page landing as a failure. Runs weekly in `.github/workflows/links.yml`, not in the deploy path. Lazy chunk, in MUST_BE_LAZY.
 - `ScalingTable` is lazy (How it works tab) and listed in `check-budget` MUST_BE_LAZY.
 
 ## Checks (all run in CI `verify`; run locally with `npm run verify`)
@@ -44,6 +46,9 @@ Verify every deploy against production with curl, not the emulator.
 Its SHA-256 is in the CSP in `firebase.json`. Edit the script → build → `node scripts/check-content.mjs` prints the new hash → replace it in `firebase.json`.
 
 ## Traps (each one has happened)
+- Unlayered CSS beats every Tailwind utility (utilities live in `@layer utilities`). A plain `a { color }` silently overrode `text-foreground` on links. Base rules live in `@layer base`; `components.css` is imported `layer(components)`.
+- Tailwind's preflight sets `margin: 0` on everything, which un-centres native `<dialog>`; `dialog.confirm` restores `margin: auto`.
+- `Number("1e999")` is `Infinity`; `num()` accepts finite numbers only (a hostile-share test caught it).
 - Time-only undo coalescing merged a keyboard pin move with the preceding drag; gestures need explicit boundaries.
 - A `.glass` dropdown (backdrop-filter + isolation) let later content paint through it; popovers use a solid surface, no backdrop-filter, and an explicit z-index on the wrapper.
 - In Perl substitutions `$1[` is an array element; write `${1}[`.

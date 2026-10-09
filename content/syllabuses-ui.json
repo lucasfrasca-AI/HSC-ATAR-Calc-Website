@@ -1,0 +1,19 @@
+{
+  "title": "Find your syllabus",
+  "intro": "Every HSC course on the calculator, linked to its official syllabus on NESA's NSW Curriculum website. VET courses link to their Industry Curriculum Framework.",
+  "phaseNote": "Where two versions are listed, a new syllabus is being phased in. Check the syllabus page for which one applies to your year.",
+  "search": "Search syllabuses",
+  "searchPlaceholder": "Course, learning area or NESA number",
+  "areaLabel": "Learning area",
+  "all": "All",
+  "mineOnly": "Only my subjects",
+  "mine": "On your list",
+  "newest": "Newer",
+  "framework": "Framework",
+  "count": "{n} courses",
+  "count1": "1 course",
+  "none": "No course matches “{q}”.",
+  "nesa": "NESA no. {code}",
+  "opensNew": "(opens NESA's site in a new tab)",
+  "source": "Links point to NESA's NSW Curriculum website. Syllabus content is © NSW Education Standards Authority. Links checked October 2026."
+}

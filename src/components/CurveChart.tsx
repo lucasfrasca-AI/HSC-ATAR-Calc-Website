@@ -69,6 +69,9 @@ export function CurveChart({ expected, target }: { expected: number | null; targ
       ref={svg} viewBox={`0 0 ${W} ${H}`} className="chart" role="group" aria-label={calc.curve.chartLabel}
       data-dragging={dragging} onPointerDown={down} onPointerMove={moveTo} onPointerUp={up} onPointerCancel={up}
     >
+      <defs aria-hidden="true">
+        <linearGradient id="curveFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" className="g-top" /><stop offset="1" className="g-bottom" /></linearGradient>
+      </defs>
       {[0, 100, 200, 300, 400, 500].map((a) => (
         <g key={a} aria-hidden="true">
           <line className="grid" x1={x(a)} x2={x(a)} y1={T - 8} y2={y(0)} />

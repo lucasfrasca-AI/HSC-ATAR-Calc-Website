@@ -16,6 +16,8 @@ const BUDGET = { js: 110_000, css: 16_000 };
 // not chunk names, because a static import merges the module into the entry.
 const MUST_BE_LAZY = [
   { name: "ScalingTable", why: "course scaling reference is only needed on the How it works tab" },
+  { name: "Syllabuses", why: "the syllabus directory is only needed on its tab" },
+  { name: "syllabuses.json", why: "141 syllabus links are only needed on the Syllabuses tab" },
   { name: "dompurify", why: "sanitiser is only needed after an import" },
   { name: "firebase", why: "no Firebase SDK on the critical path" },
 ];

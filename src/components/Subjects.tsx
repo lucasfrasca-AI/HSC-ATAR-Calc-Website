@@ -273,7 +273,7 @@ function SummaryTable() {
   const positions = rows.flatMap((r) => (r.info.rank !== null && r.info.cohort ? [r.info.rank / r.info.cohort] : []));
   const n = marks.length, tm = marks.reduce((a, m) => a + m, 0), rc = positions.length, rs = positions.reduce((a, p) => a + p, 0);
   return (
-    <Section id="summary" title={k.title} intro={k.intro}>
+    <Section id="summary" kicker={site.kickers.summary} title={k.title} intro={k.intro}>
       <Glass className="glass-sm tscroll">
         <table className="table min-w-[680px]">
           <thead><tr>{Object.values(k.cols).map((h) => <th key={h} scope="col">{h}</th>)}</tr></thead>
@@ -339,7 +339,7 @@ export function Subjects() {
   const { data } = useCalc();
   return (
     <>
-      <Section id="your-subjects" title={sub.title} intro={<>{sub.intro.split(sub.introStrong)[0]}<b className="text-foreground">{sub.introStrong}</b>{sub.intro.split(sub.introStrong)[1]}</>}>
+      <Section id="your-subjects" kicker={site.kickers.subjects} title={sub.title} intro={<>{sub.intro.split(sub.introStrong)[0]}<b className="text-foreground">{sub.introStrong}</b>{sub.intro.split(sub.introStrong)[1]}</>}>
         {!data.subjects.length && (
           <Glass className="glass-sm mb-3.5 px-5 py-10 text-center">
             <h3 className="text-[1.3rem] font-semibold">{sub.noneTitle}</h3>
