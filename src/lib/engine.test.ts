@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import sample from "../../content/sample-student.json" with { type: "json" };
 import {
-  blankData, compute, examImpact, sanitise, solveShift, baseline, subjectFrom, validate, atarToAgg,
+  blankData, compute, examImpact, nextBand, planFor, sanitise, solveShift, baseline, subjectFrom, validate, atarToAgg,
   type Data, type Subject,
 } from "./engine.ts";
 
@@ -112,4 +112,37 @@ test("examImpact: ranked, never negative, zero at the 100 cap, and consistent wi
   const capped = structuredClone(d);
   capped.subjects[0]!.exam = 100;
   assert.equal(examImpact(capped).find((x) => x.uid === capped.subjects[0]!.uid)!.atarDelta, 0);
+});
+
+test("planFor reaches the target with no more marks than an even spread", () => {
+  const d = sanitise(sample);
+  const now = compute(d).atar;
+  const t0 = performance.now();
+  const plan = planFor(d, now + 8);
+  const ms = performance.now() - t0;
+  assert.ok(plan.reached, "target reachable");
+  assert.ok(plan.atar >= now + 8 - 0.01);
+  assert.ok(plan.evenTotal !== null && plan.total <= plan.evenTotal + 1e-9, `${plan.total} vs even ${plan.evenTotal}`);
+  for (const [uid, m] of Object.entries(plan.marks)) assert.ok(m >= 0 && m <= 100, uid);
+  assert.ok(ms < 400, `planner took ${ms.toFixed(0)} ms`);
+});
+
+test("planFor: already there costs nothing; impossible targets say so", () => {
+  const d = sanitise(sample);
+  const p0 = planFor(d, compute(d).atar - 5);
+  assert.equal(p0.total, 0);
+  assert.ok(p0.reached);
+  const one = new Set([d.subjects[0]!.uid]);
+  const p1 = planFor(d, 99.9, one);
+  assert.equal(p1.reached, false);
+  assert.equal(p1.marks[d.subjects[0]!.uid], 100);
+  assert.equal(p1.evenTotal, null);
+});
+
+test("nextBand: exam mark needed for the next band", () => {
+  assert.deepEqual(nextBand(76, 75), { band: 5, exam: 84 });   // (76 + 84) / 2 = 80
+  assert.deepEqual(nextBand(85, 89.5), { band: 6, exam: 95 });
+  assert.deepEqual(nextBand(70, 79), { band: 5, exam: 90 });   // (70 + 90) / 2 = 80
+  assert.equal(nextBand(92, 95), null);                          // already Band 6: nothing above
+  assert.equal(nextBand(40, 89), null);                          // Band 6 would need exam 140: out of reach
 });

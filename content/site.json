@@ -65,7 +65,9 @@
       "scaled": "Scaled aggregate / 500",
       "raw": "Raw aggregate / 500",
       "units": "ATAR units entered"
-    }
+    },
+    "ring": "Finished above about {pct}% of the Year 12 age group",
+    "ringShort": "above ~{pct}%"
   },
   "tabs": {
     "label": "Sections",
@@ -201,7 +203,6 @@
   },
   "kickers": {
     "curve": "01 · Projection",
-    "impact": "02 · Leverage",
     "projection": "03 · Exams",
     "compare": "04 · Scenarios",
     "units": "05 · Counting",
@@ -210,6 +211,7 @@
     "summary": "At a glance",
     "help": "Method",
     "scaling": "Reference",
-    "syllabuses": "NESA syllabuses"
+    "syllabuses": "NESA syllabuses",
+    "plan": "02 · Plan"
   }
 }

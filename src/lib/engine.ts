@@ -409,3 +409,59 @@ export function examImpact(data: Data, step = 5): Impact[] {
   }
   return out.sort((a, b) => b.atarDelta - a.atarDelta);
 }
+
+/* ---------- smart plan: fewest total exam marks to reach a target ---------- */
+export interface Plan {
+  marks: Record<string, number>;   // planned what-if exam mark per subject
+  added: Record<string, number>;   // marks added per subject
+  total: number;                   // total marks added
+  reached: boolean;
+  atar: number;                    // ATAR at the planned marks
+  evenTotal: number | null;        // total marks the even (pin) spread would need, if it can reach
+}
+/**
+ * Greedy allocation: repeatedly give one exam mark to whichever eligible subject
+ * raises the aggregate most, until the target ATAR is reached or nothing helps.
+ * Treats every mark as equally easy to earn — a deliberate simplification the UI states.
+ */
+export function planFor(data: Data, targetAtar: number, ids?: Set<string>): Plan {
+  const base = baseline(data);
+  const pool = new Set(ids ?? data.subjects.filter((s) => s.focus).map((s) => s.uid));
+  for (const uid of [...pool]) if (base[uid] === undefined) pool.delete(uid);
+  const marks = { ...base };
+  const aggAt = (m: Record<string, number>) => computeFrom(data, (s, i) => m[s.uid] ?? examOf(s, i)).aggregate;
+  const target = atarToAgg(targetAtar);
+  let agg = aggAt(marks);
+  for (let guard = 0; agg < target - 1e-9 && guard < 2000; guard++) {
+    let best: string | null = null, bestGain = 1e-9;
+    for (const uid of pool) {
+      if (marks[uid]! >= 100) continue;
+      const trial = { ...marks, [uid]: Math.min(100, marks[uid]! + 1) };
+      const gain = aggAt(trial) - agg;
+      if (gain > bestGain + 1e-12 || (Math.abs(gain - bestGain) <= 1e-12 && best !== null && marks[uid]! < marks[best]!)) { best = uid; bestGain = gain; }
+    }
+    if (!best) break;
+    marks[best] = Math.min(100, marks[best]! + 1);
+    agg += bestGain;
+  }
+  agg = aggAt(marks);
+  const added: Record<string, number> = {};
+  let total = 0;
+  for (const uid of Object.keys(marks)) { const a = marks[uid]! - base[uid]!; if (a > 0) { added[uid] = a; total += a; } }
+  let evenTotal: number | null = null;
+  if (pool.size) {
+    const even = solveShift(data, base, pool, target);
+    if (!even.capped) evenTotal = [...pool].reduce((a, uid) => a + Math.max(0, even.marks[uid]! - base[uid]!), 0);
+  }
+  return { marks, added, total, reached: agg >= target - 1e-6, atar: aggregateToAtar(agg), evenTotal };
+}
+
+/* ---------- HSC band ladder (approximate: blended mark, not NESA's aligned mark) ---------- */
+export const BAND_FLOORS = [50, 60, 70, 80, 90] as const; // Band 2…6
+/** Exam mark needed for the blended mark to reach the next band, or null if none / out of reach. */
+export function nextBand(internal: number, blended: number): { band: number; exam: number } | null {
+  const floor = BAND_FLOORS.find((f) => f > blended + 1e-9);
+  if (floor === undefined) return null;
+  const exam = Math.ceil((2 * floor - internal) * 2) / 2;
+  return exam > 100 ? null : { band: bandOf(floor), exam: Math.max(0, exam) };
+}

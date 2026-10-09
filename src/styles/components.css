@@ -146,12 +146,12 @@ details[open] > summary .plus { transform: rotate(45deg); }
 
 /* ---------- tables ---------- */
 .tscroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-.table { border-collapse: collapse; width: 100%; font-size: 0.86rem; }
-.table th, .table td { padding: 9px 12px; text-align: right; border-bottom: 1px solid hsl(var(--border) / 0.08); white-space: nowrap; font-variant-numeric: tabular-nums; }
-.table th { font-weight: 600; font-size: 0.74rem; color: hsl(var(--foreground-3)); border-bottom-color: hsl(var(--border) / 0.16); }
-.table th:first-child, .table td:first-child { text-align: left; }
-.table tr.total td { font-weight: 600; background: hsl(var(--foreground) / 0.04); border-top: 1px solid hsl(var(--border) / 0.16); }
-.table tr.area td { font-weight: 600; font-size: 0.78rem; color: hsl(var(--foreground-2)); text-align: left; padding-top: 16px; background: hsl(var(--foreground) / 0.03); }
+.datatable { border-collapse: collapse; width: 100%; font-size: 0.86rem; }
+.datatable th, .datatable td { padding: 9px 12px; text-align: right; border-bottom: 1px solid hsl(var(--border) / 0.08); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.datatable th { font-weight: 600; font-size: 0.74rem; color: hsl(var(--foreground-3)); border-bottom-color: hsl(var(--border) / 0.16); }
+.datatable th:first-child, .datatable td:first-child { text-align: left; }
+.datatable tr.total td { font-weight: 600; background: hsl(var(--foreground) / 0.04); border-top: 1px solid hsl(var(--border) / 0.16); }
+.datatable tr.area td { font-weight: 600; font-size: 0.78rem; color: hsl(var(--foreground-2)); text-align: left; padding-top: 16px; background: hsl(var(--foreground) / 0.03); }
 .gain { color: hsl(var(--gain)); } .loss { color: hsl(var(--loss)); }
 
 /* ---------- meters ---------- */
@@ -165,7 +165,7 @@ details[open] > summary .plus { transform: rotate(45deg); }
 .chart[data-dragging="true"] { cursor: grabbing; }
 .chart .curve-fill { fill: hsl(var(--foreground) / 0.06); }
 .chart .curve-line { fill: none; stroke: hsl(var(--foreground-2)); stroke-width: 1.6; }
-.chart .grid { stroke: hsl(var(--border) / 0.08); }
+.chart .gridline { stroke: hsl(var(--border) / 0.08); }
 .chart .tick { fill: hsl(var(--foreground-3)); font-size: 11px; font-family: var(--font-mono); }
 .chart .axis-title { fill: hsl(var(--foreground-3)); font-size: 11px; }
 .chart .pin-stem { stroke: hsl(var(--accent)); stroke-width: 1.5; stroke-dasharray: 3 3; }
@@ -291,3 +291,31 @@ input[type="range"].glide:disabled { opacity: 0.4; }
 .chart .g-top { stop-color: hsl(var(--foreground)); stop-opacity: 0.13; }
 .chart .g-bottom { stop-color: hsl(var(--foreground)); stop-opacity: 0.01; }
 .chart .curve-fill { fill: url(#curveFill); }
+
+/* ---------- band ladder ---------- */
+.band-track { position: relative; height: 30px; }
+.band-seg { position: absolute; top: 4px; height: 6px; background: hsl(var(--foreground) / 0.08); transition: background-color 0.4s; }
+.band-seg:first-child { border-radius: 6px 0 0 6px; }
+.band-seg:last-of-type { border-radius: 0 6px 6px 0; }
+.band-seg + .band-seg { box-shadow: inset 2px 0 0 hsl(var(--surface)); }
+.band-seg > span { position: absolute; left: 0; right: 0; top: 11px; text-align: center; font-size: 0.62rem; font-weight: 600; color: hsl(var(--foreground-3)); transition: color 0.4s; }
+.band-seg[data-on="true"] { background: hsl(var(--foreground) / 0.3); }
+.band-seg[data-on="true"] > span { color: hsl(var(--foreground)); }
+.band-marker { position: absolute; top: 1px; width: 12px; height: 12px; margin-left: -6px; border-radius: 50%; background: hsl(var(--surface));
+  border: 2px solid hsl(var(--foreground)); box-shadow: 0 2px 6px hsl(var(--background) / 0.6); transition: left 0.5s cubic-bezier(.2, .8, .2, 1); }
+@media (prefers-reduced-motion: reduce) { .band-marker, .band-seg { transition: none; } }
+
+/* ---------- odometer digits ---------- */
+.odo { display: inline-flex; align-items: flex-start; }
+.odo-col { display: inline-block; height: 1em; line-height: 1; overflow: hidden; }
+.odo-strip { display: flex; flex-direction: column; height: 1000%; transition: transform 0.75s cubic-bezier(.2, .9, .25, 1.02); will-change: transform; }
+.odo-strip > span, .odo-sep { display: block; height: 10%; line-height: 1; }
+.odo-strip > span { height: 1em; }
+.odo-sep { height: 1em; }
+@media (prefers-reduced-motion: reduce) { .odo-strip { transition: none; } }
+
+/* ---------- percentile ring ---------- */
+.pct-ring { flex: none; }
+.ring-track { fill: none; stroke: hsl(var(--foreground) / 0.1); stroke-width: 4; }
+.ring-arc { fill: none; stroke: hsl(var(--accent-fill)); stroke-width: 4; stroke-linecap: round; transition: stroke-dashoffset 0.9s cubic-bezier(.2, .8, .2, 1); }
+@media (prefers-reduced-motion: reduce) { .ring-arc { transition: none; } }

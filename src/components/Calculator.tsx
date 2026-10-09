@@ -1,7 +1,7 @@
 import calc from "../../content/calculator.json";
 import site from "../../content/site.json";
 import {
-  aggregateToAtar, atarToAgg, displayName, examImpact, examOf, fmt, inRange, isEstimate, scenarioAgg, COUNTING_UNITS, MAX_AGGREGATE,
+  aggregateToAtar, atarToAgg, displayName, examImpact, nextBand, planFor, BAND_FLOORS, examOf, fmt, inRange, isEstimate, scenarioAgg, COUNTING_UNITS, MAX_AGGREGATE,
   type Subject,
 } from "../lib/engine.ts";
 import { useNav } from "../lib/nav.ts";
@@ -9,7 +9,7 @@ import { sampleData, useCalc, type GoalField } from "../lib/state.tsx";
 import { cap, msg, signed, t } from "../lib/text.ts";
 import { CurveChart } from "./CurveChart.tsx";
 import { useFeedback } from "./Feedback.tsx";
-import { useMemo, type CSSProperties } from "react";
+import { useDeferredValue, useMemo, useState, type CSSProperties } from "react";
 import { Glass, NumInput, Range, Section, Stat, TweenNum } from "./ui.tsx";
 
 const subjectColour = (i: number) => `hsl(var(--subject-${(i % 8) + 1}))`;
@@ -169,7 +169,8 @@ function CurveSection() {
   return (
     <Section id="curve" kicker={site.kickers.curve} title={calc.curve.title} intro={calc.curve.intro}>
       <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
-        <Glass className="p-3 sm:p-4">
+        <div className="grid gap-5">
+        <Glass className="rise p-3 sm:p-4">
           <CurveChart expected={E?.agg ?? null} target={T?.agg ?? null} />
           <div className="mt-2 flex items-center gap-3 border-t border-border/10 px-1 pt-3">
             <label htmlFor="aggRange" className="text-[0.8rem] whitespace-nowrap text-foreground-3">{calc.curve.aggregateLabel}</label>
@@ -188,6 +189,8 @@ function CurveSection() {
             <li className="flex items-center gap-1.5"><i aria-hidden="true" className="inline-block h-2.5 w-2.5 rounded-full bg-[hsl(var(--target))]" />{calc.curve.legend.target} — <b className="text-foreground-2 num">{legend(T)}</b></li>
           </ul>
         </Glass>
+        <ImpactPanel />
+        </div>
 
         <Glass as="aside" className="p-5" aria-label={calc.curve.whatIfAtar}>
           <AtarBox id="liveAtarIn" big label={calc.curve.whatIfAtar} value={has ? c.atar : null}
@@ -233,44 +236,131 @@ function CurveSection() {
 }
 
 /* ---------------- where marks matter most ---------------- */
-function ImpactSection() {
+function ImpactPanel() {
   const { data, c } = useCalc();
   const k = calc.impact;
   const impact = useMemo(() => examImpact(data, k.step), [data, k.step]);
   const max = Math.max(0.01, ...impact.map((x) => x.atarDelta));
   return (
-    <Section id="impact" kicker={site.kickers.impact} title={k.title} intro={k.intro}>
-      <Glass className="rise p-4 sm:p-5">
-        {!impact.length ? <p className="text-[0.86rem] text-foreground-3">{k.empty}</p> : (
-          <ol aria-label={k.listLabel} className="space-y-3">
-            {impact.map((x, rank) => {
-              const s = data.subjects.find((y) => y.uid === x.uid)!;
-              const i = data.subjects.indexOf(s);
-              const mostlyOut = x.added > 0 && x.atarDelta < max * 0.4 && (c.countedBy[s.uid] ?? 0) < s.units;
-              return (
-                <li key={x.uid} className="impact-row grid grid-cols-[1.6rem_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5">
-                  <span aria-hidden="true" className="text-[0.78rem] text-foreground-3 num">{rank + 1}</span>
-                  <span className="flex min-w-0 items-center gap-2">
-                    <i aria-hidden="true" className="inline-block h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: subjectColour(i) }} />
-                    <span className="truncate text-[0.9rem]">{displayName(s)}</span>
-                    <span className="hidden text-[0.75rem] text-foreground-3 sm:inline">{x.added > 0 ? t(k.row, { added: fmt(x.added, x.added % 1 ? 1 : 0) }) : k.none}</span>
-                  </span>
-                  <span className="text-right text-[0.9rem] font-semibold num">{t(k.gain, { atar: fmt(x.atarDelta, 2) })}</span>
-                  <span aria-hidden="true" />
-                  <span className="impact-bar col-span-2"><i style={{ transform: `scaleX(${Math.max(0, x.atarDelta) / max})` }} /></span>
-                  {mostlyOut && <span className="col-start-2 col-end-4 text-[0.74rem] text-dropped">{k.notCounted}</span>}
-                </li>
-              );
-            })}
+    <Glass className="rise p-4 sm:p-5" style={{ "--i": 2 } as CSSProperties} aria-labelledby="impact-h">
+      <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+        <h3 id="impact-h" className="text-[1.05rem] font-semibold">{k.title}</h3>
+        <span className="flag !ml-0">{k.estimate}</span>
+      </div>
+      <p className="mb-3.5 text-[0.8rem] text-foreground-3">{k.intro}</p>
+      {!impact.length ? <p className="text-[0.86rem] text-foreground-3">{k.empty}</p> : (
+        <ol aria-label={k.listLabel} className="space-y-2.5">
+          {impact.map((x, rank) => {
+            const s = data.subjects.find((y) => y.uid === x.uid)!;
+            const i = data.subjects.indexOf(s);
+            const mostlyOut = x.added > 0 && x.atarDelta < max * 0.4 && (c.countedBy[s.uid] ?? 0) < s.units;
+            return (
+              <li key={x.uid} className="impact-row grid grid-cols-[1.3rem_minmax(0,1fr)_auto] items-center gap-x-2.5 gap-y-1">
+                <span aria-hidden="true" className="text-[0.74rem] text-foreground-3 num">{rank + 1}</span>
+                <span className="flex min-w-0 items-center gap-2">
+                  <i aria-hidden="true" className="inline-block h-2 w-2 shrink-0 rounded-full" style={{ background: subjectColour(i) }} />
+                  <span className="truncate text-[0.86rem]">{displayName(s)}</span>
+                </span>
+                <span className="text-right text-[0.86rem] font-semibold num">{x.added > 0 ? t(k.gain, { atar: fmt(x.atarDelta, 2) }) : k.none}</span>
+                <span aria-hidden="true" />
+                <span className="impact-bar col-span-2 !h-1.5"><i style={{ transform: `scaleX(${Math.max(0, x.atarDelta) / max})` }} /></span>
+                {mostlyOut && <span className="col-start-2 col-end-4 text-[0.72rem] text-dropped">{k.notCounted}</span>}
+              </li>
+            );
+          })}
+        </ol>
+      )}
+    </Glass>
+  );
+}
+
+/* ---------------- smart plan ---------------- */
+function PlanSection() {
+  const { data, c, update, clearDrag } = useCalc();
+  const { toast } = useFeedback();
+  const k = calc.plan;
+  const T = scenarioAgg(data, "target");
+  const [want, setWant] = useState<number>(() => Math.min(99.95, Math.round((T?.atar ?? c.atar + 5) * 20) / 20));
+  // Deferred so dragging the pin never waits on the planner (~5 ms, but per frame).
+  const deferred = useDeferredValue(data);
+  const ticked = deferred.subjects.filter((s) => s.focus).length;
+  const plan = useMemo(() => planFor(deferred, want), [deferred, want]);
+  const rows = deferred.subjects.filter((s) => plan.marks[s.uid] !== undefined && s.focus)
+    .map((s) => ({ s, from: plan.marks[s.uid]! - (plan.added[s.uid] ?? 0), to: plan.marks[s.uid]!, add: plan.added[s.uid] ?? 0 }))
+    .sort((a, b) => b.add - a.add);
+  const maxAdd = Math.max(1, ...rows.map((r) => r.add));
+  const saved = plan.evenTotal === null ? null : plan.evenTotal - plan.total;
+  const apply = () => {
+    update((d) => { for (const s of d.subjects) if (plan.added[s.uid]) s.exam = plan.marks[s.uid]!; });
+    clearDrag(); toast(k.applied);
+  };
+  return (
+    <Section id="plan" kicker={site.kickers.plan} title={k.title} intro={k.intro}>
+      <Glass className="rise grid gap-6 p-4 sm:p-6 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
+        <div>
+          <label className="field" htmlFor="planTarget">{k.target}
+            <NumInput id="planTarget" min={0} max={99.95} step={0.05} value={want}
+              className="!max-w-[200px] !border-b-[3px] !border-b-accent-fill !py-1 !text-[2.2rem] font-semibold tracking-[-0.03em]"
+              onCommit={(v) => { if (v !== null && v >= 0 && v <= 99.95) setWant(v); }} />
+          </label>
+          {T && Math.abs(T.atar - want) > 0.01 && <button type="button" className="btn mt-2.5" onClick={() => setWant(Math.round(T.atar * 100) / 100)}>{k.useTarget}</button>}
+          <div className="mt-5 space-y-2 text-[0.9rem]" aria-live="polite">
+            {!ticked ? <p className="text-foreground-3">{k.needTicked}</p>
+              : plan.total === 0 && plan.reached ? <p>{t(k.zero, { atar: fmt(want, 2) })}</p>
+              : !plan.reached ? <p className="text-warn">{t(k.unreachable, { atar: fmt(plan.atar, 2) })}</p>
+              : <>
+                  <p className="text-[1.05rem]"><b className="text-[1.6rem] font-semibold tracking-[-0.02em] num"><TweenNum value={plan.total} digits={0} /></b> {t(k.result, { atar: fmt(want, 2) })}</p>
+                  <p className="text-foreground-2">{plan.evenTotal === null ? k.evenUnreachable : saved !== null && saved >= 0.5 ? t(k.saving, { even: fmt(plan.evenTotal, 0), saved: fmt(saved, 0) }) : k.noSaving}</p>
+                </>}
+          </div>
+          <p className="mt-4 text-[0.76rem] text-foreground-3"><span className="flag !ml-0 mr-1.5">{k.estimate}</span>{k.assumption}</p>
+        </div>
+        <div>
+          <ol aria-label={k.listLabel} className="space-y-2.5">
+            {rows.map(({ s, from, to, add }) => (
+              <li key={s.uid} className="impact-row grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1">
+                <span className="flex min-w-0 items-center gap-2">
+                  <i aria-hidden="true" className="inline-block h-2 w-2 shrink-0 rounded-full" style={{ background: subjectColour(data.subjects.findIndex((x) => x.uid === s.uid)) }} />
+                  <span className="truncate text-[0.88rem]">{displayName(s)}</span>
+                  <span className="hidden text-[0.75rem] text-foreground-3 sm:inline num">{add ? t(k.row, { from: fmt(from, 0), to: fmt(to, 0) }) : ""}</span>
+                </span>
+                <span className={`text-right text-[0.88rem] font-semibold num ${add ? "" : "text-foreground-3 font-normal"}`}>{add ? t(k.gain, { n: fmt(add, 0) }) : k.unchanged}</span>
+                <span className="impact-bar col-span-2 !h-1.5"><i style={{ transform: `scaleX(${add / maxAdd})` }} /></span>
+              </li>
+            ))}
           </ol>
-        )}
-        <p className="mt-4 text-[0.76rem] text-foreground-3"><span className="flag !ml-0">{k.estimate}</span></p>
+          <button type="button" className="btn btn-primary mt-5" disabled={!plan.reached || plan.total === 0} onClick={apply}>{k.apply}</button>
+        </div>
       </Glass>
     </Section>
   );
 }
 
 /* ---------------- projection ---------------- */
+/** Blended mark on the HSC band ladder (approximate: NESA bands use aligned marks). */
+function BandTrack({ internal, blended }: { internal: number; blended: number }) {
+  const p = calc.projection;
+  const lo = 40, x = (v: number) => `${Math.max(0, Math.min(100, ((v - lo) / (100 - lo)) * 100))}%`;
+  const next = nextBand(internal, blended);
+  const segs = [{ from: lo, to: BAND_FLOORS[0], n: 1 }, ...BAND_FLOORS.map((f, i) => ({ from: f as number, to: (BAND_FLOORS[i + 1] ?? 100) as number, n: i + 2 }))];
+  return (
+    <div className="mt-3">
+      <div className="band-track" role="img" aria-label={`${p.bandTrack}: ${fmt(blended)}%`}>
+        {segs.map((g) => (
+          <span key={g.n} className="band-seg" data-on={(g.n === 1 ? blended < g.to : blended >= g.from) && (blended < g.to || g.to === 100)} style={{ left: x(g.from), width: `calc(${x(g.to)} - ${x(g.from)})` }}>
+            <span aria-hidden="true">{t(p.bandLabel, { n: g.n })}</span>
+          </span>
+        ))}
+        <i className="band-marker" style={{ left: x(blended) }} aria-hidden="true" />
+      </div>
+      <p className="mt-1.5 flex justify-between gap-2 text-[0.75rem] text-foreground-3">
+        <span>{blended >= 90 ? p.bandTop : next ? t(p.bandNext, { band: next.band, exam: fmt(next.exam, next.exam % 1 ? 1 : 0) }) : p.bandOut}</span>
+        <span>{p.bandNote}</span>
+      </p>
+    </div>
+  );
+}
+
 function ProjectionCard({ s, i }: { s: Subject; i: number }) {
   const { c, update } = useCalc();
   const r = c.rows.find((x) => x.s.uid === s.uid)!;
@@ -324,7 +414,8 @@ function ProjectionCard({ s, i }: { s: Subject; i: number }) {
               </div>
             ))}
           </dl>
-          <div className="relative mt-2.5 h-2 overflow-hidden rounded-full bg-foreground/8" aria-hidden="true">
+          <BandTrack internal={r.used.mark!} blended={r.blended} />
+          <div className="relative mt-3 h-2 overflow-hidden rounded-full bg-foreground/8" aria-hidden="true">
             <i className="absolute inset-y-0 left-0 block bg-foreground-3/60 transition-[width] duration-500" style={{ width: `${Math.max(0, Math.min(100, r.blended))}%` }} />
             <i className={`absolute inset-y-0 left-0 block opacity-85 transition-[width] duration-500 ${diff >= 0 ? "bg-gain" : "bg-loss"}`} style={{ width: `${Math.max(0, Math.min(100, r.scaled100))}%` }} />
           </div>
@@ -394,7 +485,7 @@ function CompareSection() {
   return (
     <Section id="compare" kicker={site.kickers.compare} title={k.title} intro={k.intro}>
       <Glass className="glass-sm tscroll">
-        <table className="table min-w-[640px]">
+        <table className="datatable min-w-[640px]">
           <thead><tr>{Object.values(k.cols).map((h) => <th key={h} scope="col">{h}</th>)}</tr></thead>
           <tbody>
             {c.rows.map((r) => {
@@ -503,7 +594,7 @@ export function Calculator() {
       {!data.subjects.length ? <EmptyState onTest={() => void loadTest()} /> : (
         <>
           <CurveSection />
-          <ImpactSection />
+          <PlanSection />
           <ProjectionSection />
           <CompareSection />
           <UnitsSection />

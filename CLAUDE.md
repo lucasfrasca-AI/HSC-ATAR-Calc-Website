@@ -25,6 +25,10 @@ Fonts: system stack first (`-apple-system` renders SF Pro on Apple devices — S
 - Accent discipline in practice: slider fills, chips and secondary buttons are neutral; accent only on the pin, focus ring, tab underline, top impact bar, links and the ATAR spectrum underline.
 - Share links (`src/lib/share.ts`): data is deflate-compressed into the URL **fragment** (`#share=v1.…`), never sent to a server or in Referer. Name excluded unless opted in. Decoding is hostile-input: payload and decompressed-size caps (zip-bomb test), then `sanitise`. Opening asks first, is undoable, and the fragment is cleared immediately. Handled on load *and* `hashchange` (pasting a link into an open tab doesn't reload).
 - Syllabuses tab: `content/syllabuses.json` from `scripts/build-syllabuses.mjs` (links only, never NESA content). `--check` verifies every URL; curriculum.nsw.edu.au answers dead links with a 200 redirect to `/`, so the checker treats a home-page landing as a failure. Runs weekly in `.github/workflows/links.yml`, not in the deploy path. Lazy chunk, in MUST_BE_LAZY.
+- Smart plan (`planFor`): greedy, one exam mark at a time to whichever ticked subject lifts the aggregate most; compared against the pin's even spread (`solveShift`). ~3–6 ms; computed from `useDeferredValue(data)` so drags never wait on it. Assumes every mark is equally easy (stated in the UI).
+- Band ladder (`nextBand`): blended mark vs Band floors 50–90; approximate (NESA bands use aligned marks), labelled "approx.".
+- Readout: odometer digits (CSS transform per digit column, keyed from the right) and a percentile ring (stroke-dashoffset). Both static under reduced motion.
+- Lazy tabs: Subjects, Syllabuses, How it works (and ScalingTable) are separate chunks, prefetched on idle, mounted on first visit and kept mounted. Cross-tab jumps use `whenElement` to wait for the lazy target.
 - `ScalingTable` is lazy (How it works tab) and listed in `check-budget` MUST_BE_LAZY.
 
 ## Checks (all run in CI `verify`; run locally with `npm run verify`)
@@ -46,6 +50,8 @@ Verify every deploy against production with curl, not the emulator.
 Its SHA-256 is in the CSP in `firebase.json`. Edit the script → build → `node scripts/check-content.mjs` prints the new hash → replace it in `firebase.json`.
 
 ## Traps (each one has happened)
+- Custom class names that match a Tailwind utility get the utility too: `.ring` drew a 1px ring box-shadow, `.table`/`.grid` set display. check-content now fails on any collision between components.css classes and the built utilities layer.
+- A browser check that ran after an earlier step had already moved state passed for the wrong reason (Apply was disabled; undo reverted something else). Checks that act must first reset to a known state.
 - Unlayered CSS beats every Tailwind utility (utilities live in `@layer utilities`). A plain `a { color }` silently overrode `text-foreground` on links. Base rules live in `@layer base`; `components.css` is imported `layer(components)`.
 - Tailwind's preflight sets `margin: 0` on everything, which un-centres native `<dialog>`; `dialog.confirm` restores `margin: auto`.
 - `Number("1e999")` is `Infinity`; `num()` accepts finite numbers only (a hostile-share test caught it).

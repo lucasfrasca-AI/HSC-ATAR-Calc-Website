@@ -117,6 +117,15 @@ const permission = JSON.parse(read("content/scaling.json")).uacPermission;
 check(!withAnchors.length || (permission && permission.reference && permission.date),
   `content/courses.json: ${withAnchors.length} course(s) carry scaling anchors (${withAnchors.slice(0, 4).join(", ")}) but scaling.json has no uacPermission record`);
 
+// Custom component classes must not share a name with a Tailwind utility: the
+// utility silently applies too (".ring" picked up Tailwind's 1px ring shadow).
+const ownClasses = new Set([...read("src/styles/components.css").replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/\.([a-z][a-z0-9-]*)(?=[\s.,:{[>)])/g)].map((m) => m[1]));
+const builtCss = distFiles.filter((f) => f.endsWith(".css")).map((f) => readFileSync(f, "utf8")).join("\n");
+const utilLayer = builtCss.match(/@layer utilities\s*\{([\s\S]*?)\}\s*(?:@layer|$)/)?.[1] ?? "";
+check(utilLayer.length > 1000, "could not find Tailwind's utilities layer in the built CSS");
+for (const c of ownClasses)
+  if (new RegExp(`(^|[^a-z0-9_-])\\.${c}(?=[\\s{:,.\\[])`).test(utilLayer)) fails.push(`components.css class .${c} collides with a Tailwind utility of the same name`);
+
 // ---- asset budgets ---------------------------------------------------------
 const LIMITS = [
   [/\.(png|jpe?g|webp|avif|gif)$/, 50_000, "image"],

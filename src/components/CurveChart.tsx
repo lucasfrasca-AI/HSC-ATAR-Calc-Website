@@ -74,7 +74,7 @@ export function CurveChart({ expected, target }: { expected: number | null; targ
       </defs>
       {[0, 100, 200, 300, 400, 500].map((a) => (
         <g key={a} aria-hidden="true">
-          <line className="grid" x1={x(a)} x2={x(a)} y1={T - 8} y2={y(0)} />
+          <line className="gridline" x1={x(a)} x2={x(a)} y1={T - 8} y2={y(0)} />
           <text className="tick" x={x(a)} y={y(0) + 18} textAnchor="middle">{a}</text>
         </g>
       ))}

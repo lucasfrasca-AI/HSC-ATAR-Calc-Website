@@ -51,7 +51,7 @@ export default function ScalingTable() {
       </div>
       <Glass className="glass-sm tscroll">
         {!rows.length ? <p className="p-4 text-foreground-2">{t(k.noMatch, { q })}</p> : (
-          <table className="table min-w-[860px]">
+          <table className="datatable min-w-[860px]">
             <thead><tr>
               <th scope="col">{k.cols.course}</th><th scope="col">{k.cols.code}</th><th scope="col">{k.cols.units}</th>
               <th scope="col" className="!text-left">{k.cols.source}</th>

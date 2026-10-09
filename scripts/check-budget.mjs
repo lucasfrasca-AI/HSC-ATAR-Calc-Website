@@ -18,6 +18,9 @@ const MUST_BE_LAZY = [
   { name: "ScalingTable", why: "course scaling reference is only needed on the How it works tab" },
   { name: "Syllabuses", why: "the syllabus directory is only needed on its tab" },
   { name: "syllabuses.json", why: "141 syllabus links are only needed on the Syllabuses tab" },
+  { name: "components/Subjects.tsx", why: "the subjects editor is prefetched when idle, not needed for first paint" },
+  { name: "components/CourseSearch.tsx", why: "course search lives in the lazy subjects editor" },
+  { name: "components/HowItWorks.tsx", why: "the explainer tab is prefetched when idle" },
   { name: "dompurify", why: "sanitiser is only needed after an import" },
   { name: "firebase", why: "no Firebase SDK on the critical path" },
 ];

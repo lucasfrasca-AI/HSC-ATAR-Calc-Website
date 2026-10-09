@@ -90,8 +90,45 @@ check(Math.abs(dragged - after) > 5, "dragging the chart moves the pin and the m
 check(await ev("document.body.innerText.includes('moved')"), "drag note explains how far subjects moved");
 
 // ---- where marks matter most ---------------------------------------------
-const impact = await ev("[...document.querySelectorAll('#impact li')].map(li => parseFloat(li.querySelector('.num:last-of-type, .text-right')?.textContent.replace('+','')))");
+const impact = await ev("[...document.querySelectorAll('[aria-labelledby=impact-h] li')].map(li => parseFloat(li.querySelector('.text-right')?.textContent.replace('+','')))");
 check(impact.length === 6 && impact.every((v, i) => i === 0 || impact[i - 1] >= v), "impact panel ranks all 6 subjects by ATAR gain", impact.join(", "));
+const place = await ev(`(() => { const chart = document.querySelector('svg.chart').closest('.glass').getBoundingClientRect(), imp = document.querySelector('[aria-labelledby=impact-h]').getBoundingClientRect(), aside = document.querySelector('#curve aside').getBoundingClientRect();
+  return { below: imp.top >= chart.bottom - 1, sameCol: Math.abs(imp.left - chart.left) < 2, besideAside: imp.right < aside.left }; })()`);
+check(place.below && place.sameCol && place.besideAside, "desktop: impact panel sits under the chart, left of the goal panel", JSON.stringify(place));
+
+// ---- odometer + ring agree with the real value ------------------------------
+await sleep(1200);
+const odo = await ev(`(() => { const real = document.querySelector('.atar-num .sr-only').textContent.trim();
+  const shown = [...document.querySelector('.odo').children].map(c => c.classList.contains('odo-col') ? String(Math.round(-parseFloat(c.firstElementChild.style.transform.match(/-?[\\d.]+/)[0]) / 10)) : c.textContent).join('');
+  const arc = document.querySelector('.ring-arc'), C = parseFloat(arc.getAttribute('stroke-dasharray')), off = parseFloat(arc.getAttribute('stroke-dashoffset'));
+  return { real, shown, ringPct: (1 - off / C) * 100 }; })()`);
+check(odo.real.startsWith(odo.shown), "odometer digits show the projected ATAR", `${odo.shown} vs ${odo.real}`);
+check(Math.abs(odo.ringPct - parseFloat(odo.real)) < 0.01, "percentile ring matches the ATAR", odo.ringPct.toFixed(2));
+
+// ---- band ladder ------------------------------------------------------------
+const bands = await ev(`[...document.querySelectorAll('.band-track')].map(b => ({ on: b.querySelectorAll('[data-on=true]').length, text: b.nextElementSibling.textContent }))`);
+check(bands.length === 6 && bands.every((b) => b.on === 1 && /Band \d needs an exam mark of|Band 6 range|out of reach/.test(b.text)), "every subject card shows its band and the next band's exam mark", bands.map((b) => b.text.slice(0, 40)).join(" | "));
+
+// ---- smart plan -------------------------------------------------------------
+// Known state: what-if marks back to internal marks, then a target 6 above the current ATAR.
+await ev("[...document.querySelectorAll('button')].find(b => b.textContent.trim() === 'Reset to internal marks').click()"); await sleep(600);
+const baseAtar = parseFloat(await ev("document.querySelector('.atar-num .sr-only').textContent"));
+const planTarget = Math.round((baseAtar + 6) * 100) / 100;
+await ev("document.getElementById('planTarget').focus()");
+await ev(`(() => { const el = document.getElementById('planTarget'); el.select(); })()`);
+await send("Input.insertText", { text: String(planTarget) });
+await key("Enter", "Enter"); await sleep(500);
+const planTotal = await ev("document.querySelector('#plan b.num .sr-only')?.textContent");
+check(planTotal !== undefined && Number(planTotal) > 0, "planner proposes a number of extra marks", `${planTotal} marks for ATAR ${planTarget}`);
+check(await ev("![...document.querySelectorAll('#plan button')].find(b => b.textContent.includes('Apply')).disabled"), "Apply is enabled for a reachable target");
+await ev("[...document.querySelectorAll('#plan button')].find(b => b.textContent.includes('Apply')).click()"); await sleep(500);
+const afterPlan = parseFloat(await ev("document.querySelector('.atar-num .sr-only').textContent"));
+check(afterPlan >= planTarget - 0.05, "applying the plan reaches the target ATAR", `${afterPlan} ≥ ${planTarget}`);
+await ev("document.activeElement.blur()");
+await send("Input.dispatchKeyEvent", { type: "keyDown", key: "z", code: "KeyZ", windowsVirtualKeyCode: 90, modifiers: 4 });
+await send("Input.dispatchKeyEvent", { type: "keyUp", key: "z", code: "KeyZ", modifiers: 4 });
+await sleep(400);
+check(Math.abs(parseFloat(await ev("document.querySelector('.atar-num .sr-only').textContent")) - baseAtar) < 0.005, "undo returns exactly to the pre-plan ATAR", String(baseAtar));
 
 // ---- undo / redo -----------------------------------------------------------
 const atarBefore = await ev("document.querySelector('.atar-num .sr-only').textContent.trim()");
@@ -210,8 +247,8 @@ check(rm.js && rm.blob === "none", "reduced motion: ambient animation off, JS se
 await ev("document.querySelector('[role=slider]').focus()");
 await key("End", "End");
 await sleep(30);
-const jumped = await ev("document.querySelector('.atar-num [aria-hidden]').textContent === document.querySelector('.atar-num .sr-only').textContent.slice(0, document.querySelector('.atar-num [aria-hidden]').textContent.length)");
-check(jumped, "reduced motion: the ATAR jumps to its value instead of counting");
+const jumped = await ev("[...document.querySelectorAll('.odo-strip, .ring-arc, .band-marker')].every(e => parseFloat(getComputedStyle(e).transitionDuration) < 0.001)");
+check(jumped, "reduced motion: odometer, ring and band markers jump instead of animating");
 await ev("document.querySelector('details summary.btn').click()"); await sleep(100);
 await ev("document.querySelector('input[name=theme][value=blue-light]').click()"); await sleep(60);
 check(await ev("document.documentElement.dataset.theme === 'blue-light' && !document.documentElement.dataset.vt"), "reduced motion: theme switches instantly, no view transition");

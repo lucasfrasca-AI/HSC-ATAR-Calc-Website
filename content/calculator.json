@@ -85,7 +85,13 @@
     "lost": "{pts} points lost",
     "dropped": "{n} of {units} not counted — outside the best 10",
     "unitsShort": "{n}u",
-    "outOf100": "{v} / 100"
+    "outOf100": "{v} / 100",
+    "bandTrack": "Blended mark on the band ladder",
+    "bandNext": "Band {band} needs an exam mark of {exam}+",
+    "bandTop": "In the Band 6 range",
+    "bandOut": "Next band out of reach this exam",
+    "bandNote": "approx.",
+    "bandLabel": "B{n}"
   },
   "compare": {
     "title": "Expected vs target",
@@ -134,7 +140,7 @@
   },
   "impact": {
     "title": "Where marks matter most",
-    "intro": "What 5 more exam marks in one subject would do to your ATAR, with everything else held where it is. It follows the same estimates as the rest of the page, so treat it as a guide to where effort pays off, not a promise.",
+    "intro": "5 more exam marks in one subject, everything else held. A guide to where effort pays off, not a promise.",
     "step": 5,
     "row": "+{added} exam marks",
     "gain": "+{atar} ATAR",
@@ -143,5 +149,26 @@
     "listLabel": "Subjects ranked by estimated ATAR gain",
     "estimate": "estimate",
     "empty": "Enter internal marks on the subjects page to see where marks matter most."
+  },
+  "plan": {
+    "title": "Plan the shortest path",
+    "intro": "Pick a target ATAR and the planner finds the fewest extra exam marks that reach it — one mark at a time, always to whichever ticked subject lifts your aggregate most. The pin spreads marks evenly instead; the difference is how much smarter effort can save.",
+    "target": "Target ATAR",
+    "useTarget": "Use my saved target",
+    "result": "extra exam marks reach an ATAR of {atar}.",
+    "zero": "You're already projected at or above {atar} — no extra marks needed.",
+    "unreachable": "Even 100% in every ticked subject only reaches {atar}. Tick more subjects or lower the target.",
+    "saving": "An even spread would need {even} — this plan saves {saved}.",
+    "noSaving": "An even spread needs about the same here.",
+    "evenUnreachable": "An even spread can't reach it at all.",
+    "row": "{from}% → {to}%",
+    "gain": "+{n}",
+    "unchanged": "No change",
+    "apply": "Apply to what-if marks",
+    "applied": "Plan applied — undo to go back",
+    "assumption": "Assumes every exam mark is equally easy to earn, which real exams aren't. Built on the same estimated scaling as the rest of the page.",
+    "listLabel": "Planned exam marks by subject",
+    "needTicked": "Tick at least one subject in “Subjects the pin moves”.",
+    "estimate": "estimate"
   }
 }

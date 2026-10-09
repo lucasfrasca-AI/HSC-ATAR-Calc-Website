@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type ChangeEvent, type PointerEvent } from
 import site from "../../content/site.json";
 import mark from "../assets/lf-mark.png";
 import { fmt, sanitise } from "../lib/engine.ts";
-import { useReducedMotion, useTween, withTransition } from "../lib/motion.ts";
+import { useReducedMotion, withTransition } from "../lib/motion.ts";
 import { useCalc } from "../lib/state.tsx";
 import { t } from "../lib/text.ts";
 import { THEMES, currentTheme, setTheme, type ThemeId } from "../lib/theme.ts";
@@ -85,11 +85,41 @@ function Toolbar() {
   );
 }
 
+/** Mechanical-counter digits: each digit column rolls to its value. Keys count from the
+ *  right so the units digit keeps its column when the number gains a digit. */
+function Odometer({ text }: { text: string }) {
+  const chars = [...text];
+  return (
+    <span className="odo" aria-hidden="true">
+      {chars.map((ch, i) => {
+        const key = chars.length - i;
+        return /\d/.test(ch) ? (
+          <span key={key} className="odo-col">
+            <span className="odo-strip" style={{ transform: `translateY(${-Number(ch) * 10}%)`, transitionDelay: `${(chars.length - i) * 35}ms` }}>
+              {"0123456789".split("").map((d) => <span key={d}>{d}</span>)}
+            </span>
+          </span>
+        ) : <span key={key} className="odo-sep">{ch}</span>;
+      })}
+    </span>
+  );
+}
+
+/** Slim ring: the share of the Year 12 age group finished above (an ATAR is that rank). */
+function PercentileRing({ atar }: { atar: number }) {
+  const R = 19, C = 2 * Math.PI * R;
+  return (
+    <svg className="pct-ring" width="46" height="46" viewBox="0 0 46 46" aria-hidden="true">
+      <circle className="ring-track" cx="23" cy="23" r={R} />
+      <circle className="ring-arc" cx="23" cy="23" r={R} strokeDasharray={C} strokeDashoffset={C * (1 - Math.max(0, Math.min(100, atar)) / 100)} transform="rotate(-90 23 23)" />
+    </svg>
+  );
+}
+
 function Readout() {
   const { data, v, c } = useCalc();
   const reduced = useReducedMotion();
   const has = data.subjects.length > 0 && c.counted.length > 0;
-  const atar = useTween(has ? c.atar : 0);
   // A light sweep across the card once the projection settles on a new value.
   const [sweep, setSweep] = useState(0);
   const settled = has ? c.atar.toFixed(2) : "";
@@ -118,11 +148,19 @@ function Readout() {
         <div>
           <p className="kicker mb-3">{site.readout.atarLabel}</p>
           <p className="atar-num" data-indicative={!v.eligible}>
-            <span aria-hidden="true">{has ? fmt(atar, 2) : site.labels.dash}</span>
+            {has ? <Odometer text={fmt(c.atar, 2)} /> : <span aria-hidden="true">{site.labels.dash}</span>}
             <span className="sr-only">{has ? fmt(c.atar, 2) : site.labels.dash}{!v.eligible && has ? ` ${site.readout.indicativeBadge}` : ""}</span>
           </p>
         </div>
-        <p className="mb-1 max-w-[24ch] text-[0.88rem] text-foreground-2">{cap}</p>
+        <div className="mb-1 max-w-[26ch]">
+          <p className="text-[0.88rem] text-foreground-2">{cap}</p>
+          {has && (
+            <p className="mt-2.5 flex items-center gap-2.5 text-[0.78rem] text-foreground-3" title={t(site.readout.ring, { pct: Math.round(c.atar) })}>
+              <PercentileRing atar={c.atar} />
+              <span>{t(site.readout.ringShort, { pct: Math.round(c.atar) })}<span className="sr-only">. {t(site.readout.ring, { pct: Math.round(c.atar) })}</span></span>
+            </p>
+          )}
+        </div>
       </div>
       <div className="grid grid-cols-3 gap-3 md:justify-self-end md:gap-8">
         <Stat className="border-l border-border/10 pl-3" value={<TweenNum value={c.aggregate} />} label={site.readout.stats.scaled} />

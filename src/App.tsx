@@ -6,11 +6,20 @@ import { Backdrop } from "./components/Backdrop.tsx";
 import { Calculator } from "./components/Calculator.tsx";
 import { FeedbackProvider } from "./components/Feedback.tsx";
 import { Header } from "./components/Header.tsx";
-import { HowItWorks } from "./components/HowItWorks.tsx";
 import { Suspense, lazy } from "react";
 import { decodeShare, readShareFromLocation } from "./lib/share.ts";
 const Syllabuses = lazy(() => import("./components/Syllabuses.tsx"));
-import { Subjects } from "./components/Subjects.tsx";
+const loadSubjects = () => import("./components/Subjects.tsx");
+const loadHelp = () => import("./components/HowItWorks.tsx");
+const Subjects = lazy(() => loadSubjects().then((m) => ({ default: m.Subjects })));
+const HowItWorks = lazy(() => loadHelp().then((m) => ({ default: m.HowItWorks })));
+
+/** Runs `fn(el)` once an element exists (lazy tabs mount a frame or two later). */
+function whenElement(id: string, fn: (el: HTMLElement) => void, tries = 90) {
+  const el = document.getElementById(id);
+  if (el) fn(el);
+  else if (tries > 0) requestAnimationFrame(() => whenElement(id, fn, tries - 1));
+}
 import { withTransition } from "./lib/motion.ts";
 import { NavCtx, type Nav, type TabKey } from "./lib/nav.ts";
 import { useFeedback } from "./components/Feedback.tsx";
@@ -42,6 +51,14 @@ function Shell() {
   const [tab, setTab] = useState<TabKey>(fromHash);
   const tabRefs = useRef<Record<TabKey, HTMLButtonElement | null>>({ calc: null, subj: null, syl: null, help: null });
   const glide = useGlider(tab, tabRefs);
+  // Lazy tabs stay mounted once visited, so their local state (open panels) survives tab switches.
+  const [visited, setVisited] = useState<Set<TabKey>>(() => new Set([fromHash()]));
+  if (!visited.has(tab)) setVisited(new Set(visited).add(tab));
+  // Fetch the other tabs while the browser is idle, so switching is instant.
+  useEffect(() => {
+    const idle = (cb: () => void) => (typeof window.requestIdleCallback === "function" ? window.requestIdleCallback(cb, { timeout: 3000 }) : globalThis.setTimeout(cb, 1500));
+    idle(() => { void loadSubjects(); void loadHelp(); });
+  }, []);
 
   // Opening a share link: decode (hostile input), ask, replace (undoable), then
   // clear the fragment so the marks don't linger in the address bar or history.
@@ -93,15 +110,13 @@ function Shell() {
   const nav: Nav = useMemo(() => ({
     go: (k, focusId) => {
       select(k);
-      requestAnimationFrame(() => {
-        if (focusId) document.getElementById(focusId)?.focus({ preventScroll: true });
-        document.getElementById("tabs")?.scrollIntoView({ block: "start", behavior: motion() });
-      });
+      document.getElementById("tabs")?.scrollIntoView({ block: "start", behavior: motion() });
+      if (focusId) whenElement(focusId, (el) => el.focus({ preventScroll: true }));
     },
     jumpToSubject: (uid) => {
       select("subj");
-      requestAnimationFrame(() => {
-        document.getElementById(`card-${uid}`)?.scrollIntoView({ block: "center", behavior: motion() });
+      whenElement(`card-${uid}`, (el) => {
+        el.scrollIntoView({ block: "center", behavior: motion() });
         document.getElementById(`im-${uid}`)?.focus({ preventScroll: true });
       });
     },
@@ -145,9 +160,9 @@ function Shell() {
         </nav>
         <main id="main" tabIndex={-1} className="outline-none">
           <div role="tabpanel" id="panel-calc" aria-labelledby="tab-calc" hidden={tab !== "calc"}><Calculator /></div>
-          <div role="tabpanel" id="panel-subj" aria-labelledby="tab-subj" hidden={tab !== "subj"}><Subjects /></div>
-          <div role="tabpanel" id="panel-syl" aria-labelledby="tab-syl" hidden={tab !== "syl"}>{tab === "syl" && <Suspense fallback={null}><Syllabuses /></Suspense>}</div>
-          <div role="tabpanel" id="panel-help" aria-labelledby="tab-help" hidden={tab !== "help"}>{tab === "help" && <HowItWorks />}</div>
+          <div role="tabpanel" id="panel-subj" aria-labelledby="tab-subj" hidden={tab !== "subj"}>{visited.has("subj") && <Suspense fallback={null}><Subjects /></Suspense>}</div>
+          <div role="tabpanel" id="panel-syl" aria-labelledby="tab-syl" hidden={tab !== "syl"}>{visited.has("syl") && <Suspense fallback={null}><Syllabuses /></Suspense>}</div>
+          <div role="tabpanel" id="panel-help" aria-labelledby="tab-help" hidden={tab !== "help"}>{visited.has("help") && <Suspense fallback={null}><HowItWorks /></Suspense>}</div>
         </main>
         <footer className="mt-6 border-t border-border/10 pt-5 text-[0.8rem] text-foreground-3">
           <p className="max-w-[90ch]">{site.footer.disclaimer}</p>

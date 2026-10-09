@@ -139,7 +139,7 @@ function SubjectCard({ s, i }: { s: Subject; i: number }) {
         <div id={pid("tasks")} hidden={!open.has("tasks")} className="reveal border-t border-border/10 bg-foreground/[0.025] px-4 pt-3.5 pb-4">
           <p className="mb-2.5 max-w-[70ch] text-[0.8rem] text-foreground-3">{sub.tasks.note}</p>
           <div className="tscroll">
-            <table className="table min-w-[640px]">
+            <table className="datatable min-w-[640px]">
               <thead><tr>
                 <th scope="col">{sub.tasks.cols.task} <span className="opt">{sub.card.optional}</span></th>
                 {(["weight", "score", "outOf", "pct", "mark", "rank"] as const).map((k) => <th key={k} scope="col">{sub.tasks.cols[k]}</th>)}
@@ -275,7 +275,7 @@ function SummaryTable() {
   return (
     <Section id="summary" kicker={site.kickers.summary} title={k.title} intro={k.intro}>
       <Glass className="glass-sm tscroll">
-        <table className="table min-w-[680px]">
+        <table className="datatable min-w-[680px]">
           <thead><tr>{Object.values(k.cols).map((h) => <th key={h} scope="col">{h}</th>)}</tr></thead>
           <tbody>
             {rows.map(({ s, info, used }) => (
