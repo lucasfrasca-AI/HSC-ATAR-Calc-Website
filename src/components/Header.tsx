@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState, type ChangeEvent, type PointerEvent } from "react";
+import type React from "react";
 import site from "../../content/site.json";
 import mark from "../assets/lf-mark.png";
 import { fmt, sanitise } from "../lib/engine.ts";
 import { useReducedMotion, withTransition } from "../lib/motion.ts";
-import { useCalc } from "../lib/state.tsx";
+import { sampleData, useCalc } from "../lib/state.tsx";
 import { t } from "../lib/text.ts";
 import { THEMES, currentTheme, setTheme, type ThemeId } from "../lib/theme.ts";
 import { useFeedback } from "./Feedback.tsx";
@@ -171,13 +172,38 @@ function Readout() {
   );
 }
 
+/**
+ * The LF monogram is a real link to lucasfrasca.com (Enter, Cmd/Ctrl-click and
+ * middle-click behave normally). A double-click loads the sample student instead,
+ * so a single mouse click waits one double-click interval before navigating.
+ */
+function Monogram() {
+  const { replace } = useCalc();
+  const { toast } = useFeedback();
+  const timer = useRef(0);
+  const onClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.detail === 0) return; // keyboard / new-tab: default
+    e.preventDefault();
+    window.clearTimeout(timer.current);
+    if (e.detail >= 2) { replace(sampleData()); toast(site.toasts.testLoaded); return; }
+    const href = e.currentTarget.href;
+    timer.current = window.setTimeout(() => window.location.assign(href), 280);
+  };
+  useEffect(() => () => window.clearTimeout(timer.current), []);
+  return (
+    <a href={site.author.url} aria-label={site.author.linkLabel} onClick={onClick} className="-ml-2 -mt-1 shrink-0 rounded-full">
+      <img src={mark} alt="" width={56} height={56} className="mark" draggable={false} />
+    </a>
+  );
+}
+
 export function Header() {
   const { data } = useCalc();
   return (
     <header className="pt-5 sm:pt-8">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex items-center gap-3">
-          <img src={mark} alt={site.header.logoAlt} width={56} height={56} className="mark -ml-2 -mt-1 shrink-0" />
+          <Monogram />
           <div>
             <h1 className="text-[1.05rem] font-semibold tracking-[-0.01em]">{site.meta.title}</h1>
             <p className="max-w-[56ch] text-[0.84rem] text-foreground-2">

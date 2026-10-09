@@ -59,9 +59,16 @@ check(await ev("!document.querySelector('main.fallback') && !!document.querySele
 check(await ev("document.documentElement.dataset.theme?.length > 0"), "theme set before paint", await ev("document.documentElement.dataset.theme"));
 await shot("01-empty-desktop");
 
-// ---- load the test student and compare with the reference numbers ---------
-await ev("[...document.querySelectorAll('button')].find(b => b.textContent.trim() === 'Add test data instead').click()");
+// ---- LF monogram: double-click loads the test student, no navigation -------
+const logo = await ev("(() => { const r = document.querySelector('header a[href^=\"https://lucasfrasca.com\"]').getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; })()");
+await send("Input.dispatchMouseEvent", { type: "mousePressed", x: logo.x, y: logo.y, button: "left", clickCount: 1 });
+await send("Input.dispatchMouseEvent", { type: "mouseReleased", x: logo.x, y: logo.y, button: "left", clickCount: 1 });
+await sleep(60);
+await send("Input.dispatchMouseEvent", { type: "mousePressed", x: logo.x, y: logo.y, button: "left", clickCount: 2 });
+await send("Input.dispatchMouseEvent", { type: "mouseReleased", x: logo.x, y: logo.y, button: "left", clickCount: 2 });
 await sleep(900);
+check(await ev("location.origin") === new URL(url).origin, "double-clicking the LF logo stays on the calculator");
+await sleep(400);
 const atar = await ev("document.querySelector('.atar-num .sr-only').textContent.trim()");
 check(atar.startsWith("63.14"), "sample student ATAR matches the reference", atar);
 const stats = await ev("[...document.querySelectorAll('header .num')].map(n => (n.querySelector('.sr-only') ?? n).textContent)");
@@ -110,6 +117,7 @@ const bands = await ev(`[...document.querySelectorAll('.band-track')].map(b => (
 check(bands.length === 6 && bands.every((b) => b.on === 1 && /Band \d needs an exam mark of|Band 6 range|out of reach/.test(b.text)), "every subject card shows its band and the next band's exam mark", bands.map((b) => b.text.slice(0, 40)).join(" | "));
 
 // ---- smart plan -------------------------------------------------------------
+check(await ev("[...document.querySelectorAll('#panel-calc section[id]')].map(s => s.id).join(',')") === "curve,projection,compare,units,split,plan", "section order: plan sits after Two halves of 250", await ev("[...document.querySelectorAll('#panel-calc section[id]')].map(s => s.id).join(',')"));
 // Known state: what-if marks back to internal marks, then a target 6 above the current ATAR.
 await ev("[...document.querySelectorAll('button')].find(b => b.textContent.trim() === 'Reset to internal marks').click()"); await sleep(600);
 const baseAtar = parseFloat(await ev("document.querySelector('.atar-num .sr-only').textContent"));
@@ -262,6 +270,20 @@ for (const th of ["violet-dark", "violet-light", "blue-dark", "blue-light", "con
   await shot(`05-theme-${th}`);
 }
 await ev("localStorage.clear()");
+
+// ---- LF monogram: a single click goes to lucasfrasca.com (last: it navigates away) ----
+await load(url.replace(/#.*$/, ""));
+const logo2 = await ev("(() => { const r = document.querySelector('header a[href^=\"https://lucasfrasca.com\"]').getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; })()");
+await send("Input.dispatchMouseEvent", { type: "mousePressed", x: logo2.x, y: logo2.y, button: "left", clickCount: 1 });
+await send("Input.dispatchMouseEvent", { type: "mouseReleased", x: logo2.x, y: logo2.y, button: "left", clickCount: 1 });
+await sleep(150);
+check(await ev("location.origin") === new URL(url).origin, "a single click waits briefly (double-click window) before leaving");
+await sleep(2500);
+check((await ev("location.host")) === "lucasfrasca.com", "a single click on the LF logo opens lucasfrasca.com", await ev("location.href"));
+await load(url.replace(/#.*$/, ""));
+await ev("document.querySelector('header a[href^=\"https://lucasfrasca.com\"]').focus()");
+await key("Enter", "Enter"); await sleep(2500);
+check((await ev("location.host")) === "lucasfrasca.com", "pressing Enter on the focused logo goes straight to lucasfrasca.com");
 
 ws.close();
 console.log(failures ? `browser-check: ${failures} failure(s)` : "browser-check: all passed");

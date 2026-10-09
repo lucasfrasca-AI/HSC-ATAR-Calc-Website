@@ -7,7 +7,6 @@
   "noJs": "This calculator runs in your browser and needs JavaScript turned on. Nothing you type leaves your browser.",
   "skipLink": "Skip to content",
   "header": {
-    "logoAlt": "Lucas Frasca monogram",
     "who": {
       "named": "{name} — NSW HSC ATAR projection.",
       "anon": "Your NSW HSC ATAR projection."
@@ -203,15 +202,19 @@
   },
   "kickers": {
     "curve": "01 · Projection",
-    "projection": "03 · Exams",
-    "compare": "04 · Scenarios",
-    "units": "05 · Counting",
-    "split": "06 · Composition",
+    "projection": "02 · Exams",
+    "compare": "03 · Scenarios",
+    "units": "04 · Counting",
+    "split": "05 · Composition",
     "subjects": "Your list",
     "summary": "At a glance",
     "help": "Method",
     "scaling": "Reference",
     "syllabuses": "NESA syllabuses",
-    "plan": "02 · Plan"
+    "plan": "06 · Plan"
+  },
+  "author": {
+    "url": "https://lucasfrasca.com",
+    "linkLabel": "Lucas Frasca — opens lucasfrasca.com"
   }
 }
