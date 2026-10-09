@@ -63,10 +63,10 @@ await shot("01-empty-desktop");
 await ev("[...document.querySelectorAll('button')].find(b => b.textContent.trim() === 'Add test data instead').click()");
 await sleep(900);
 const atar = await ev("document.querySelector('.atar-num .sr-only').textContent.trim()");
-check(atar.startsWith("64.39"), "sample student ATAR matches the reference", atar);
+check(atar.startsWith("63.14"), "sample student ATAR matches the reference", atar);
 const stats = await ev("[...document.querySelectorAll('header .num')].map(n => n.textContent)");
-check(stats[0] === "229.3" && stats[1] === "366.0", "scaled 229.3 / raw 366.0 in the readout", stats.join(", "));
-check(await ev("document.body.innerText.includes('Health and Movement Science — 1 unit')"), "HMS unit shown as not counted");
+check(stats[0] === "223.1" && stats[1] === "366.5", "scaled 223.1 / raw 366.5 in the readout", stats.join(", "));
+check(await ev("document.body.innerText.includes('Studies of Religion I — 1 unit')"), "Studies of Religion I unit shown as not counted");
 await shot("02-sample-desktop");
 
 // ---- the pin: keyboard slider moves the aggregate --------------------------

@@ -372,7 +372,8 @@ export function sanitise(d: unknown): Data {
     s.focus = y.focus !== false;
     if (y.units === 1 || y.units === 2) s.units = y.units;
     if (typeof y.english === "boolean") s.english = y.english;
-    if (y.scaling === "course" || y.scaling === "custom" || isTier(y.scaling)) s.scaling = y.scaling;
+    // "course" anchors exist only for catalogue courses that ship them; otherwise keep the default tier.
+    if ((y.scaling === "course" && courseById(id).anchors) || y.scaling === "custom" || isTier(y.scaling)) s.scaling = y.scaling;
     if (Array.isArray(y.anchors)) s.anchors = y.anchors.slice(0, 8).map((a: unknown) => { const p = Array.isArray(a) ? a : []; return [num(p[0]), num(p[1])] as Anchor; });
     s.mode = y.mode === "tasks" ? "tasks" : "simple";
     if (Array.isArray(y.tasks))

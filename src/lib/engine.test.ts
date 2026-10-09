@@ -9,13 +9,16 @@ import {
 const data = (subjects: Subject[]): Data => ({ ...blankData(), subjects });
 const keys = (d: Data, level?: string) => validate(d).issues.filter((i) => !level || i.level === level).map((i) => i.key);
 
+// Golden values come from running the ORIGINAL reference script with its six
+// "supplied" anchors removed (they were UAC-derived; see CLAUDE.md). With those
+// anchors the reference gives 366.0 / 229.3 / 64.39; without, 366.5 / 223.1 / 63.14.
 test("golden: the sample student matches the reference calculator exactly", () => {
   const d = sanitise(sample);
   const c = compute(d);
-  assert.equal(c.rawAggregate.toFixed(1), "366.0");
-  assert.equal(c.aggregate.toFixed(1), "229.3");
-  assert.equal(c.atar.toFixed(2), "64.39");
-  assert.deepEqual(c.notCounted.map((n) => `${n.u.r.s.courseId}:${n.why}`), ["hms:best10"]);
+  assert.equal(c.rawAggregate.toFixed(1), "366.5");
+  assert.equal(c.aggregate.toFixed(1), "223.1");
+  assert.equal(c.atar.toFixed(2), "63.14");
+  assert.deepEqual(c.notCounted.map((n) => `${n.u.r.s.courseId}:${n.why}`), ["sor1:best10"]);
   assert.equal(validate(d).eligible, true);
 });
 
@@ -72,6 +75,11 @@ test("extension courses don't add a subject to the four-subject rule", () => {
 test("Mathematics Extension 1 with Extension 2 flags the unit rule", () => {
   const d = data([subjectFrom("maths-ext1", { internalMark: 70 }), subjectFrom("maths-ext2", { internalMark: 70 })]);
   assert.ok(keys(d, "info").includes("subject.mathsExt1Units"));
+});
+
+test("an import claiming course anchors for a course without them falls back to its tier", () => {
+  const d = sanitise({ subjects: [{ courseId: "eng-std", scaling: "course", internalMark: 70 }] });
+  assert.equal(d.subjects[0]!.scaling, "low");
 });
 
 test("sanitise rejects junk and bounds hostile input", () => {

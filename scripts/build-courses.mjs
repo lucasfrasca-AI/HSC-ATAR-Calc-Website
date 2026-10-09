@@ -5,8 +5,10 @@
 //
 // Scaling here is NOT UAC data. Each course gets the generic tier the original
 // reference assigned it ("reference" source), or the generic "average" tier if
-// the reference didn't list it ("default" source). Six courses carry the
-// anchors supplied in the reference. All are labelled estimates in the UI.
+// the reference didn't list it ("default" source). All are labelled estimates.
+// The reference also "supplied" anchors for six courses; they turned out to be
+// copied from an older UAC scaling report, so they are deliberately not used
+// until UAC gives written permission (see CLAUDE.md "Data provenance").
 import { readFileSync, writeFileSync } from "node:fs";
 
 const src = JSON.parse(readFileSync(process.argv[2], "utf8"));
@@ -14,14 +16,14 @@ const src = JSON.parse(readFileSync(process.argv[2], "utf8"));
 // From reference/nsw-hsc-atar-calculator-blank.html CATALOG: id, name in the
 // 2026 list, generic tier, supplied anchors (blended -> scaled /100).
 const REF = {
-  "English Standard": ["eng-std", "low", [[67, 28.0], [73, 39.2], [77, 51.6], [81, 62.4], [88, 79.0]]],
+  "English Standard": ["eng-std", "low"],
   "English Advanced": ["eng-adv", "above"],
   "English as an Additional Language or Dialect": ["eng-eald", "average"],
   "English Studies (Examination)": ["eng-studies", "low"],
   "English Extension 1": ["eng-ext1", "strong"],
   "English Extension 2": ["eng-ext2", "strong"],
   "Mathematics Standard 1 (Examination)": ["maths-std1", "low"],
-  "Mathematics Standard 2": ["maths-std2", "low", [[63, 28.8], [73, 44.6], [81, 61.8], [89, 74.6], [96, 86.4]]],
+  "Mathematics Standard 2": ["maths-std2", "low"],
   "Mathematics Advanced": ["maths-adv", "above"],
   "Mathematics Extension 1": ["maths-ext1", "strong"],
   "Mathematics Extension 2": ["maths-ext2", "strong"],
@@ -31,7 +33,7 @@ const REF = {
   "Earth and Environmental Science": ["ees", "average"],
   "Investigating Science": ["inv-sci", "below"],
   "Science Extension": ["sci-ext", "strong"],
-  "Business Studies": ["business", "below", [[66, 28.4], [75, 47.0], [84, 65.6], [90, 78.0], [95, 90.8]]],
+  "Business Studies": ["business", "below"],
   Economics: ["economics", "strong"],
   "Legal Studies": ["legal", "average"],
   "Modern History": ["modern", "above"],
@@ -39,10 +41,10 @@ const REF = {
   "History Extension": ["hist-ext", "strong"],
   Geography: ["geography", "average"],
   "Society and Culture": ["soc-cult", "average"],
-  "Studies of Religion I": ["sor1", "low", [[70, 41.0], [78, 55.4], [84, 69.6], [90, 79.8], [98, 92.0]]],
+  "Studies of Religion I": ["sor1", "low"],
   "Studies of Religion II": ["sor2", "average"],
   "Aboriginal Studies": ["aboriginal", "below"],
-  "Health and Movement Science": ["hms", "low", [[67, 27.8], [75, 44.4], [83, 62.4], [90, 75.2], [94, 87.8]]],
+  "Health and Movement Science": ["hms", "low"],
   "Community and Family Studies": ["cafs", "below"],
   "Visual Arts": ["visual-arts", "below"],
   "Music 1": ["music1", "below"],
@@ -58,7 +60,7 @@ const REF = {
   "Food Technology": ["food-tech", "below"],
   "Textiles and Design": ["textiles", "below"],
   Agriculture: ["agriculture", "below"],
-  "Italian Beginners": ["italian-beg", "low", [[69, 33.8], [80, 51.2], [90, 67.8], [93, 77.2], [99, 97.2]]],
+  "Italian Beginners": ["italian-beg", "low"],
   "Italian Continuers": ["italian-cont", "above"],
   "French Beginners": ["french-beg", "low"],
   "French Continuers": ["french-cont", "strong"],
@@ -112,7 +114,7 @@ const courses = src.courses.map((c) => {
     units, english, extension: ext, excl,
     tier: ref ? ref[1] : "average",
     tierSource: ref ? "reference" : "default",
-    anchors: ref?.[2] ?? null,
+    anchors: null,
   };
 });
 

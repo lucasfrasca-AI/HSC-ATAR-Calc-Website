@@ -28,6 +28,6 @@
     "sourceSupplied": "Supplied", "sourceCustom": "Your custom anchors", "sourceTier": "Estimate — {tier}", "sourceDefault": "Estimate — generic average",
     "noMatch": "No course matches “{q}”.",
     "loading": "Loading the course table…",
-    "note": "\"Supplied\" anchors were entered for this calculator. \"Estimate\" courses use a generic tier, not UAC data. Course names, NESA numbers and unit values are from UAC's 2026 HSC course list."
+    "note": "Every course uses a generic estimate tier, not UAC scaling data. Courses on your list use your own settings, including any anchors you enter. Course names, NESA numbers and unit values are from UAC's 2026 HSC course list."
   }
 }

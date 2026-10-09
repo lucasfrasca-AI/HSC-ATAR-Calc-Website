@@ -109,6 +109,14 @@ const emitted = [...new Set([...read("src/lib/engine.ts").matchAll(/"((?:subject
 for (const k of emitted) check(k in messages, `content/messages.json: no copy for message key ${k}`);
 check(emitted.length > 20, `expected the engine to emit 20+ message keys, found ${emitted.length}`);
 
+// No course-specific scaling anchors ship without UAC's written permission on
+// record (scaling.json "uacPermission"): the only published anchors are UAC's.
+const courses = JSON.parse(read("content/courses.json")).courses;
+const withAnchors = courses.filter((c) => c.anchors !== null).map((c) => c.id);
+const permission = JSON.parse(read("content/scaling.json")).uacPermission;
+check(!withAnchors.length || (permission && permission.reference && permission.date),
+  `content/courses.json: ${withAnchors.length} course(s) carry scaling anchors (${withAnchors.slice(0, 4).join(", ")}) but scaling.json has no uacPermission record`);
+
 // ---- asset budgets ---------------------------------------------------------
 const LIMITS = [
   [/\.(png|jpe?g|webp|avif|gif)$/, 50_000, "image"],
