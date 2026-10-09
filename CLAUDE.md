@@ -24,7 +24,7 @@ The `apple-design` skill (github.com/emilkowalski/skills, MIT; installed at `~/.
 - Hero: large title + intro + the thick `glass-hero` readout. Material order: hero > `.glass` > `.glass-sm`.
 - "Full breakdown" `<details>` holds Expected vs target, ten units and 250+250 (common path first); Plan is section 04.
 - Background is static (skill: no full-viewport moving backgrounds).
-- Hero is centred (title, intro, readout stacked; stats in a hairline-divided row).
+- Hero is centred (title, intro, readout stacked; stats in a hairline-divided row) and shown on the Calculator tab only. Other tabs keep an sr-only h1 and a hidden (mounted) readout, so the bar's compact ATAR shows there; tapping it returns to the Calculator.
 - Steps are one grouped surface (hairline dividers, current step a quiet accent fill). The eligibility panel shows only when something needs fixing; "all clear" is step 1's tick.
 - Related actions share a `.seg` track (save/load what-if marks, tick/untick all); the exam-marks stats and its actions are one panel.
 

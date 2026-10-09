@@ -4,6 +4,7 @@ import site from "../../content/site.json";
 import mark from "../assets/lf-mark.png";
 import { fmt, sanitise } from "../lib/engine.ts";
 import { useReducedMotion, withTransition } from "../lib/motion.ts";
+import { useNav } from "../lib/nav.ts";
 import { sampleData, useCalc } from "../lib/state.tsx";
 import { t } from "../lib/text.ts";
 import { THEMES, currentTheme, setTheme, type ThemeId } from "../lib/theme.ts";
@@ -213,21 +214,33 @@ function Monogram() {
 /** Compact ATAR that materialises in the app bar once the hero number scrolls away. */
 function CompactAtar() {
   const { c } = useCalc();
+  const nav = useNav();
   const [show, setShow] = useState(false);
+  const [readout, setReadout] = useState<HTMLElement | null>(null);
+  // The readout remounts when the hero switches between full and compact; follow it.
   useEffect(() => {
-    const el = document.getElementById("readout");
-    if (!el) return;
-    const io = new IntersectionObserver(([e]) => setShow(!e!.isIntersecting), { rootMargin: "-72px 0px 0px 0px", threshold: 0 });
-    io.observe(el);
-    return () => io.disconnect();
+    const find = () => setReadout(document.getElementById("readout"));
+    const mo = new MutationObserver(find);
+    const id = requestAnimationFrame(find);
+    mo.observe(document.getElementById("root") ?? document.body, { childList: true, subtree: true });
+    return () => { mo.disconnect(); cancelAnimationFrame(id); };
   }, []);
+  useEffect(() => {
+    if (!readout) return;
+    const io = new IntersectionObserver(([e]) => setShow(!e!.isIntersecting), { rootMargin: "-72px 0px 0px 0px", threshold: 0 });
+    io.observe(readout);
+    return () => io.disconnect();
+  }, [readout]);
   const has = c.counted.length > 0;
   if (!has) return null;
   return (
     <button
       type="button" className="compact-atar" data-show={show} tabIndex={show ? 0 : -1} aria-hidden={!show}
       aria-label={t(site.header.compactAtarLabel, { atar: fmt(c.atar, 2) })}
-      onClick={() => window.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" })}
+      onClick={() => {
+        if (!readout?.offsetParent) nav.go("calc");
+        window.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+      }}
     >
       <span className="text-foreground-3">{site.header.compactAtar}</span> <b className="num">{fmt(c.atar, 2)}</b>
     </button>
@@ -261,8 +274,16 @@ export function AppBar({ tabs }: { tabs: React.ReactNode }) {
   );
 }
 
-export function Hero() {
+/** The big title and readout belong to the Calculator. Other tabs open on their own content
+ *  (wayfinding); the readout stays mounted but hidden, so the bar's compact ATAR takes over. */
+export function Hero({ compact = false }: { compact?: boolean }) {
   const { data } = useCalc();
+  if (compact) return (
+    <section className="hero" aria-labelledby="page-title">
+      <h1 id="page-title" className="sr-only">{site.meta.title}</h1>
+      <div hidden><Readout /></div>
+    </section>
+  );
   return (
     <section className="hero pt-10 text-center sm:pt-16" aria-labelledby="page-title">
       <h1 id="page-title" className="mx-auto max-w-[16ch] text-[clamp(2.3rem,6.4vw,4.4rem)] leading-[1.02] font-semibold tracking-[-0.04em] text-balance">{site.meta.title}</h1>

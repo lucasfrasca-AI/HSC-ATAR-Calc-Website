@@ -349,6 +349,18 @@ await ev("document.querySelector('header a[href^=\"https://lucasfrasca.com\"]').
 await key("Enter", "Enter"); await sleep(2500);
 check((await ev("location.host")) === "lucasfrasca.com", "pressing Enter on the focused logo goes straight to lucasfrasca.com");
 
+// ---- wayfinding: other tabs open on their own content, the bar carries the ATAR ----
+await setViewport(1440);
+await load(url.replace(/#.*$/, ""));
+await ev("localStorage.clear()"); await load(url.replace(/#.*$/, ""));
+await ev("document.querySelector('.monogram').dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, detail: 2, button: 0 }))"); await sleep(900);
+await ev("document.querySelector('#tab-subj').click()"); await sleep(900);
+const way = await ev("({ top: Math.round(document.querySelector('#panel-subj h2').getBoundingClientRect().top), h1: document.querySelectorAll('h1').length, bar: document.querySelector('.compact-atar')?.dataset.show })");
+check(way.top < 300 && way.h1 === 1, "the Subjects tab opens on its own heading, not under the hero", JSON.stringify(way));
+check(way.bar === "true", "away from the Calculator, the app bar shows the ATAR", JSON.stringify(way));
+await ev("document.querySelector('.compact-atar').click()"); await sleep(900);
+check(await ev("document.querySelector('#tab-calc').getAttribute('aria-selected') === 'true' && !!document.querySelector('#readout').offsetParent"), "tapping the bar ATAR returns to the Calculator readout");
+
 // ---- WebGL liquid glass: on by default, steps aside for reduced transparency and contrast ----
 await setViewport(1440);
 await ev(`localStorage.setItem("hsc-theme", "violet-dark")`);

@@ -177,8 +177,8 @@ function Shell() {
           the containing block for position:fixed, which would pin the bottom bar inside it. */}
       {phone && tabsNav}
       <div className="mx-auto max-w-[1200px] px-4 pb-10 sm:px-6">
-        <Hero />
-        <div className="h-10" aria-hidden="true" />
+        <Hero compact={tab !== "calc"} />
+        <div className={tab === "calc" ? "h-10" : "h-8 sm:h-12"} aria-hidden="true" />
         <main id="main" tabIndex={-1} className="outline-none">
           <div role="tabpanel" id="panel-calc" aria-labelledby="tab-calc" hidden={tab !== "calc"}><Calculator /></div>
           <div role="tabpanel" id="panel-subj" aria-labelledby="tab-subj" hidden={tab !== "subj"}>{visited.has("subj") && <Suspense fallback={null}><Subjects /></Suspense>}</div>
