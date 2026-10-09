@@ -1,6 +1,8 @@
 // localStorage access that never throws (private mode, blocked storage).
 export const STORE_KEY = "hsc-atar-calculator-v4";
 export const THEME_KEY = "hsc-theme";
+/** "done" once the first-visit guide has been finished or dismissed. */
+export const GUIDE_KEY = "hsc-guide";
 export function read(key: string): string | null {
   try { return localStorage.getItem(key); } catch { return null; }
 }

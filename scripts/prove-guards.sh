@@ -37,6 +37,7 @@ t "budget: lazy chunk statically imported" src/App.tsx 's|^|import { x } from ".
 t "budget: syllabus tab made static" src/App.tsx 's/const Syllabuses = lazy\(\(\) => import\("\.\/components\/Syllabuses\.tsx"\)\);/import Syllabuses from ".\/components\/Syllabuses.tsx";/' "npx vite build >/dev/null 2>&1; node scripts/check-budget.mjs"
 t "contrast: backdrop glow too strong" src/styles/tokens.css 's/--glow-alpha: 0\.36;/--glow-alpha: 0.6;/' "node scripts/check-contrast.mjs"
 t "budget: WebGL glass made static" src/components/Backdrop.tsx 's|^|import "../lib/liquidGlass.ts";\n|' "npx vite build >/dev/null 2>&1; node scripts/check-budget.mjs"
+t "budget: guide made static" src/App.tsx 's/const Guide = lazy\(\(\) => import\("\.\/components\/Guide\.tsx"\)\);/import Guide from ".\/components\/Guide.tsx";/' "npx vite build >/dev/null 2>&1; node scripts/check-budget.mjs"
 t "budget: over ceiling" scripts/check-budget.mjs 's/js: 110_000/js: 50_000/' "npx vite build >/dev/null 2>&1; node scripts/check-budget.mjs"
 t "typecheck: type error" src/App.tsx 's/export function App\(\) \{/export function App() {\n  const n: number = "x"; void n;/' "npx tsc -b"
 t "lint: hook in condition" src/App.tsx 's/export function App\(\) \{/import { useState } from "react";\nexport function App() {\n  if (Math.random()) useState(0);/' "npx eslint ."

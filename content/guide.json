@@ -1,0 +1,34 @@
+{
+  "label": "Getting started guide",
+  "close": "Hide the guide",
+  "progress": "Step {n} of 4",
+  "welcome": {
+    "title": "New here? Let's get your ATAR estimate.",
+    "body": "You only need two things for each subject: the course and its final internal mark. It takes about a minute, and nothing leaves this browser.",
+    "start": "Start",
+    "sample": "Try a sample student",
+    "explore": "I'll look around"
+  },
+  "add": {
+    "title": "Add your first subject",
+    "body": "Type a course name, like maths, chem or English, then pick it from the list.",
+    "go": "Go to Subjects"
+  },
+  "mark": {
+    "title": "Enter its final internal mark",
+    "body": "The percentage your school reported for {course}. A best guess is fine for now; you can change it any time.",
+    "go": "Show me where"
+  },
+  "more": {
+    "title": "Add the rest of your subjects",
+    "units": "{n} of 10 units so far",
+    "eligible": "That's enough for an ATAR. Add any others you take, then see your estimate.",
+    "done": "See my ATAR",
+    "go": "Go to Subjects"
+  },
+  "result": {
+    "title": "This is your projected ATAR",
+    "body": "It uses your internal marks as the exam marks for now. Drag the pin on the curve, or move any exam slider, to see what different exam results would do.",
+    "done": "Got it"
+  }
+}

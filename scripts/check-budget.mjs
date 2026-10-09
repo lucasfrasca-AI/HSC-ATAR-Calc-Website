@@ -15,6 +15,7 @@ const BUDGET = { js: 110_000, css: 16_000 };
 // module ids recorded per chunk by the chunk-map plugin in vite.config.ts —
 // not chunk names, because a static import merges the module into the entry.
 const MUST_BE_LAZY = [
+  { name: "components/Guide.tsx", why: "the getting-started guide only loads for first-time visitors" },
   { name: "lib/liquidGlass.ts", why: "WebGL glass is a progressive enhancement started when the browser is idle" },
   { name: "ScalingTable", why: "course scaling reference is only needed on the How it works tab" },
   { name: "Syllabuses", why: "the syllabus directory is only needed on its tab" },

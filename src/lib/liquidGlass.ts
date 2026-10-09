@@ -117,7 +117,7 @@ type Prog = { p: WebGLProgram; u: Record<string, WebGLUniformLocation | null> };
 interface Panel { el: HTMLElement; cv: HTMLCanvasElement; ctx: CanvasRenderingContext2D; key: string }
 
 const PAD = 24;
-const SKIP = "dialog, .menu, .listbox, .theme-menu, .appbar, .tabbar";
+const SKIP = "dialog, .menu, .listbox, .theme-menu, .appbar, .tabbar, .toast, .guide";
 const css = (n: string) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 /** "h s% l%" token → sRGB 0..1 (same maths as check-contrast). */
 function rgb(token: string): [number, number, number] {

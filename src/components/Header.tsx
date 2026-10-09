@@ -87,6 +87,7 @@ function Toolbar() {
           <button type="button" className="menu-item" onClick={exportData}>{site.toolbar.export}</button>
           <button type="button" className="menu-item" onClick={() => file.current?.click()}>{site.toolbar.import}</button>
           <button type="button" className="menu-item" onClick={() => window.print()}>{site.toolbar.print}</button>
+          <button type="button" className="menu-item" onClick={(e) => { e.currentTarget.closest("details")?.removeAttribute("open"); window.dispatchEvent(new Event("hsc:guide")); }}>{site.toolbar.guide}</button>
         </div>
       </details>
       <input ref={file} type="file" accept="application/json,.json" hidden aria-label={site.toolbar.importLabel} onChange={importData} />

@@ -52,7 +52,7 @@ const problems = () => events.filter((e) => e.method === "Log.entryAdded" || e.m
 // ---- fresh visit, desktop --------------------------------------------------
 await setViewport(1440);
 await load();
-await ev("localStorage.clear()");
+await ev("localStorage.clear(); localStorage.setItem('hsc-guide', 'done')");
 await load();
 check(problems().length === 0, "no console errors or CSP violations on load", problems().join(" | "));
 check(await ev("!document.querySelector('main.fallback') && !!document.querySelector('[role=tablist]')"), "React replaced the no-JS fallback");
@@ -253,7 +253,7 @@ await ev("[...document.querySelectorAll('button')].find(b => b.textContent.trim(
 const link = await ev("document.getElementById('share-link').value");
 check(link.includes("#share=v1.") && !link.includes("Sample"), "share link is built in the fragment, without the name by default", `${link.length} chars`);
 await ev("document.querySelector('dialog[open] .btn-primary').click()");
-await ev("localStorage.clear()");
+await ev("localStorage.clear(); localStorage.setItem('hsc-guide', 'done')");
 await load(link); await sleep(500);
 check(await ev("!!document.querySelector('dialog.confirm[open]') && document.getElementById('confirm-q').textContent.includes('" + sharedN + " subjects')"), "opening a share link asks before replacing anything", `${sharedN} subjects`);
 check(await ev("!location.hash.includes('share=')"), "the shared marks are cleared from the address bar immediately");
@@ -333,7 +333,7 @@ for (const th of ["violet-dark", "violet-light", "blue-dark", "blue-light", "con
   check(await ev(`document.documentElement.dataset.theme === '${th}'`), `saved theme ${th} applies`);
   await shot(`05-theme-${th}`);
 }
-await ev("localStorage.clear()");
+await ev("localStorage.clear(); localStorage.setItem('hsc-guide', 'done')");
 
 // ---- LF monogram: a single click goes to lucasfrasca.com (last: it navigates away) ----
 await load(url.replace(/#.*$/, ""));
@@ -349,10 +349,40 @@ await ev("document.querySelector('header a[href^=\"https://lucasfrasca.com\"]').
 await key("Enter", "Enter"); await sleep(2500);
 check((await ev("location.host")) === "lucasfrasca.com", "pressing Enter on the focused logo goes straight to lucasfrasca.com");
 
+// ---- first-visit guide: offered once, follows the data, never blocks ----
+await setViewport(1440);
+await load(url.replace(/#.*$/, "")); await ev("localStorage.clear()"); await load(url.replace(/#.*$/, "")); await sleep(600);
+check(await ev("!!document.querySelector('aside.guide')"), "a first-time visitor is offered the getting-started guide");
+check(await ev("document.querySelector('#tab-subj') && !document.querySelector('aside.guide').closest('[aria-modal]') && document.elementFromPoint(400, 400) !== null"), "the guide is not modal (page stays usable)");
+await ev("[...document.querySelectorAll('aside.guide .btn')].find(b => b.classList.contains('btn-primary')).click()"); await sleep(900);
+check(await ev("document.querySelector('#tab-subj').getAttribute('aria-selected') === 'true' && document.activeElement.id === 'addCourse'"), "Start opens Subjects with the course search focused");
+check(await ev("document.getElementById('addCourse').classList.contains('guide-spot')"), "the guide highlights the course search");
+await send("Input.insertText", { text: "english standard" }); await sleep(300);
+await key("Enter", "Enter"); await sleep(700);
+const g2 = await ev("({ kicker: document.querySelector('aside.guide .kicker').textContent, spot: document.querySelector('.guide-spot')?.id ?? '' })");
+check(g2.kicker.includes("2") && g2.spot.startsWith("im-"), "adding a subject moves the guide on to its internal mark, highlighted", JSON.stringify(g2));
+await ev(`document.getElementById(${JSON.stringify(g2.spot)}).focus()`); await send("Input.insertText", { text: "72" }); await sleep(800);
+const g3 = await ev("({ kicker: document.querySelector('aside.guide .kicker').textContent, meter: !!document.querySelector('aside.guide .guide-meter') })");
+check(g3.kicker.includes("3") && g3.meter, "a mark moves it to 'add the rest' with a units meter", JSON.stringify(g3));
+await ev("document.querySelector('#tab-calc').click()"); await sleep(400);
+check(await ev("!!document.querySelector('aside.guide')"), "the student can wander off to another tab; the guide waits");
+await ev("document.querySelector('aside.guide .guide-x').click()"); await sleep(300);
+check(await ev("!document.querySelector('aside.guide') && localStorage.getItem('hsc-guide') === 'done'"), "closing the guide remembers it");
+await load(url.replace(/#.*$/, ""));
+check(await ev("!document.querySelector('aside.guide')"), "a returning visitor is not shown the guide again");
+await ev("document.querySelector('details.more summary').click()"); await sleep(200);
+await ev("[...document.querySelectorAll('.menu-item')].at(-1).click()"); await sleep(700);
+check(await ev("!!document.querySelector('aside.guide')"), "the More menu reopens the guide");
+await setViewport(390); await sleep(500);
+const gp = await ev("(() => { const g = document.querySelector('aside.guide').getBoundingClientRect(), t = document.querySelector('.tabbar').getBoundingClientRect(); return { overlap: g.bottom > t.top, overflow: document.documentElement.scrollWidth > innerWidth }; })()");
+check(!gp.overlap && !gp.overflow, "on phones the guide sits above the tab bar without overflow", JSON.stringify(gp));
+await setViewport(1440);
+await ev("localStorage.setItem('hsc-guide', 'done')");
+
 // ---- wayfinding: other tabs open on their own content, the bar carries the ATAR ----
 await setViewport(1440);
 await load(url.replace(/#.*$/, ""));
-await ev("localStorage.clear()"); await load(url.replace(/#.*$/, ""));
+await ev("localStorage.clear(); localStorage.setItem('hsc-guide', 'done')"); await load(url.replace(/#.*$/, ""));
 await ev("document.querySelector('.monogram').dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, detail: 2, button: 0 }))"); await sleep(900);
 await ev("document.querySelector('#tab-subj').click()"); await sleep(900);
 const way = await ev("({ top: Math.round(document.querySelector('#panel-subj h2').getBoundingClientRect().top), h1: document.querySelectorAll('h1').length, bar: document.querySelector('.compact-atar')?.dataset.show })");

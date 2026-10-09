@@ -32,7 +32,8 @@
     "shortcutsHint": "Tip: ⌘Z / Ctrl+Z undoes any change.",
     "share": "Share",
     "more": "More",
-    "moreLabel": "More actions"
+    "moreLabel": "More actions",
+    "guide": "Show the getting started guide"
   },
   "theme": {
     "label": "Theme",

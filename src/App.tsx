@@ -9,6 +9,7 @@ import { AppBar, Hero } from "./components/Header.tsx";
 import { Suspense, lazy } from "react";
 import { decodeShare, readShareFromLocation } from "./lib/share.ts";
 const Syllabuses = lazy(() => import("./components/Syllabuses.tsx"));
+const Guide = lazy(() => import("./components/Guide.tsx"));
 const loadSubjects = () => import("./components/Subjects.tsx");
 const loadHelp = () => import("./components/HowItWorks.tsx");
 const Subjects = lazy(() => loadSubjects().then((m) => ({ default: m.Subjects })));
@@ -24,6 +25,7 @@ import { withTransition } from "./lib/motion.ts";
 import { NavCtx, type Nav, type TabKey } from "./lib/nav.ts";
 import { useFeedback } from "./components/Feedback.tsx";
 import { CalculatorProvider, useCalc } from "./lib/state.tsx";
+import { GUIDE_KEY, read, write } from "./lib/storage.ts";
 import { t } from "./lib/text.ts";
 
 const ORDER: TabKey[] = ["calc", "subj", "syl", "help"];
@@ -64,6 +66,14 @@ function Shell() {
   const [tab, setTab] = useState<TabKey>(fromHash);
   const tabRefs = useRef<Record<TabKey, HTMLButtonElement | null>>({ calc: null, subj: null, syl: null, help: null });
   const phone = usePhoneLayout();
+  // First visit (nothing saved, no guide history, not arriving via a share link): offer the guide.
+  const [guide, setGuide] = useState(() => !data.subjects.length && read(GUIDE_KEY) === null && !readShareFromLocation());
+  const closeGuide = useCallback(() => { write(GUIDE_KEY, "done"); setGuide(false); }, []);
+  useEffect(() => {
+    const open = () => setGuide(true);
+    window.addEventListener("hsc:guide", open);
+    return () => window.removeEventListener("hsc:guide", open);
+  }, []);
   const glide = useGlider(tab, tabRefs, phone);
   // Lazy tabs stay mounted once visited, so their local state (open panels) survives tab switches.
   const [visited, setVisited] = useState<Set<TabKey>>(() => new Set([fromHash()]));
@@ -190,6 +200,7 @@ function Shell() {
           <p className="mt-6 text-center text-[0.7rem] tracking-[0.18em] uppercase">{site.footer.credit}</p>
         </footer>
       </div>
+      {guide && <Suspense fallback={null}><Guide tab={tab} onClose={closeGuide} /></Suspense>}
     </NavCtx.Provider>
   );
 }
