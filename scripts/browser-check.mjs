@@ -427,9 +427,10 @@ let tl = await tilesNow();
 check(tl.length >= 8 && tl.some((x) => x.a === "Mathematics") && tl[0].mine && !(await ev("!!document.querySelector('#papers details.paper-course')")), "NESA papers open as learning-area tiles (no course list yet), areas with your subjects first", JSON.stringify(tl.map((x) => x.a)));
 const span = await ev("(() => { const ul = document.querySelector('#papers .paper-tiles').getBoundingClientRect(), last = document.querySelector('#papers .paper-tiles > li:last-child').getBoundingClientRect(); return { ul: Math.round(ul.right), last: Math.round(last.right) }; })()");
 check(Math.abs(span.ul - span.last) <= 1, "the last learning-area tile stretches to the end of its row", JSON.stringify(span));
-await ev("document.querySelector('#papers .paper-tile[data-area=Science]').click()"); await sleep(600);
+// The bug this guards: open a maths course from a search, clear it, then tap Mathematics.
+await search("mathematics advanced"); await sleep(400);
 await ev("document.querySelector('#papers details.paper-course > summary').click()"); await sleep(300);
-await ev("document.querySelector('#papers .paper-back').click()"); await sleep(600);
+await search(""); await sleep(400);
 let ma = await openArea("Mathematics");
 check(await ev("document.querySelectorAll('#papers details.paper-course[open]').length === 0"), "opening an area shows every course closed (even after one was opened elsewhere)");
 check(ma.h === "Mathematics" && ma.focus === "papers-area-h" && maths4.every((m) => ma.n.includes(m)) && ma.n.length === 4, "tapping Mathematics opens Standard, Advanced, Extension 1 and Extension 2", JSON.stringify(ma));
