@@ -226,24 +226,28 @@ const glider = await ev("(() => { const g = document.querySelector('.tab-glider'
 check(glider >= 0 && glider < 2, "tab indicator glides under the selected tab", `${glider}px off`);
 await key("ArrowRight", "ArrowRight");
 await sleep(900);
-check(await ev("location.hash === '#syllabuses' && document.querySelectorAll('#panel-syl a[href^=\"https://\"]').length > 100"), "Syllabuses tab lazy-loads its links", `${await ev("document.querySelectorAll('#panel-syl a[href^=\"https://\"]').length")} links`);
+check(await ev("location.hash === '#syllabuses' && document.querySelectorAll('#panel-syl .paper-tile').length >= 8"), "Syllabuses tab lazy-loads, opening on learning-area tiles", `${await ev("document.querySelectorAll('#panel-syl .paper-tile').length")} tiles`);
 await key("End", "End");
 await sleep(900);
 check(await ev("document.querySelectorAll('#panel-help tbody tr').length > 100"), "How it works lazy-loads the full course table", `${await ev("document.querySelectorAll('#panel-help tbody tr').length")} rows`);
 await ev("history.back()"); await sleep(400);
 check(await ev("location.hash === '#syllabuses' && !document.querySelector('#panel-syl').hidden"), "browser Back returns to the previous tab");
 
-// ---- syllabuses ------------------------------------------------------------
-const syl = await ev(`(() => { const cards = [...document.querySelectorAll('#panel-syl li.rise')];
-  const links = [...document.querySelectorAll('#panel-syl a[href^="https://"]')];
-  return { cards: cards.length, safe: links.every(a => a.target === '_blank' && a.rel.includes('noopener') && a.rel.includes('noreferrer')),
-    hosts: [...new Set(links.map(a => new URL(a.href).host))] }; })()`);
-check(syl.cards === 115, "every course has a syllabus card", `${syl.cards} cards`);
-check(syl.safe, "syllabus links open in a new tab with noopener noreferrer");
+// ---- syllabuses: learning-area tiles like Papers -----------------------------
+const sylTiles = await ev("[...document.querySelectorAll('#panel-syl .paper-tile')].map(t => ({ a: t.dataset.area, n: +t.querySelector('.text-foreground-3').textContent.match(/\\d+/)[0] }))");
+check(sylTiles.reduce((x, t) => x + t.n, 0) === 115, "every course with a syllabus sits in one learning-area tile", JSON.stringify(sylTiles));
+await ev("document.querySelector('#panel-syl .paper-tile[data-area=Mathematics]').click()"); await sleep(700);
+const sylMaths = await ev("({ h: document.getElementById('syl-area-h')?.textContent, focus: document.activeElement?.id, names: [...document.querySelectorAll('#panel-syl li.rise h3')].map(h => h.textContent) })");
+check(sylMaths.h === "Mathematics" && sylMaths.focus === "syl-area-h" && ["Mathematics Advanced", "Mathematics Extension 1", "Mathematics Extension 2"].every((m) => sylMaths.names.some((n) => n.startsWith(m))), "tapping Mathematics opens its syllabuses", JSON.stringify(sylMaths));
+const syl = await ev(`(() => { const links = [...document.querySelectorAll('#panel-syl a[href^="https://"]')];
+  return { n: links.length, safe: links.every(a => a.target === '_blank' && a.rel.includes('noopener') && a.rel.includes('noreferrer')), hosts: [...new Set(links.map(a => new URL(a.href).host))] }; })()`);
+check(syl.n > 0 && syl.safe, "syllabus links open in a new tab with noopener noreferrer");
 check(syl.hosts.every((h) => ["curriculum.nsw.edu.au", "www.nsw.gov.au"].includes(h)), "syllabus links only point at NESA hosts", syl.hosts.join(", "));
+await ev("document.querySelector('#panel-syl .paper-back').click()"); await sleep(700);
+check(await ev("document.activeElement?.dataset.area === 'Mathematics'"), "Back returns to the syllabus tiles, focus on Mathematics");
 await ev("document.querySelector('#panel-syl input[type=search]').focus()");
 await send("Input.insertText", { text: "physics" }); await sleep(300);
-check(await ev("document.querySelectorAll('#panel-syl li.rise').length") === 1, "syllabus search narrows to Physics");
+check(await ev("document.querySelectorAll('#panel-syl li.rise').length") === 1, "syllabus search skips the tiles and narrows to Physics");
 
 // ---- share link: create, open in a fresh visit, confirm, compare -----------
 await ev("location.hash = '#calculator'"); await sleep(300);

@@ -15,5 +15,22 @@
   "none": "No course matches “{q}”.",
   "nesa": "NESA no. {code}",
   "opensNew": "(opens NESA's site in a new tab)",
-  "source": "Links point to NESA's NSW Curriculum website. Syllabus content is © NSW Education Standards Authority. Links checked October 2026."
+  "source": "Links point to NESA's NSW Curriculum website. Syllabus content is © NSW Education Standards Authority. Links checked October 2026.",
+  "areas": {
+    "English": "English",
+    "Mathematics": "Mathematics",
+    "Science": "Science",
+    "Human Society and Its Environment": "Humanities and social sciences",
+    "Languages": "Languages",
+    "Creative Arts": "Creative arts",
+    "PDHPE": "PDHPE",
+    "Technological and Applied Studies": "Technology and applied studies",
+    "VET (examination courses)": "VET"
+  },
+  "areaCourses": "{n} courses",
+  "areaCourses1": "1 course",
+  "areaMine": "{n} on your list",
+  "back": "All learning areas",
+  "tilesLabel": "Learning areas",
+  "open": "Open {area}"
 }
