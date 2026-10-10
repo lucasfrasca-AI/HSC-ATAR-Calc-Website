@@ -210,8 +210,7 @@
     "bad": "That share link is damaged or incomplete.",
     "tooLarge": "That share link is too large to open.",
     "empty": "Add some subjects first — there's nothing to share yet.",
-    "back": "Back",
-    "backLabel": "Back to the calculator"
+    "closeLabel": "Close"
   },
   "kickers": {
     "curve": "01 · Projection",

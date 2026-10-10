@@ -270,7 +270,9 @@ await ev("[...document.querySelectorAll('button')].find(b => b.textContent.trim(
 const link = await ev("document.getElementById('share-link').value");
 // Ways out of the share sheet: ‹ Back, a tap outside, Escape (then reopen for the rest of the flow).
 const shareBtn = "[...document.querySelectorAll('button')].find(b => b.textContent.trim() === 'Share')";
-await ev("document.querySelector('dialog[open] .paper-back').click()"); await sleep(300);
+const doneVis = await ev("(() => { const b = document.querySelector('dialog[open] .btn-primary'); const cs = getComputedStyle(b); return { bg: cs.backgroundColor, fg: cs.color }; })()");
+check(doneVis.bg !== doneVis.fg && !/rgba\(.*, 0\.0\d\)/.test(doneVis.bg), "the share sheet's Done button keeps its solid accent fill (app bar styles don't leak into the sheet)", JSON.stringify(doneVis));
+await ev("document.querySelector('dialog[open] .sheet-x').click()"); await sleep(300);
 const outBack = await ev("!document.querySelector('dialog[open]')");
 await ev(`${shareBtn}.click()`); await sleep(500);
 await send("Input.dispatchMouseEvent", { type: "mousePressed", x: 8, y: 450, button: "left", clickCount: 1 });
@@ -280,7 +282,7 @@ await ev(`${shareBtn}.click()`); await sleep(500);
 await send("Input.dispatchKeyEvent", { type: "keyDown", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
 await send("Input.dispatchKeyEvent", { type: "keyUp", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 }); await sleep(300);
 const outEsc = await ev("!document.querySelector('dialog[open]')");
-check(outBack && outSide && outEsc, "the share sheet closes with ‹ Back, a tap outside, or Escape", JSON.stringify({ outBack, outSide, outEsc }));
+check(outBack && outSide && outEsc, "the share sheet closes with its ✕, a tap outside, or Escape", JSON.stringify({ outBack, outSide, outEsc }));
 await ev(`${shareBtn}.click()`); await sleep(500);
 check(link.includes("#share=v1.") && !link.includes("Sample"), "share link is built in the fragment, without the name by default", `${link.length} chars`);
 await ev("document.querySelector('dialog[open] .btn-primary').click()");

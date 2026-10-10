@@ -398,8 +398,10 @@ h3 { letter-spacing: -0.012em; line-height: 1.25; }
 /* Icon buttons in the bar: 40px targets, quiet until hovered. */
 .btn-icon { width: 40px; min-height: 40px; padding: 0; border-color: transparent; background: hsl(var(--foreground) / 0.06); color: hsl(var(--foreground-2)); }
 .btn-icon:hover { background: hsl(var(--foreground) / 0.1); color: hsl(var(--foreground)); border-color: transparent; }
-.appbar .btn:not(.btn-icon) { min-height: 40px; border-color: transparent; background: hsl(var(--foreground) / 0.06); }
-.appbar .btn:not(.btn-icon):hover { background: hsl(var(--foreground) / 0.1); }
+/* Toolbar buttons only: the share sheet is a <dialog> rendered inside the bar, and these rules
+   must not reach its buttons (they turned the primary "Done" white-on-white). */
+.appbar .btn:not(.btn-icon):not(dialog .btn) { min-height: 40px; border-color: transparent; background: hsl(var(--foreground) / 0.06); }
+.appbar .btn:not(.btn-icon):not(dialog .btn):hover { background: hsl(var(--foreground) / 0.1); }
 
 /* More menu */
 .menu { background: hsl(var(--surface)) !important; transform-origin: top right; animation: materialize 0.24s cubic-bezier(.2, .9, .3, 1) both; }
@@ -561,3 +563,8 @@ section > h2 { font-size: clamp(1.7rem, 3.4vw, 2.4rem); letter-spacing: -0.032em
 .seg-lg .seg-thumb { top: 4px; bottom: 4px; }
 .seg-slide .seg-count { color: inherit; opacity: 0.7; }
 @media (prefers-reduced-motion: reduce) { .seg-thumb { transition: none; } .seg-slide .btn { transition: none; } }
+
+/* Sheet close button (top-right ✕, like an iOS sheet). */
+.sheet-x { display: grid; place-items: center; width: 30px; height: 30px; flex: none; border-radius: 999px; color: hsl(var(--foreground-2)); background: hsl(var(--foreground) / 0.08); transition: background-color 0.2s ease; }
+.sheet-x:hover { color: hsl(var(--foreground)); background: hsl(var(--foreground) / 0.14); }
+.sheet-x:active { transform: scale(0.94); transition: transform 100ms ease-out; }

@@ -57,7 +57,7 @@ The `apple-design` skill (github.com/emilkowalski/skills, MIT; installed at `~/.
 - Readout: odometer digits (CSS transform per digit column, keyed from the right) and a percentile ring (stroke-dashoffset). Both static under reduced motion.
 - Lazy tabs: Subjects, Syllabuses, How it works (and ScalingTable) are separate chunks, prefetched on idle, mounted on first visit and kept mounted. Cross-tab jumps use `whenElement` to wait for the lazy target.
 - Scaling table: one fixed order, no sort control — highest scaling first (at 70, then 90, then name); courses with no course-specific scaling recorded (tierSource "default", generic average) grouped last under one divider row. (The old "Learning area" sort never sorted by area, so a heading row landed before almost every course.)
-- Dialogs always have three ways out: ‹ Back (share sheet) or Cancel, Done/confirm, and a tap on the backdrop or Escape.
+- Dialogs always have three ways out: ✕ (share sheet) or Cancel, Done/confirm, and a tap on the backdrop or Escape.
 - `ScalingTable` is lazy (How it works tab) and listed in `check-budget` MUST_BE_LAZY.
 
 ## Checks (all run in CI `verify`; run locally with `npm run verify`)
