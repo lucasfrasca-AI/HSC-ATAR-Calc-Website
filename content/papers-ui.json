@@ -69,5 +69,11 @@
   "withSol": "with solutions",
   "loading": "Loading school papers…",
   "thscSource": "Links point to THSC Online (thsconline.github.io), a volunteer-run site. Papers belong to the schools that wrote them. Index built {date}.",
-  "thscViewAll": "See this course on THSC"
+  "thscViewAll": "See this course on THSC",
+  "areaCourses": "{n} courses",
+  "areaCourses1": "1 course",
+  "areaMine": "{n} on your list",
+  "back": "All learning areas",
+  "tilesLabel": "Learning areas",
+  "open": "Open {area}"
 }

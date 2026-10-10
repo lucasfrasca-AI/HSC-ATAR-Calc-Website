@@ -9,6 +9,8 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react
 import data from "../../content/papers.json";
 import ui from "../../content/papers-ui.json";
 import site from "../../content/site.json";
+import { flushSync } from "react-dom";
+import { withTransition } from "../lib/motion.ts";
 import { read, write } from "../lib/storage.ts";
 import { useCalc } from "../lib/state.tsx";
 import { t } from "../lib/text.ts";
@@ -211,12 +213,12 @@ export default function Papers() {
     write(DONE_KEY, JSON.stringify([...next]));
   };
   const words = useMemo(() => q.toLowerCase().split(/\s+/).filter(Boolean), [q]);
-  const match = useCallback((name: string, ids: string[], a: Area) =>
-    (!area || a === area) && (!mineOnly || isMine(ids)) && words.every((w) => name.toLowerCase().includes(w)), [area, mineOnly, isMine, words]);
+  const match = useCallback((name: string, ids: string[]) =>
+    (!mineOnly || isMine(ids)) && words.every((w) => name.toLowerCase().includes(w)), [mineOnly, isMine, words]);
 
   const nesa = useMemo(() => COURSES
     .map((c) => ({ ...c, years: old ? c.years : c.years.filter((y) => !y.old) }))
-    .filter((c) => c.years.length && match(`${c.name} ${c.successor ?? ""}`, c.courseIds, c.area)), [old, match]);
+    .filter((c) => c.years.length && match(`${c.name} ${c.successor ?? ""}`, c.courseIds)), [old, match]);
   const thscCourses = useMemo(() => {
     if (!thsc) return [];
     const by = new Map<string, ThscCourse>();
@@ -225,11 +227,10 @@ export default function Papers() {
       c.groups.push(g);
       by.set(g.name, c);
     }
-    return [...by.values()].filter((c) => match(c.name, c.courseIds, c.area) && (!solOnly || c.groups.some((g) => g.items.some((i) => i.sol))))
+    return [...by.values()].filter((c) => match(c.name, c.courseIds) && (!solOnly || c.groups.some((g) => g.items.some((i) => i.sol))))
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [thsc, match, solOnly]);
 
-  const areasPresent = AREA_ORDER.filter((a) => (source === "nesa" ? COURSES : thscCourses).some((c) => c.area === a));
   // Grouped like NESA and THSC group them — every learning area complete (all the maths courses
   // under Mathematics). Your subjects lead within their area, and areas holding them come first.
   const sections = <T extends { area: Area; courseIds: string[] }>(list: T[]) =>
@@ -237,7 +238,30 @@ export default function Papers() {
       const items = list.filter((c) => c.area === a).sort((x, y) => Number(isMine(y.courseIds)) - Number(isMine(x.courseIds)));
       return { key: a, title: ui.areas[a], items, mine: items.some((c) => isMine(c.courseIds)) };
     }).filter((s) => s.items.length).sort((x, y) => Number(y.mine) - Number(x.mine));
-  const list = source === "nesa" ? nesa : thscCourses;
+  const list: { area: Area; courseIds: string[] }[] = source === "nesa" ? nesa : thscCourses;
+  // Learning areas are tiles (Mathematics holds Standard, Advanced, Ext 1, Ext 2); tapping one
+  // drills in, Back returns to the tile it came from. A search skips the tiles and lists matches.
+  const searching = words.length > 0;
+  const tiles = sections(list);
+  const shownArea = area && tiles.some((s) => s.key === area) ? area : null;
+  // View Transitions apply the DOM change a frame or two later; wait for the target before focusing.
+  const focusWhen = (sel: string, then?: (el: HTMLElement) => void, tries = 60) => {
+    const el = document.querySelector<HTMLElement>(sel);
+    if (el) { el.focus({ preventScroll: true }); then?.(el); }
+    else if (tries > 0) requestAnimationFrame(() => focusWhen(sel, then, tries - 1));
+  };
+  const enter = (a: Area) => {
+    withTransition("tab", () => flushSync(() => setArea(a)));
+    focusWhen("#papers-area-h", (h) => h.scrollIntoView({ block: "nearest" }));
+  };
+  const back = () => {
+    const from = shownArea;
+    withTransition("tab", () => flushSync(() => setArea(null)));
+    focusWhen(`#papers .paper-tile[data-area="${from}"]`);
+  };
+  const courseList = (key: string, items: { area: Area; courseIds: string[] }[]) => source === "nesa"
+    ? <ul key={key} className="grid gap-3">{(items as Course[]).map((c) => <li key={c.name}>{nesaCard(c)}</li>)}</ul>
+    : <ul key={key} className="grid gap-3">{(items as ThscCourse[]).map((c) => <li key={c.name}><ThscCard c={c} origin={thsc!.origin} open={open} setOpen={setOpen} solOnly={solOnly} mine={isMine(c.courseIds)} /></li>)}</ul>;
   const nesaCard = (c: Course) => {
     const n = c.years.length, nDone = c.years.filter((y) => done.has(y.files.find((f) => f.kind === "exam")?.url ?? y.page)).length;
     const from = c.years.at(-1)!.year, to = c.years[0]!.year;
@@ -274,14 +298,6 @@ export default function Papers() {
         {source === "nesa"
           ? <label className="flex items-center gap-2 pb-2.5 text-[0.86rem]"><input type="checkbox" checked={old} onChange={(e) => setOld(e.target.checked)} />{ui.archive}</label>
           : <label className="flex items-center gap-2 pb-2.5 text-[0.86rem]"><input type="checkbox" checked={solOnly} onChange={(e) => setSolOnly(e.target.checked)} />{ui.solOnly}</label>}
-        <div role="group" aria-label={ui.areaLabel} className="flex w-full flex-wrap gap-1.5">
-          {[null, ...areasPresent].map((a) => (
-            <button key={a ?? "all"} type="button" aria-pressed={area === a} onClick={() => setArea(a)}
-              className={`rounded-full border px-3 py-1 text-[0.78rem] transition-colors ${area === a ? "border-foreground/40 bg-foreground/10 font-semibold text-foreground" : "border-input-border text-foreground-2 hover:text-foreground"}`}>
-              {a ? ui.areas[a] : ui.all}
-            </button>
-          ))}
-        </div>
       </Glass>
       {source === "nesa" && old && <p className="mb-3 max-w-[80ch] text-[0.8rem] text-foreground-3">{ui.oldNote}</p>}
       {source === "thsc" && !thsc ? <p className="text-[0.86rem] text-foreground-3" role="status">{ui.loading}</p> : (
@@ -289,15 +305,35 @@ export default function Papers() {
           <p className="mb-3 text-[0.8rem] text-foreground-3" role="status" aria-live="polite">
             {list.length ? t(list.length === 1 ? ui.count1 : ui.count, { n: list.length }) : t(ui.none, { q })}
           </p>
-          {source === "nesa"
-            ? sections(nesa).map((s) => (
-              <div key={s.key} className="paper-area"><h3 className="paper-area-h">{s.title}</h3><ul className="grid gap-3">{s.items.map((c) => <li key={c.name}>{nesaCard(c)}</li>)}</ul></div>
-            ))
-            : sections(thscCourses).map((s) => (
-              <div key={s.key} className="paper-area"><h3 className="paper-area-h">{s.title}</h3>
-                <ul className="grid gap-3">{s.items.map((c) => <li key={c.name}><ThscCard c={c} origin={thsc!.origin} open={open} setOpen={setOpen} solOnly={solOnly} mine={isMine(c.courseIds)} /></li>)}</ul>
-              </div>
-            ))}
+          {searching ? tiles.map((s) => (
+            <div key={s.key} className="paper-area"><h3 className="paper-area-h">{s.title}</h3>{courseList(s.key, s.items)}</div>
+          )) : shownArea ? (
+            <div className="paper-area">
+              <button type="button" className="paper-back" onClick={back}>
+                <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>{ui.back}
+              </button>
+              <h3 id="papers-area-h" tabIndex={-1} className="mt-2 mb-4 text-[1.6rem] font-semibold tracking-[-0.02em] outline-none">{ui.areas[shownArea]}</h3>
+              {courseList(shownArea, tiles.find((s) => s.key === shownArea)!.items)}
+            </div>
+          ) : (
+            <ul className="paper-tiles" aria-label={ui.tilesLabel}>
+              {tiles.map((s) => {
+                const yours = s.items.filter((c) => isMine(c.courseIds)).length;
+                return (
+                  <li key={s.key}>
+                    <button type="button" data-area={s.key} className="glass glass-sm lift paper-tile" onClick={() => enter(s.key)} aria-label={`${t(ui.open, { area: s.title })}, ${t(s.items.length === 1 ? ui.areaCourses1 : ui.areaCourses, { n: s.items.length })}${yours ? `, ${t(ui.areaMine, { n: yours })}` : ""}`}>
+                      <span className="min-w-0 flex-1 text-left">
+                        <b className="block text-[1.05rem] font-semibold tracking-[-0.01em]">{s.title}</b>
+                        <span className="mt-0.5 block text-[0.78rem] text-foreground-3">{t(s.items.length === 1 ? ui.areaCourses1 : ui.areaCourses, { n: s.items.length })}</span>
+                        {yours > 0 && <span className="pill mt-2 inline-block !border-accent/50 !text-accent">{t(ui.areaMine, { n: yours })}</span>}
+                      </span>
+                      <svg aria-hidden="true" className="shrink-0 text-foreground-3" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6" /></svg>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </>
       )}
       {source === "nesa"
