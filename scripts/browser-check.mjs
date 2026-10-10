@@ -349,6 +349,40 @@ await ev("document.querySelector('header a[href^=\"https://lucasfrasca.com\"]').
 await key("Enter", "Enter"); await sleep(2500);
 check((await ev("location.host")) === "lucasfrasca.com", "pressing Enter on the focused logo goes straight to lucasfrasca.com");
 
+// ---- theme menu behaves like a native menu: pick closes it, arrows browse, Esc/outside dismiss ----
+await setViewport(1440);
+await load(url.replace(/#.*$/, ""));
+const click = async (sel) => {
+  const p = await ev(`(() => { const r = document.querySelector(${JSON.stringify(sel)}).getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; })()`);
+  await send("Input.dispatchMouseEvent", { type: "mousePressed", x: p.x, y: p.y, button: "left", clickCount: 1 });
+  await send("Input.dispatchMouseEvent", { type: "mouseReleased", x: p.x, y: p.y, button: "left", clickCount: 1 });
+};
+const themeBox = "document.querySelector('details:has(.theme-menu)')";
+await click("details:has(.theme-menu) > summary"); await sleep(300);
+check(await ev(`${themeBox}.open`), "clicking the theme button opens the menu");
+await click("[data-theme-swatch=blue-dark]"); await sleep(900);
+check(await ev(`!${themeBox}.open && document.documentElement.dataset.theme === 'blue-dark'`), "choosing a theme applies it and closes the menu", await ev("document.documentElement.dataset.theme"));
+await click("details:has(.theme-menu) > summary"); await sleep(300);
+await ev("document.querySelector('input[name=theme]:checked').focus()");
+await key("ArrowDown", "ArrowDown"); await sleep(700);
+check(await ev(`${themeBox}.open && document.documentElement.dataset.theme !== 'blue-dark'`), "arrow keys preview themes and keep the menu open", await ev("document.documentElement.dataset.theme"));
+await key("Enter", "Enter"); await sleep(300);
+check(await ev(`!${themeBox}.open && document.activeElement === ${themeBox}.querySelector('summary')`), "Enter commits, closes, and returns focus to the button");
+await click("details:has(.theme-menu) > summary"); await sleep(300);
+await ev("document.querySelector('input[name=theme]:checked').focus()");
+await send("Input.dispatchKeyEvent", { type: "keyDown", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
+await send("Input.dispatchKeyEvent", { type: "keyUp", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 }); await sleep(300);
+check(await ev(`!${themeBox}.open`), "Escape closes the theme menu");
+await click("details:has(.theme-menu) > summary"); await sleep(300);
+await send("Input.dispatchMouseEvent", { type: "mousePressed", x: 700, y: 600, button: "left", clickCount: 1 });
+await send("Input.dispatchMouseEvent", { type: "mouseReleased", x: 700, y: 600, button: "left", clickCount: 1 }); await sleep(300);
+check(await ev(`!${themeBox}.open`), "clicking outside closes the theme menu");
+await click("details.more > summary"); await sleep(300);
+await send("Input.dispatchMouseEvent", { type: "mousePressed", x: 700, y: 600, button: "left", clickCount: 1 });
+await send("Input.dispatchMouseEvent", { type: "mouseReleased", x: 700, y: 600, button: "left", clickCount: 1 }); await sleep(300);
+check(await ev("!document.querySelector('details.more').open"), "clicking outside closes the More menu");
+await ev(`localStorage.setItem("hsc-theme", "violet-dark")`);
+
 // ---- first-visit guide: offered once, follows the data, never blocks ----
 await setViewport(1440);
 await load(url.replace(/#.*$/, "")); await ev("localStorage.clear()"); await load(url.replace(/#.*$/, "")); await sleep(600);

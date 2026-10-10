@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ChangeEvent, type PointerEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type ChangeEvent, type PointerEvent } from "react";
 import type React from "react";
 import site from "../../content/site.json";
 import mark from "../assets/lf-mark.png";
@@ -12,21 +12,53 @@ import { useFeedback } from "./Feedback.tsx";
 import { ShareButton } from "./ShareDialog.tsx";
 import { Glass, Stat, TweenNum } from "./ui.tsx";
 
+/** Popover menus built on <details>: close on a click outside and on Escape (focus returns
+ *  to the button), like any native menu. */
+function useDismiss() {
+  const ref = useRef<HTMLDetailsElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const outside = (e: globalThis.PointerEvent) => { if (el.open && !el.contains(e.target as Node)) el.open = false; };
+    const esc = (e: globalThis.KeyboardEvent) => { if (e.key === "Escape" && el.open) { el.open = false; el.querySelector("summary")?.focus(); } };
+    document.addEventListener("pointerdown", outside);
+    el.addEventListener("keydown", esc);
+    return () => { document.removeEventListener("pointerdown", outside); el.removeEventListener("keydown", esc); };
+  }, []);
+  const close = useCallback((focus = false) => {
+    const el = ref.current;
+    if (!el) return;
+    el.open = false;
+    if (focus) el.querySelector("summary")?.focus();
+  }, []);
+  return { ref, close };
+}
+
 function ThemePicker() {
   const [theme, set] = useState<ThemeId>(currentTheme);
+  const { ref: box, close: closeMenu } = useDismiss();
   const summary = useRef<HTMLElement>(null);
+  // Arrow keys move between radios (and fire change) while browsing; only a click/tap or
+  // Enter/Space commits and closes the menu.
+  const byKeyboard = useRef(false);
   const name = THEMES.find((x) => x.id === theme)?.name;
   const choose = (id: ThemeId) => {
     const r = summary.current?.getBoundingClientRect();
-    withTransition("theme", () => { setTheme(id); set(id); }, r ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : undefined);
+    const close = !byKeyboard.current;
+    // Closing inside the transition makes the new snapshot menu-free, so the reveal is clean.
+    withTransition("theme", () => { setTheme(id); set(id); if (close) closeMenu(); }, r ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : undefined);
+  };
+  const commitKey = (e: React.KeyboardEvent) => {
+    byKeyboard.current = e.key.startsWith("Arrow");
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); closeMenu(true); }
   };
   return (
-    <details className="relative">
+    <details ref={box} className="relative">
       <summary ref={summary} className="btn btn-icon lg:!w-auto lg:!px-3.5" aria-label={`${site.theme.label}: ${name}`}>
         <span aria-hidden="true" className="inline-block h-3.5 w-3.5 rounded-full bg-accent-fill ring-2 ring-foreground/15" />
         <span className="hidden lg:inline">{name}</span>
       </summary>
-      <Glass as="fieldset" className="theme-menu glass-sm absolute right-0 z-20 mt-2 w-52 p-2">
+      <Glass as="fieldset" className="theme-menu glass-sm absolute right-0 z-20 mt-2 w-52 p-2" onKeyDown={commitKey} onPointerDown={() => { byKeyboard.current = false; }}>
         <legend className="sr-only">{site.theme.label}</legend>
         {THEMES.map((o) => (
           <label key={o.id} className="flex cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2 text-sm hover:bg-foreground/5">
@@ -43,6 +75,7 @@ function Toolbar() {
   const { data, replace, undo, redo, canUndo, canRedo } = useCalc();
   const { toast } = useFeedback();
   const file = useRef<HTMLInputElement>(null);
+  const { ref: more, close: closeMore } = useDismiss();
   const exportData = () => {
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
     const a = Object.assign(document.createElement("a"), {
@@ -78,16 +111,16 @@ function Toolbar() {
       </button>
       <ThemePicker />
       <ShareButton />
-      <details className="more relative">
+      <details ref={more} className="more relative">
         <summary className="btn btn-icon" aria-label={site.toolbar.moreLabel}>
           <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8" /><circle cx="12" cy="12" r="1.8" /><circle cx="19" cy="12" r="1.8" /></svg>
         </summary>
-        <div className="menu glass-sm absolute right-0 z-30 mt-2 w-48 p-1.5" role="group" aria-label={site.toolbar.moreLabel}>
+        <div className="menu glass-sm absolute right-0 z-30 mt-2 w-48 p-1.5" role="group" aria-label={site.toolbar.moreLabel} onClick={(e) => { if ((e.target as Element).closest(".menu-item")) closeMore(); }}>
           <button type="button" className="menu-item sm:hidden" disabled={!canRedo} onClick={() => { if (redo()) toast(site.toolbar.redone); }}>{site.toolbar.redo}</button>
           <button type="button" className="menu-item" onClick={exportData}>{site.toolbar.export}</button>
           <button type="button" className="menu-item" onClick={() => file.current?.click()}>{site.toolbar.import}</button>
           <button type="button" className="menu-item" onClick={() => window.print()}>{site.toolbar.print}</button>
-          <button type="button" className="menu-item" onClick={(e) => { e.currentTarget.closest("details")?.removeAttribute("open"); window.dispatchEvent(new Event("hsc:guide")); }}>{site.toolbar.guide}</button>
+          <button type="button" className="menu-item" onClick={() => window.dispatchEvent(new Event("hsc:guide"))}>{site.toolbar.guide}</button>
         </div>
       </details>
       <input ref={file} type="file" accept="application/json,.json" hidden aria-label={site.toolbar.importLabel} onChange={importData} />
