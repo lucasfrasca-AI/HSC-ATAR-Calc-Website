@@ -1,4 +1,4 @@
-# CLAUDE.md — NSW HSC ATAR Calculator
+# CLAUDE.md — HSC ATAR Calculator
 
 Live: https://hsc-atar-calc.web.app · Firebase project `hsc-atar-calc` · Repo `lucasfrasca-AI/HSC-ATAR-Calc-Website` (public)
 
