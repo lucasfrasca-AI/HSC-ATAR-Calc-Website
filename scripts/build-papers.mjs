@@ -40,7 +40,8 @@ async function get(path, tries = 3) {
 
 if (process.argv[2] === "--check") {
   const { courses } = JSON.parse(readFileSync(OUT, "utf8"));
-  const files = courses.flatMap((c) => c.years.flatMap((y) => y.files.filter((f) => f.kind !== "external").map((f) => ORIGIN + f.path)));
+  const { files: prefix } = JSON.parse(readFileSync(OUT, "utf8"));
+  const files = courses.flatMap((c) => c.years.flatMap(([, fs]) => fs.filter(([k]) => k !== "external").map(([, , , p]) => ORIGIN + (p.startsWith("/") ? p : prefix + p))));
   let bad = 0;
   await pool(files, 6, async (u) => {
     try {
@@ -52,15 +53,19 @@ if (process.argv[2] === "--check") {
   process.exit(bad ? 1 : 0);
 }
 
+const AREAS = ["English", "Mathematics", "Science", "HSIE", "Languages", "Creative Arts", "PDHPE", "Technological and Applied Studies", "VET"];
+
 // 1. Every exam pack page (current + archive) from the public index.
 const es = await fetch(`${ORIGIN}/api/v1/elasticsearch/prod_content/_search`, {
   method: "POST", headers: { ...UA, "content-type": "application/json" },
-  body: JSON.stringify({ size: 1000, _source: ["url", "title_short", "name_resource_type"],
+  body: JSON.stringify({ size: 1000, _source: ["url", "title_short", "name_resource_type", "name_category"],
     query: { bool: { filter: [{ terms: { name_resource_type: ["HSC exam pack", "Archive HSC exam pack"] } }] } } }),
 }).then((r) => r.json());
 const packs = es.hits.hits.map((h) => ({
   path: h._source.url[0], name: h._source.title_short[0].replace(/\s*\(Archive\)$/, ""),
   archive: h._source.name_resource_type[0].startsWith("Archive"),
+  // NESA's own learning area (every pack has exactly one) — used to group courses like NESA and THSC do.
+  area: AREAS.find((a) => h._source.name_category.includes(a)) ?? "Other",
 })).filter((p) => p.path.startsWith(BASE));
 console.error(`${packs.length} exam packs`);
 
@@ -96,7 +101,7 @@ const courses = await pool(packs, 3, async (p) => {
   }
   out.sort((a, b) => b.year - a.year);
   console.error(`  ${p.name}${p.archive ? " (archive)" : ""}: ${out.length} years, ${out.reduce((a, y) => a + y.files.length, 0)} files`);
-  return { slug: p.path.slice(BASE.length), name: p.name, archive: p.archive, page: p.path, years: out, related };
+  return { slug: p.path.slice(BASE.length), name: p.name, area: p.area, archive: p.archive, page: p.path, years: out, related };
 });
 
 // Link each pack to our catalogue course where the names agree, so "your subjects" sort first.
@@ -121,11 +126,20 @@ for (const c of courses) delete c.related;
 
 courses.sort((a, b) => a.name.localeCompare(b.name) || Number(a.archive) - Number(b.archive));
 const kept = courses.filter((c) => c.years.length);
+// Compact form (it ships to browsers): year page = pack page + /year; NESA files drop the shared
+// /sites/default/files/ prefix; a file is [kind, part, size, path] where part is the label's
+// "– Paper 1" tail (or the full label for external links), the only bit the UI shows.
+const FILES = "/sites/default/files/";
+for (const c of kept) c.years = c.years.map((y) => [y.year, y.files.map((f) => [
+  f.kind, f.kind === "external" ? f.label : f.label.split(/\s[–—-]\s/).slice(1).join(" – "), f.size.replace(/^PDF\s*/i, ""),
+  f.kind === "external" ? f.path : f.path.startsWith(FILES) ? f.path.slice(FILES.length) : f.path,
+])]);
 writeFileSync(OUT, JSON.stringify({
   source: "NSW Education Standards Authority (NESA), HSC exam papers — https://www.nsw.gov.au/education-and-training/nesa/curriculum/hsc-exam-papers",
   origin: ORIGIN,
+  files: FILES,
   generated: new Date().toISOString().slice(0, 10),
   courses: kept,
 }) + "\n");
-const nFiles = kept.reduce((a, c) => a + c.years.reduce((b, y) => b + y.files.length, 0), 0);
+const nFiles = kept.reduce((a, c) => a + c.years.reduce((b, y) => b + y[1].length, 0), 0);
 console.error(`wrote ${kept.length} courses, ${nFiles} files; ${kept.filter((c) => !c.courseIds.length).length} without a catalogue match`);

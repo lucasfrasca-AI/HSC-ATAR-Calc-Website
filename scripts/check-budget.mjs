@@ -16,6 +16,7 @@ const BUDGET = { js: 110_000, css: 16_000 };
 // not chunk names, because a static import merges the module into the entry.
 const MUST_BE_LAZY = [
   { name: "components/Papers.tsx", why: "the past-papers index is only needed on its tab" },
+  { name: "thsc.json", why: "school trial paper links load only when that view is chosen" },
   { name: "papers.json", why: "thousands of paper links are only needed on the Papers tab" },
   { name: "components/Guide.tsx", why: "the getting-started guide only loads for first-time visitors" },
   { name: "lib/liquidGlass.ts", why: "WebGL glass is a progressive enhancement started when the browser is idle" },

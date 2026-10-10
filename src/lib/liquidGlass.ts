@@ -197,7 +197,9 @@ export function startLiquidGlass(root: HTMLElement): (() => void) | null {
     backCtx.drawImage(glc, 0, glc.height - h, w, h, 0, 0, w, h);
   };
 
-  const eligible = (el: HTMLElement) => !el.parentElement?.closest(".glass") && !el.closest(SKIP);
+  // A closed <details> hides every child but its <summary> — including an injected canvas — so
+  // disclosure cards keep the CSS glass.
+  const eligible = (el: HTMLElement) => el.tagName !== "DETAILS" && !el.parentElement?.closest(".glass") && !el.closest(SKIP);
   const drawPanel = (el: HTMLElement, r: DOMRect, key: string) => {
     let pn = panels.get(el);
     if (!pn) {

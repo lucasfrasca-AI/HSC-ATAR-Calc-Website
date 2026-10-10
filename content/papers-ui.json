@@ -1,6 +1,6 @@
 {
   "title": "Past HSC papers",
-  "intro": "Every HSC exam NESA publishes, with its marking guidelines, for every course. Each link opens the official PDF on NESA's website. Your subjects come first.",
+  "intro": "Official HSC exams from NESA, and schools' own trial papers and assessment tasks shared on THSC Online — kept apart. Your subjects come first.",
   "search": "Search papers",
   "searchPlaceholder": "Course name, e.g. chemistry or Japanese",
   "mineOnly": "Only my subjects",
@@ -33,5 +33,41 @@
   "source": "Links point to NESA's HSC exam papers on nsw.gov.au. Exam papers and marking guidelines are © NSW Education Standards Authority. Index built {date}; links checked weekly.",
   "external": "Exam papers ({site})",
   "opensExternal": "(opens another exam authority's website in a new tab)",
-  "predecessor": "Previous course to {name}, which has no HSC papers yet"
+  "predecessor": "Previous course to {name}, which has no HSC papers yet",
+  "sourceLabel": "Paper source",
+  "sources": {
+    "nesa": "NESA HSC exams",
+    "thsc": "School trials & tasks"
+  },
+  "areaLabel": "Learning area",
+  "all": "All",
+  "areas": {
+    "English": "English",
+    "Mathematics": "Mathematics",
+    "Science": "Science",
+    "HSIE": "Humanities and social sciences",
+    "Languages": "Languages",
+    "Creative Arts": "Creative arts",
+    "PDHPE": "PDHPE",
+    "Technological and Applied Studies": "Technology and applied studies",
+    "VET": "VET",
+    "Other": "Other"
+  },
+  "solOnly": "With solutions only",
+  "thscNote": "These are schools' own trial exams and internal assessment tasks, uploaded to THSC Online by students and teachers. They are not NESA papers and are not checked by us. Each opens in THSC's viewer.",
+  "thscCount": "{n} papers · {s} with solutions",
+  "thscCount1": "1 paper",
+  "trials": "Trial papers",
+  "tasks": "Assessment tasks",
+  "kindLabel": "Paper type",
+  "solutions": "Solutions",
+  "noSchool": "Practice material (no school named)",
+  "thscOpens": "(opens THSC Online in a new tab)",
+  "thscPaper": "{school} {year} {kind}",
+  "trialWord": "trial paper",
+  "taskWord": "assessment task",
+  "withSol": "with solutions",
+  "loading": "Loading school papers…",
+  "thscSource": "Links point to THSC Online (thsconline.github.io), a volunteer-run site. Papers belong to the schools that wrote them. Index built {date}.",
+  "thscViewAll": "See this course on THSC"
 }
