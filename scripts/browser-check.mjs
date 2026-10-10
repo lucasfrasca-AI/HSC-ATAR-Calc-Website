@@ -465,7 +465,9 @@ await ev("[...document.querySelectorAll('#papers details.paper-course')].find(d 
 check(await ev("/Yearly exams/.test(document.querySelector('#papers details.paper-course[open] .seg-slide').textContent) && [...document.querySelectorAll('#papers details.paper-course[open] a.paper-link')].every(a => a.href.includes('/s/v/'))"), "Year 11 cards offer yearly exams and assessment tasks, linked to THSC");
 await ev("document.querySelector('#papers .paper-back').click()"); await sleep(400);
 await ev("[...document.querySelectorAll('#papers .seg-slide')][0].querySelectorAll('.btn')[0].click()"); await sleep(500);
-check(await ev("/NESA only sets exams in Year 12/.test(document.getElementById('papers').textContent)"), "NESA in Year 11 explains that NESA papers are Year 12 only");
+check(await ev("[...document.querySelectorAll('#papers .seg-slide')][1].querySelector('[aria-pressed=true]').textContent === 'Year 12' && !!document.querySelector('#papers .paper-tile')"), "switching from Year 11 school papers to NESA moves to Year 12 automatically");
+await ev("[...document.querySelectorAll('#papers .seg-slide')][1].querySelectorAll('.btn')[1].click()"); await sleep(500);
+check(await ev("/NESA only sets exams in Year 12/.test(document.getElementById('papers').textContent)"), "choosing Year 11 while on NESA explains that NESA papers are Year 12 only");
 await ev("[...document.querySelectorAll('#papers .seg-slide')][1].querySelectorAll('.btn')[0].click()"); await sleep(400);
 await ev("[...document.querySelectorAll('#papers .seg-slide')][0].querySelectorAll('.btn')[1].click()"); await sleep(600);
 await search("biology"); await sleep(400);

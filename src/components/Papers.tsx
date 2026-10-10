@@ -318,7 +318,7 @@ export default function Papers() {
   return (
     <Section id="papers" kicker={site.kickers.papers} title={ui.title} intro={ui.intro}>
       <div className="mb-4 flex flex-wrap items-center gap-3">
-        <Switch big label={ui.sourceLabel} value={source} onChange={(s) => { setSource(s); setArea(null); setOpen(new Set()); }}
+        <Switch big label={ui.sourceLabel} value={source} onChange={(s) => { setSource(s); if (s === "nesa") setYr(12); setArea(null); setOpen(new Set()); }}
           options={(["nesa", "thsc"] as const).map((k) => ({ key: k, label: ui.sources[k] }))} />
         <Switch big label={ui.yearLabel} value={String(yr) as "12" | "11"} onChange={(y) => { setYr(Number(y) as 12 | 11); setArea(null); setOpen(new Set()); }}
           options={(["12", "11"] as const).map((k) => ({ key: k, label: ui.years2[k] }))} />
