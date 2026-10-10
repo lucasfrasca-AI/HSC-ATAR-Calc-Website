@@ -532,8 +532,32 @@ section > h2 { font-size: clamp(1.7rem, 3.4vw, 2.4rem); letter-spacing: -0.032em
 .paper-sol { font-size: 0.68rem; font-weight: 600; color: hsl(var(--gain)); border: 1px solid hsl(var(--gain) / 0.5); border-radius: 999px; padding: 0 6px; }
 
 /* Learning-area tiles: one tile per area; tap to drill in (Files-style), Back returns. */
-.paper-tiles { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr)); }
+/* Fixed column counts so a short last row can stretch to the edge (alignment): the last tile
+   spans whatever the row has left. */
+.paper-tiles { display: grid; gap: 12px; grid-template-columns: 1fr; }
+@media (min-width: 560px) { .paper-tiles { grid-template-columns: repeat(2, 1fr); } .paper-tiles > li:last-child:nth-child(2n+1) { grid-column: 1 / -1; } }
+@media (min-width: 1024px) {
+  .paper-tiles { grid-template-columns: repeat(4, 1fr); }
+  .paper-tiles > li:last-child:nth-child(2n+1) { grid-column: auto; }
+  .paper-tiles > li:last-child:nth-child(4n+1) { grid-column: 1 / -1; }
+  .paper-tiles > li:last-child:nth-child(4n+2) { grid-column: span 3; }
+  .paper-tiles > li:last-child:nth-child(4n+3) { grid-column: span 2; }
+}
 .paper-tile { display: flex; align-items: center; gap: 12px; width: 100%; height: 100%; padding: 18px 16px 18px 18px; border-radius: 20px; text-align: left; cursor: pointer; }
 .paper-tile:active { transform: scale(0.98); transition: transform 100ms ease-out; }
 .paper-back { display: inline-flex; align-items: center; gap: 4px; margin-left: -6px; padding: 6px 10px 6px 4px; border-radius: 999px; font-size: 0.9rem; font-weight: 500; color: hsl(var(--accent)); }
 .paper-back:hover { background: hsl(var(--accent) / 0.1); }
+
+/* Sliding segmented switch: the thumb glides to the chosen option, which glows; the rest dim. */
+.seg-slide { position: relative; isolation: isolate; }
+.seg-slide .btn { position: relative; z-index: 1; background: transparent !important; box-shadow: none !important; color: hsl(var(--foreground-3)); transition: color 0.25s ease; }
+.seg-slide .btn[aria-pressed="true"] { color: hsl(var(--foreground)); font-weight: 600; text-shadow: 0 0 14px hsl(var(--accent) / 0.55); }
+.seg-thumb {
+  position: absolute; top: 3px; bottom: 3px; left: 0; z-index: 0; border-radius: 999px; pointer-events: none;
+  background: hsl(var(--surface));
+  box-shadow: 0 0 0 1px hsl(var(--accent) / 0.35), 0 0 18px -2px hsl(var(--accent) / 0.45), inset 0 1px 0 hsl(var(--border) / 0.14);
+  transition: transform 0.38s cubic-bezier(.2, .9, .25, 1), width 0.38s cubic-bezier(.2, .9, .25, 1);
+}
+.seg-lg .seg-thumb { top: 4px; bottom: 4px; }
+.seg-slide .seg-count { color: inherit; opacity: 0.7; }
+@media (prefers-reduced-motion: reduce) { .seg-thumb { transition: none; } .seg-slide .btn { transition: none; } }

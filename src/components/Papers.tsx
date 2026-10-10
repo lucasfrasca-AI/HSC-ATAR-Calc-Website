@@ -5,7 +5,7 @@
 //    (content/thsc.json, scripts/build-thsc.mjs). Not NESA papers; loaded only when opened.
 // Both are grouped by NESA's learning areas, with the student's own subjects first.
 // Lazy — check-budget fails the build if any of this reaches the critical path.
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import data from "../../content/papers.json";
 import ui from "../../content/papers-ui.json";
 import site from "../../content/site.json";
@@ -22,9 +22,9 @@ interface File { kind: string; part: string; size: string; url: string }
 interface Year { year: number; page: string; files: File[] }
 /** Compact JSON (see build-papers.mjs): years are [year, [kind, part, size, path][]]. */
 interface Pack { name: string; area: string; archive: boolean; page: string; courseIds: string[]; successor?: string; years: [number, [string, string, string, string][]][] }
-interface Course { name: string; area: Area; courseIds: string[]; successor?: string; years: (Year & { old: boolean })[] }
+interface Course { name: string; area: Area; courseIds: string[]; successor?: string; years: (Year & { old: boolean; oldName?: string })[] }
 interface ThscItem { school: string; year: number | null; sol: boolean; note: string; group: string; f: number; t: string }
-interface ThscGroup { name: string; courseIds: string[]; kind: "trial" | "task"; section: string; page: string; items: ThscItem[] }
+interface ThscGroup { yr: 12 | 11; name: string; courseIds: string[]; kind: "trial" | "yearly" | "task"; section: string; page: string; items: ThscItem[] }
 type ThscRow = [string, number | null, 0 | 1, string, string | null, number?];
 interface ThscData { origin: string; generated: string; groups: (Omit<ThscGroup, "items"> & { f: number | null; items: ThscRow[] })[] }
 // THSC's own title rule (viewer.js pdf(), mirrored in build-thsc.mjs): keep (Adv.)/(Std.), drop anything outside [A-Za-z0-9._- ].
@@ -43,18 +43,22 @@ const AREA_ORDER = Object.keys(ui.areas) as Area[];
 const DONE_KEY = "hsc-papers-done";
 const ORIGIN = data.origin;
 
-// One NESA card per course: current and old-syllabus packs merged, newest year first.
+// One NESA card per course, newest year first. Old-syllabus packs merge into the current course
+// they became — same name ("Chemistry"), or the same calculator course ids (Mathematics →
+// Mathematics Advanced, Mathematics General → Mathematics Standard) — and their years say so.
 const COURSES: Course[] = (() => {
   const by = new Map<string, Course>();
-  for (const p of data.courses as unknown as Pack[]) {
+  const packs = data.courses as unknown as Pack[];
+  const sameIds = (a: string[], b: string[]) => a.length > 0 && a.length === b.length && a.every((x) => b.includes(x));
+  for (const p of [...packs.filter((x) => !x.archive), ...packs.filter((x) => x.archive)]) {
     // NESA's titles vary in case between current and archive packs ("Dutch continuers").
-    const key = p.name.toLowerCase();
+    let key = p.name.toLowerCase();
+    if (p.archive && !by.has(key)) key = [...by.entries()].find(([, c]) => sameIds(c.courseIds, p.courseIds))?.[0] ?? key;
     const c = by.get(key) ?? { name: p.name, area: (p.area in ui.areas ? p.area : "Other") as Area, courseIds: [], years: [] };
-    if (!p.archive) c.name = p.name;
     c.courseIds = [...new Set([...c.courseIds, ...p.courseIds])];
     c.successor ??= p.successor;
     c.years.push(...p.years.map(([year, fs]) => ({
-      year, page: `${p.page}/${year}`, old: p.archive,
+      year, page: `${p.page}/${year}`, old: p.archive, oldName: p.archive && p.name.toLowerCase() !== c.name.toLowerCase() ? p.name : undefined,
       files: fs.map(([kind, part, size, path]) => ({ kind, part, size, url: kind === "external" || path.startsWith("http") ? path : ORIGIN + (path.startsWith("/") ? path : data.files + path) })),
     })));
     by.set(key, c);
@@ -101,7 +105,7 @@ function NesaYear({ c, y, done, toggle }: { c: Course; y: Course["years"][number
         <input type="checkbox" checked={done.has(key)} onChange={() => toggle(key)} aria-label={`${t(ui.markDone, { year: y.year })} (${c.name})`} />
       </label>
       <div className="min-w-0 flex-1">
-        <p className="flex items-center gap-2 text-[0.92rem] font-semibold num">{y.year}{y.old && <span className="pill">{ui.oldSyllabus}</span>}</p>
+        <p className="flex items-center gap-2 text-[0.92rem] font-semibold num">{y.year}{y.old && <span className="pill">{y.oldName ? `${ui.oldSyllabus} · ${y.oldName}` : ui.oldSyllabus}</span>}</p>
         <div className="mt-1.5 flex flex-wrap gap-1.5">
           {y.files.map((f) => {
             const ext = f.kind === "external";
@@ -157,8 +161,36 @@ function ThscList({ origin, groups, solOnly, kindWord }: { origin: string; group
   );
 }
 
+/**
+ * Segmented switch with a thumb that slides to the chosen option (measured, so it follows any
+ * label width). The chosen option glows; the others are dimmed. Reduced motion: no slide.
+ */
+function Switch<K extends string>({ label, value, options, onChange, big }: { label: string; value: K; options: { key: K; label: ReactNode }[]; onChange: (k: K) => void; big?: boolean }) {
+  const refs = useRef<Partial<Record<K, HTMLButtonElement | null>>>({});
+  const [box, setBox] = useState<{ x: number; w: number } | null>(null);
+  useLayoutEffect(() => {
+    const el = refs.current[value];
+    if (!el) return;
+    const measure = () => setBox({ x: el.offsetLeft, w: el.offsetWidth });
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el.parentElement!);
+    return () => ro.disconnect();
+  }, [value]);
+  return (
+    <div className={`seg seg-slide ${big ? "seg-lg" : ""}`} role="group" aria-label={label}>
+      {box && <span aria-hidden="true" className="seg-thumb" style={{ width: box.w, transform: `translateX(${box.x}px)` }} />}
+      {options.map((o) => (
+        <button key={o.key} ref={(el) => { refs.current[o.key] = el; }} type="button" className="btn" aria-pressed={value === o.key} onClick={() => onChange(o.key)}>{o.label}</button>
+      ))}
+    </div>
+  );
+}
+
 function ThscCard({ c, origin, open, setOpen, solOnly, mine }: { c: ThscCourse; origin: string; open: Set<string>; setOpen: (s: Set<string>) => void; solOnly: boolean; mine: boolean }) {
-  const trials = c.groups.filter((g) => g.kind === "trial"), tasks = c.groups.filter((g) => g.kind === "task");
+  // Year 12 has trial papers, Year 11 yearly exams; both sit beside the assessment tasks.
+  const trials = c.groups.filter((g) => g.kind !== "task"), tasks = c.groups.filter((g) => g.kind === "task");
+  const exam = trials[0]?.kind === "yearly" ? { label: ui.yearly, word: ui.yearlyWord } : { label: ui.trials, word: ui.trialWord };
   const count = (gs: ThscGroup[]) => gs.reduce((a, g) => a + g.items.filter((i) => !solOnly || i.sol).length, 0);
   const n = count(c.groups), s = c.groups.reduce((a, g) => a + g.items.filter((i) => i.sol).length, 0);
   const [kind, setKind] = useState<"trial" | "task">(trials.length ? "trial" : "task");
@@ -171,12 +203,12 @@ function ThscCard({ c, origin, open, setOpen, solOnly, mine }: { c: ThscCourse; 
       {() => (
         <div className="border-t border-border/10 px-4 pt-3 pb-4">
           {trials.length > 0 && tasks.length > 0 && (
-            <div className="seg mb-1" role="group" aria-label={ui.kindLabel}>
-              <button type="button" className="btn" aria-pressed={kind === "trial"} onClick={() => setKind("trial")}>{ui.trials} <span className="num text-foreground-3">{count(trials)}</span></button>
-              <button type="button" className="btn" aria-pressed={kind === "task"} onClick={() => setKind("task")}>{ui.tasks} <span className="num text-foreground-3">{count(tasks)}</span></button>
-            </div>
+            <div className="mb-1"><Switch label={ui.kindLabel} value={kind} onChange={setKind} options={[
+              { key: "trial", label: <>{exam.label} <span className="num seg-count">{count(trials)}</span></> },
+              { key: "task", label: <>{ui.tasks} <span className="num seg-count">{count(tasks)}</span></> },
+            ]} /></div>
           )}
-          <ThscList origin={origin} groups={kind === "trial" ? trials : tasks} solOnly={solOnly} kindWord={kind === "trial" ? ui.trialWord : ui.taskWord} />
+          <ThscList origin={origin} groups={kind === "trial" ? trials : tasks} solOnly={solOnly} kindWord={kind === "trial" ? exam.word : ui.taskWord} />
           <a href={c.page} target="_blank" rel="noopener noreferrer" className="mt-3 inline-block text-[0.8rem] text-accent underline underline-offset-2">{ui.thscViewAll}<span className="sr-only"> {ui.thscOpens}</span></a>
         </div>
       )}
@@ -190,7 +222,9 @@ export default function Papers() {
   const [q, setQ] = useState("");
   const [area, setArea] = useState<Area | null>(null);
   const [mineOnly, setMineOnly] = useState(false);
-  const [old, setOld] = useState(false);
+  // Old-syllabus NESA packs (2014–2018 archive) are part of "every NESA paper", so they show by default.
+  const [old, setOld] = useState(true);
+  const [yr, setYr] = useState<12 | 11>(12);
   const [solOnly, setSolOnly] = useState(false);
   const [open, setOpen] = useState<Set<string>>(() => new Set());
   const [done, setDone] = useState(loadDone);
@@ -222,14 +256,14 @@ export default function Papers() {
   const thscCourses = useMemo(() => {
     if (!thsc) return [];
     const by = new Map<string, ThscCourse>();
-    for (const g of thsc.groups.map(expand)) {
+    for (const g of thsc.groups.filter((x) => x.yr === yr).map(expand)) {
       const c = by.get(g.name) ?? { name: g.name, area: areaFor(g.name, g.courseIds), courseIds: g.courseIds, page: g.page, groups: [] };
       c.groups.push(g);
       by.set(g.name, c);
     }
     return [...by.values()].filter((c) => match(c.name, c.courseIds) && (!solOnly || c.groups.some((g) => g.items.some((i) => i.sol))))
       .sort((a, b) => a.name.localeCompare(b.name));
-  }, [thsc, match, solOnly]);
+  }, [thsc, match, solOnly, yr]);
 
   // Grouped like NESA and THSC group them — every learning area complete (all the maths courses
   // under Mathematics). Your subjects lead within their area, and areas holding them come first.
@@ -250,13 +284,14 @@ export default function Papers() {
     if (el) { el.focus({ preventScroll: true }); then?.(el); }
     else if (tries > 0) requestAnimationFrame(() => focusWhen(sel, then, tries - 1));
   };
+  // Every way into a list starts with all courses closed.
   const enter = (a: Area) => {
-    withTransition("tab", () => flushSync(() => setArea(a)));
+    withTransition("tab", () => flushSync(() => { setOpen(new Set()); setArea(a); }));
     focusWhen("#papers-area-h", (h) => h.scrollIntoView({ block: "nearest" }));
   };
   const back = () => {
     const from = shownArea;
-    withTransition("tab", () => flushSync(() => setArea(null)));
+    withTransition("tab", () => flushSync(() => { setOpen(new Set()); setArea(null); }));
     focusWhen(`#papers .paper-tile[data-area="${from}"]`);
   };
   const courseList = (key: string, items: { area: Area; courseIds: string[] }[]) => source === "nesa"
@@ -282,12 +317,18 @@ export default function Papers() {
 
   return (
     <Section id="papers" kicker={site.kickers.papers} title={ui.title} intro={ui.intro}>
-      <div className="seg seg-lg mb-4" role="group" aria-label={ui.sourceLabel}>
-        {(["nesa", "thsc"] as const).map((s) => (
-          <button key={s} type="button" className="btn" aria-pressed={source === s} onClick={() => { setSource(s); setArea(null); }}>{ui.sources[s]}</button>
-        ))}
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        <Switch big label={ui.sourceLabel} value={source} onChange={(s) => { setSource(s); setArea(null); setOpen(new Set()); }}
+          options={(["nesa", "thsc"] as const).map((k) => ({ key: k, label: ui.sources[k] }))} />
+        <Switch big label={ui.yearLabel} value={String(yr) as "12" | "11"} onChange={(y) => { setYr(Number(y) as 12 | 11); setArea(null); setOpen(new Set()); }}
+          options={(["12", "11"] as const).map((k) => ({ key: k, label: ui.years2[k] }))} />
       </div>
-      {source === "thsc" && <p className="thsc-note mb-4 max-w-[80ch] border-l-2 border-warn/70 pl-3 text-[0.84rem] text-foreground-2">{ui.thscNote}</p>}
+      {source === "thsc" && (
+        <div className="thsc-note mb-4 max-w-[80ch] border-l-2 border-warn/70 pl-3">
+          <p className="text-[0.84rem] text-foreground-2">{ui.thscNote}</p>
+          <p className="mt-0.5 text-[0.74rem] text-foreground-3">{ui.thscFragile}</p>
+        </div>
+      )}
       <Glass className="glass-sm mb-4 flex flex-wrap items-end gap-x-5 gap-y-3 p-4">
         <label className="field min-w-[240px] flex-[2_1_280px]">{ui.search}
           <input className="input" type="search" placeholder={ui.searchPlaceholder} value={q} onChange={(e) => setQ(e.target.value)} />
@@ -300,7 +341,12 @@ export default function Papers() {
           : <label className="flex items-center gap-2 pb-2.5 text-[0.86rem]"><input type="checkbox" checked={solOnly} onChange={(e) => setSolOnly(e.target.checked)} />{ui.solOnly}</label>}
       </Glass>
       {source === "nesa" && old && <p className="mb-3 max-w-[80ch] text-[0.8rem] text-foreground-3">{ui.oldNote}</p>}
-      {source === "thsc" && !thsc ? <p className="text-[0.86rem] text-foreground-3" role="status">{ui.loading}</p> : (
+      {source === "nesa" && yr === 11 ? (
+        <Glass className="glass-sm p-5 text-center">
+          <p className="text-[0.95rem]">{ui.nesaYear11}</p>
+          <button type="button" className="btn btn-primary mt-3" onClick={() => { setSource("thsc"); setArea(null); setOpen(new Set()); }}>{ui.nesaYear11Go}</button>
+        </Glass>
+      ) : source === "thsc" && !thsc ? <p className="text-[0.86rem] text-foreground-3" role="status">{ui.loading}</p> : (
         <>
           <p className="mb-3 text-[0.8rem] text-foreground-3" role="status" aria-live="polite">
             {list.length ? t(list.length === 1 ? ui.count1 : ui.count, { n: list.length }) : t(ui.none, { q })}

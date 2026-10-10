@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Generator: content/thsc.json — links to the school trial papers and internal assessment
-// tasks listed on THSC Online (thsconline.github.io), Year 12 pages only. These are NOT NESA
+// tasks listed on THSC Online (thsconline.github.io), Year 12 and Year 11 pages. These are NOT NESA
 // papers: they are schools' own exams, uploaded to THSC by students and teachers. Links only;
 // nothing is copied. THSC's "HSC papers" pages are skipped: those are NESA's papers, which
 // content/papers.json already links at the source.
@@ -60,6 +60,32 @@ const MAP = {
   "Studies of Religion/trialpapers_sor2.html": ["Studies of Religion II", ["sor2"], "trial"],
   "Visual Arts/trialpapers.html": ["Visual Arts", ["visual-arts"], "trial"],
 };
+// Year 11 (THSC's "Year 11 - Preliminary"): schools' yearly exams and assessment tasks. Maths
+// Accelerated is Year 11 students starting the Advanced course early, so it maps to Advanced.
+const MAP11 = {
+  "Biology/prelimpapers.html": ["Biology", ["biology"], "yearly"],
+  "Biology/assessment-tasks.html": ["Biology", ["biology"], "task"],
+  "Business Studies/prelimpapers.html": ["Business Studies", ["business"], "yearly"],
+  "Chemistry/prelimpapers.html": ["Chemistry", ["chemistry"], "yearly"],
+  "Chemistry/assessment-tasks.html": ["Chemistry", ["chemistry"], "task"],
+  "Earth & Environmental Science/prelimpapers.html": ["Earth and Environmental Science", ["ees"], "yearly"],
+  "Economics/prelimpapers.html": ["Economics", ["economics"], "yearly"],
+  "Economics/assessment-tasks.html": ["Economics", ["economics"], "task"],
+  "Engineering Studies/prelimpapers.html": ["Engineering Studies", ["engineering"], "yearly"],
+  "Engineering Studies/assessment-tasks.html": ["Engineering Studies", ["engineering"], "task"],
+  "Maths/prelimpapers_general.html": ["Mathematics Standard", ["maths-std1", "maths-std2"], "yearly"],
+  "Maths/prelimpapers_advanced.html": ["Mathematics Advanced", ["maths-adv"], "yearly"],
+  "Maths/prelimpapers_accelerated.html": ["Mathematics Advanced", ["maths-adv"], "yearly", "Accelerated"],
+  "Maths/prelimpapers_extension1.html": ["Mathematics Extension 1", ["maths-ext1"], "yearly"],
+  "Maths/assessment-tasks_advanced.html": ["Mathematics Advanced", ["maths-adv"], "task"],
+  "Maths/assessment-tasks_accelerated.html": ["Mathematics Advanced", ["maths-adv"], "task", "Accelerated"],
+  "Maths/assessment-tasks_extension1.html": ["Mathematics Extension 1", ["maths-ext1"], "task"],
+  "IPT/prelimpapers.html": ["Information Processes and Technology", [], "yearly"],
+  "Legal Studies/prelimpapers.html": ["Legal Studies", ["legal"], "yearly"],
+  "Modern History/prelimpapers.html": ["Modern History", ["modern"], "yearly"],
+  "Physics/prelimpapers.html": ["Physics", ["physics"], "yearly"],
+  "Physics/assessment-tasks.html": ["Physics", ["physics"], "task"],
+};
 const SKIP = /^(hscpapers|qpapers|vcepapers|tcepapers)/;   // NESA copies, interstate papers
 
 const get = async (p) => { const r = await fetch(B + p, { headers: UA }); if (!r.ok) throw new Error(`${r.status} ${p}`); return r.text(); };
@@ -68,16 +94,17 @@ const dec = (s) => s.replace(/&amp;/g, "&").replace(/&#160;|&nbsp;/g, " ").repla
 const thscTitle = (t) => t.replace(/\(Adv\.\)/g, "__ADV__").replace(/\(Std\.\)/g, "__STD__").replace(/[^A-Za-z0-9._\- ]/g, "").replace(/__ADV__/g, "(Adv.)").replace(/__STD__/g, "(Std.)");
 const SOL = /\s*\bw\.?\s*sol(?:n|ns|utions?)?\.?/i;
 
-const idx = await get("/s/yr12/");
-const folders = [...new Set([...idx.matchAll(/href="([^"#?/][^"#?]*\/)"/g)].map((m) => m[1].replace(/&amp;/g, "&")).filter((h) => !h.startsWith("http") && h !== "../"))];
 const groups = [], unknown = [], odd = [];
+for (const [yr, MAPY] of [[12, MAP], [11, MAP11]]) {
+const idx = await get(`/s/yr${yr}/`);
+const folders = [...new Set([...idx.matchAll(/href="([^"#?/][^"#?]*\/)"/g)].map((m) => m[1].replace(/&amp;/g, "&")).filter((h) => !h.startsWith("http") && h !== "../"))];
 for (const f of folders) {
   const folder = dec(decodeURIComponent(f)).replace(/\/$/, "");
-  const pages = [...new Set([...(await get(`/s/yr12/${encodeURI(f)}`)).matchAll(/href="([a-z0-9_-]+\.html)"/gi)].map((m) => m[1]))]
+  const pages = [...new Set([...(await get(`/s/yr${yr}/${encodeURI(f)}`)).matchAll(/href="([a-z0-9_-]+\.html)"/gi)].map((m) => m[1]))]
     .filter((p) => p !== "index.html" && !SKIP.test(p));
   for (const p of pages) {
     const key = `${folder}/${p}`;
-    const html = await get(`/s/yr12/${encodeURI(f)}${p}`);
+    const html = await get(`/s/yr${yr}/${encodeURI(f)}${p}`);
     const body = html.slice(html.indexOf("BEGIN CONTENT") > 0 ? html.indexOf("BEGIN CONTENT") : 0);
     const items = [];
     // Each school is one table row: a <summary> heading (or plain text before the first <br>), then its links.
@@ -107,12 +134,13 @@ for (const f of folders) {
       }
     }
     if (!items.length) continue;
-    if (!MAP[key]) { unknown.push(`${key} (${items.length})`); continue; }
-    const [name, courseIds, kind, section = ""] = MAP[key];
+    if (!MAPY[key]) { unknown.push(`yr${yr} ${key} (${items.length})`); continue; }
+    const [name, courseIds, kind, section = ""] = MAPY[key];
     items.sort((a, b) => (b.year ?? 0) - (a.year ?? 0) || a.school.localeCompare(b.school));
-    groups.push({ name, courseIds, kind, section, page: `${B}/s/yr12/${encodeURI(f)}${p}`, items });
-    console.error(`  ${key}: ${items.length} (${items.filter((i) => i.sol).length} with solutions)`);
+    groups.push({ yr, name, courseIds, kind, section, page: `${B}/s/yr${yr}/${encodeURI(f)}${p}`, items });
+    console.error(`  yr${yr} ${key}: ${items.length} (${items.filter((i) => i.sol).length} with solutions)`);
   }
+}
 }
 if (odd.length) console.error(`entries listed under a category heading, not a school (school read from the title instead):\n  ${odd.join("\n  ")}`);
 if (unknown.length) { console.error(`THSC pages with no mapping — add them to MAP:\n  ${unknown.join("\n  ")}`); process.exit(1); }

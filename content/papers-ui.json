@@ -1,6 +1,6 @@
 {
   "title": "Past HSC papers",
-  "intro": "Official HSC exams from NESA, and schools' own trial papers and assessment tasks shared on THSC Online — kept apart. Your subjects come first.",
+  "intro": "Official HSC exams from NESA, and schools' own trial papers, yearly exams and assessment tasks shared on THSC Online — kept apart. Your subjects come first.",
   "search": "Search papers",
   "searchPlaceholder": "Course name, e.g. chemistry or Japanese",
   "mineOnly": "Only my subjects",
@@ -54,7 +54,7 @@
     "Other": "Other"
   },
   "solOnly": "With solutions only",
-  "thscNote": "These are schools' own trial exams and internal assessment tasks, uploaded to THSC Online by students and teachers. They are not NESA papers and are not checked by us. Each opens in THSC's viewer.",
+  "thscNote": "These are schools' own trial exams and internal assessment tasks, uploaded to THSC Online by students and teachers. They are not NESA papers and are not checked by us.",
   "thscCount": "{n} papers · {s} with solutions",
   "thscCount1": "1 paper",
   "trials": "Trial papers",
@@ -75,5 +75,15 @@
   "areaMine": "{n} on your list",
   "back": "All learning areas",
   "tilesLabel": "Learning areas",
-  "open": "Open {area}"
+  "open": "Open {area}",
+  "thscFragile": "Some links may break or load slowly, as they depend on THSC's site.",
+  "yearLabel": "School year",
+  "years2": {
+    "12": "Year 12",
+    "11": "Year 11"
+  },
+  "yearly": "Yearly exams",
+  "yearlyWord": "yearly exam",
+  "nesaYear11": "NESA only sets exams in Year 12. Year 11 exams are written by schools.",
+  "nesaYear11Go": "See Year 11 school papers"
 }
