@@ -11,23 +11,49 @@
   "trust": {
     "title": "What to trust and what not to",
     "notes": [
-      { "title": "Eligibility rules checked", "open": true, "body": "At least 10 ATAR units, including 2 units of English, at least three courses of 2 units or more, and at least four subjects. Since 2025 UAC no longer splits courses into Category A and B, so there's no longer a minimum of Category A units or a cap on Category B units." },
-      { "title": "Scaling estimates", "open": false, "body": "Courses marked \"estimated\" use a generic scaling tier, not UAC data. They are there so every course produces a number, not so the number is exact. Courses added from the 2026 course list that the original calculator didn't cover use the generic average tier. Open \"Course settings\" on a subject to enter your own anchors." },
-      { "title": "The ATAR curve", "open": false, "body": "A normal distribution fitted through two UAC reference points: aggregate 154.50 → ATAR 48.75 and aggregate 283.53 → ATAR 74.50. It is least accurate at the extremes." },
-      { "title": "Moderation", "open": false, "body": "In the real HSC your assessment mark is replaced by the exam mark sitting at your rank in your school's cohort. The optional estimate places your rank on an assumed cohort distribution. It is a rough guide — the real result depends on how your classmates actually perform." }
+      {
+        "title": "Eligibility rules checked",
+        "open": true,
+        "body": "At least 10 ATAR units, including 2 units of English, at least three courses of 2 units or more, and at least four subjects. Since 2025 UAC no longer splits courses into Category A and B, so there's no longer a minimum of Category A units or a cap on Category B units."
+      },
+      {
+        "title": "Scaling estimates",
+        "open": false,
+        "body": "Courses marked \"estimated\" use a generic scaling tier, not UAC data. They are there so every course produces a number, not so the number is exact. Courses added from the 2026 course list that the original calculator didn't cover use the generic average tier. Open \"Course settings\" on a subject to enter your own anchors."
+      },
+      {
+        "title": "The ATAR curve",
+        "open": false,
+        "body": "A normal distribution fitted through two UAC reference points: aggregate 154.50 → ATAR 48.75 and aggregate 283.53 → ATAR 74.50. It is least accurate at the extremes."
+      },
+      {
+        "title": "Moderation",
+        "open": false,
+        "body": "In the real HSC your assessment mark is replaced by the exam mark sitting at your rank in your school's cohort. The optional estimate places your rank on an assumed cohort distribution. It is a rough guide — the real result depends on how your classmates actually perform."
+      }
     ]
   },
   "scaling": {
     "title": "Every course and its scaling",
     "intro": "What each course's blended HSC mark becomes after scaling, out of 100 (halved for each unit). The small number is the change: marks lost to scaling are shown with a minus sign, marks gained with a plus. Courses on your list use your own settings.",
-    "search": "Search", "searchPlaceholder": "e.g. Chemistry or Languages",
-    "sort": "Sort by",
-    "sorts": { "area": "Learning area", "up": "Scales up most (at a mark of 70)", "down": "Scales down most (at a mark of 70)", "name": "Name" },
-    "cols": { "course": "Course", "code": "NESA no.", "units": "Units", "source": "Scaling source", "mark": "Mark {p} →" },
+    "search": "Search",
+    "searchPlaceholder": "e.g. Chemistry or Languages",
+    "cols": {
+      "course": "Course",
+      "code": "NESA no.",
+      "units": "Units",
+      "source": "Scaling source",
+      "mark": "Mark {p} →"
+    },
     "mine": "On your list",
-    "sourceSupplied": "Supplied", "sourceCustom": "Your custom anchors", "sourceTier": "Estimate — {tier}", "sourceDefault": "Estimate — generic average",
+    "sourceSupplied": "Supplied",
+    "sourceCustom": "Your custom anchors",
+    "sourceTier": "Estimate — {tier}",
+    "sourceDefault": "Estimate — generic average",
     "noMatch": "No course matches “{q}”.",
     "loading": "Loading the course table…",
-    "note": "Every course uses a generic estimate tier, not UAC scaling data. Courses on your list use your own settings, including any anchors you enter. Course names, NESA numbers and unit values are from UAC's 2026 HSC course list."
+    "note": "Every course uses a generic estimate tier, not UAC scaling data. Courses on your list use your own settings, including any anchors you enter. Course names, NESA numbers and unit values are from UAC's 2026 HSC course list.",
+    "order": "Highest scaling first (at a mark of 70).",
+    "noRecord": "No course-specific scaling recorded — generic average shown"
   }
 }

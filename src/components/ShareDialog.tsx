@@ -41,8 +41,13 @@ export function ShareButton() {
         <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7" /><path d="m16 6-4-4-4 4" /><path d="M12 2v13" /></svg>
         <span className="hidden sm:inline">{site.toolbar.share}</span>
       </button>
-      <dialog ref={dialog} className="confirm" aria-labelledby="share-title" onClose={() => setOpen(false)}>
+      {/* Three ways out, always: ‹ Back at the top, Done at the bottom, or a tap outside / Escape. */}
+      <dialog ref={dialog} className="confirm" aria-labelledby="share-title" onClose={() => setOpen(false)}
+        onClick={(e) => { if (e.target === e.currentTarget) close(); }}>
         <div className="glass p-5 sm:p-6">
+          <button type="button" className="paper-back mb-2" aria-label={s.backLabel} onClick={close}>
+            <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>{s.back}
+          </button>
           <h2 id="share-title" className="text-[1.15rem] font-semibold">{s.title}</h2>
           <p className="mt-2 text-[0.88rem] text-foreground-2">{s.body}</p>
           <label className="mt-4 flex items-start gap-2.5 text-[0.88rem]">

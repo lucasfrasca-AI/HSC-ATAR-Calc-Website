@@ -10,12 +10,10 @@ import { t } from "../lib/text.ts";
 import { Glass } from "./ui.tsx";
 
 const POINTS = [50, 60, 70, 80, 90];
-type Sort = keyof typeof help.scaling.sorts;
 
 export default function ScalingTable() {
   const { data } = useCalc();
   const [q, setQ] = useState("");
-  const [sort, setSort] = useState<Sort>("area");
   const k = help.scaling;
   const rows = useMemo(() => {
     let r = CATALOG.filter((c) => c.id !== "custom").map((c) => {
@@ -30,12 +28,12 @@ export default function ScalingTable() {
     });
     const needle = q.trim().toLowerCase();
     if (needle) r = r.filter((x) => x.c.name.toLowerCase().includes(needle) || x.c.area.toLowerCase().includes(needle));
-    const at70 = (x: (typeof r)[number]) => x.vals[2]! - 70;
-    if (sort === "up") r.sort((a, b) => at70(b) - at70(a));
-    else if (sort === "down") r.sort((a, b) => at70(a) - at70(b));
-    else if (sort === "name") r.sort((a, b) => a.c.name.localeCompare(b.c.name));
-    return r;
-  }, [data.subjects, q, sort, k]);
+    // One fixed order: highest scaling first (at a mark of 70, then 90 to break ties, then name).
+    // Courses with no course-specific scaling recorded (generic average) go last, in their own group.
+    const noRecord = (x: (typeof r)[number]) => !x.mine && x.c.tierSource === "default";
+    r.sort((a, b) => Number(noRecord(a)) - Number(noRecord(b)) || b.vals[2]! - a.vals[2]! || b.vals[4]! - a.vals[4]! || a.c.name.localeCompare(b.c.name));
+    return r.map((x) => ({ ...x, noRecord: noRecord(x) }));
+  }, [data.subjects, q, k]);
 
   return (
     <>
@@ -43,11 +41,7 @@ export default function ScalingTable() {
         <label className="field min-w-[220px]">{k.search}
           <input className="input" type="search" placeholder={k.searchPlaceholder} value={q} onChange={(e) => setQ(e.target.value)} />
         </label>
-        <label className="field min-w-[220px]">{k.sort}
-          <select className="input" value={sort} onChange={(e) => setSort(e.target.value as Sort)}>
-            {(Object.keys(k.sorts) as Sort[]).map((s) => <option key={s} value={s}>{k.sorts[s]}</option>)}
-          </select>
-        </label>
+        <p className="self-end pb-2.5 text-[0.82rem] text-foreground-3">{k.order}</p>
       </div>
       <Glass className="glass-sm tscroll">
         {!rows.length ? <p className="p-4 text-foreground-2">{t(k.noMatch, { q })}</p> : (
@@ -60,7 +54,7 @@ export default function ScalingTable() {
             <tbody>
               {rows.flatMap((r, i) => {
                 const out = [];
-                if (sort === "area" && (i === 0 || rows[i - 1]!.c.area !== r.c.area)) { out.push(<tr key={`a-${r.c.area}`} className="area"><td colSpan={9}>{r.c.area}</td></tr>); }
+                if (r.noRecord && (i === 0 || !rows[i - 1]!.noRecord)) out.push(<tr key="no-record" className="area"><td colSpan={9}>{k.noRecord}</td></tr>);
                 out.push(
                   <tr key={r.c.id}>
                     <td>{r.c.name}{r.mine && <span className="pill ml-2">{k.mine}</span>}</td>

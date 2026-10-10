@@ -209,7 +209,9 @@
     "opened": "Shared projection opened — undo to go back",
     "bad": "That share link is damaged or incomplete.",
     "tooLarge": "That share link is too large to open.",
-    "empty": "Add some subjects first — there's nothing to share yet."
+    "empty": "Add some subjects first — there's nothing to share yet.",
+    "back": "Back",
+    "backLabel": "Back to the calculator"
   },
   "kickers": {
     "curve": "01 · Projection",

@@ -48,7 +48,8 @@ export function FeedbackProvider({ children }: { children: ReactNode }) {
         <span>{text}</span>
         {action && on && <button type="button" className="toast-action" onClick={() => { action.run(); setOn(false); }}>{action.label}</button>}
       </div>
-      <dialog ref={dialog} className="confirm" aria-labelledby="confirm-q" onCancel={(e) => { e.preventDefault(); close(false); }}>
+      <dialog ref={dialog} className="confirm" aria-labelledby="confirm-q" onCancel={(e) => { e.preventDefault(); close(false); }}
+        onClick={(e) => { if (e.target === e.currentTarget) close(false); }}>
         <div className="glass p-5">
           <p id="confirm-q" className="text-[0.95rem]">{question}</p>
           <div className="mt-5 flex justify-end gap-2">

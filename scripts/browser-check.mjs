@@ -230,6 +230,19 @@ check(await ev("location.hash === '#syllabuses' && document.querySelectorAll('#p
 await key("End", "End");
 await sleep(900);
 check(await ev("document.querySelectorAll('#panel-help tbody tr').length > 100"), "How it works lazy-loads the full course table", `${await ev("document.querySelectorAll('#panel-help tbody tr').length")} rows`);
+// Scaling table: one fixed order — highest scaling first, "no scaling recorded" grouped last; no sort control.
+const sc = await ev(`(() => { const rows = [...document.querySelectorAll('#panel-help tbody tr')];
+  const course = rows.filter(r => !r.classList.contains('area'));
+  const at70 = course.map(r => parseFloat(r.children[4].textContent));
+  const src = course.map(r => r.children[3].textContent);
+  const firstNo = src.findIndex(t => /generic average/.test(t));
+  const areaRows = rows.filter(r => r.classList.contains('area'));
+  const head = firstNo >= 0 ? at70.slice(0, firstNo) : at70;
+  return { select: !!document.querySelector('#panel-help select'), n: course.length, filled: course.every(r => r.children.length === 9 && r.children[0].textContent.trim()),
+    sorted: head.every((v, i) => i === 0 || head[i - 1] >= v), firstNo, tailAll: src.slice(firstNo).every(t => /generic average/.test(t)),
+    groups: areaRows.map(r => r.textContent), groupBefore: firstNo >= 0 && rows.indexOf(course[firstNo]) - 1 === rows.indexOf(areaRows[0]) }; })()`);
+check(!sc.select && sc.n > 100 && sc.filled, "the scaling table has no sort control and every row shows its course", JSON.stringify({ select: sc.select, n: sc.n, filled: sc.filled }));
+check(sc.sorted && sc.firstNo > 0 && sc.tailAll && sc.groups.length === 1 && sc.groupBefore, "courses run highest scaling to lowest, with 'no scaling recorded' grouped at the bottom", JSON.stringify({ sorted: sc.sorted, firstNo: sc.firstNo, tail: sc.tailAll, groups: sc.groups }));
 await ev("history.back()"); await sleep(400);
 check(await ev("location.hash === '#syllabuses' && !document.querySelector('#panel-syl').hidden"), "browser Back returns to the previous tab");
 
@@ -255,6 +268,20 @@ const sharedAtar = await ev("document.querySelector('.atar-num .sr-only').textCo
 const sharedN = await ev("JSON.parse(localStorage.getItem('hsc-atar-calculator-v4')).subjects.length");
 await ev("[...document.querySelectorAll('button')].find(b => b.textContent.trim() === 'Share').click()"); await sleep(600);
 const link = await ev("document.getElementById('share-link').value");
+// Ways out of the share sheet: ‹ Back, a tap outside, Escape (then reopen for the rest of the flow).
+const shareBtn = "[...document.querySelectorAll('button')].find(b => b.textContent.trim() === 'Share')";
+await ev("document.querySelector('dialog[open] .paper-back').click()"); await sleep(300);
+const outBack = await ev("!document.querySelector('dialog[open]')");
+await ev(`${shareBtn}.click()`); await sleep(500);
+await send("Input.dispatchMouseEvent", { type: "mousePressed", x: 8, y: 450, button: "left", clickCount: 1 });
+await send("Input.dispatchMouseEvent", { type: "mouseReleased", x: 8, y: 450, button: "left", clickCount: 1 }); await sleep(300);
+const outSide = await ev("!document.querySelector('dialog[open]')");
+await ev(`${shareBtn}.click()`); await sleep(500);
+await send("Input.dispatchKeyEvent", { type: "keyDown", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
+await send("Input.dispatchKeyEvent", { type: "keyUp", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 }); await sleep(300);
+const outEsc = await ev("!document.querySelector('dialog[open]')");
+check(outBack && outSide && outEsc, "the share sheet closes with ‹ Back, a tap outside, or Escape", JSON.stringify({ outBack, outSide, outEsc }));
+await ev(`${shareBtn}.click()`); await sleep(500);
 check(link.includes("#share=v1.") && !link.includes("Sample"), "share link is built in the fragment, without the name by default", `${link.length} chars`);
 await ev("document.querySelector('dialog[open] .btn-primary').click()");
 await ev("localStorage.clear(); localStorage.setItem('hsc-guide', 'done')");
