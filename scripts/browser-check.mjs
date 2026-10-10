@@ -413,6 +413,25 @@ check(!gp.overlap && !gp.overflow, "on phones the guide sits above the tab bar w
 await setViewport(1440);
 await ev("localStorage.setItem('hsc-guide', 'done')");
 
+// ---- past papers: lazy tab, your subjects first, links go straight to NESA's PDFs ----
+await setViewport(1440);
+await load(url.replace(/#.*$/, ""));
+await ev("document.querySelector('.monogram').dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, detail: 2, button: 0 }))"); await sleep(900);
+check(await ev("![...document.scripts].some(s => /Papers/.test(s.src)) && !document.getElementById('papers')"), "the papers index is not loaded until its tab opens");
+await ev("document.querySelector('#tab-pap').click()"); await sleep(1500);
+const pap = await ev("({ n: document.querySelectorAll('#papers details.paper-course').length, first: document.querySelector('#papers details.paper-course b')?.textContent, mineFirst: !!document.querySelector('#papers details.paper-course .pill') })");
+check(pap.n > 80 && pap.mineFirst, "Papers lists the NESA courses with the student's own subjects first", JSON.stringify(pap));
+await ev("document.querySelector('#papers input[type=search]').value = ''");
+await ev("(() => { const i = document.querySelector('#papers input[type=search]'); const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(i, 'chemistry'); i.dispatchEvent(new Event('input', { bubbles: true })); })()"); await sleep(400);
+await ev("document.querySelector('#papers details.paper-course > summary').click()"); await sleep(500);
+const links = await ev("[...document.querySelectorAll('#papers details.paper-course[open] a.paper-link')].map(a => ({ h: a.href, t: a.target, r: a.rel }))");
+const pdfs = links.filter((l) => l.h.endsWith(".pdf"));
+check(pdfs.length >= 10 && pdfs.every((l) => l.h.startsWith("https://www.nsw.gov.au/sites/default/files/") && l.t === "_blank" && l.r.includes("noopener")), "each paper links directly to the official NESA PDF, in a new tab", `${pdfs.length} pdfs, e.g. ${pdfs[0]?.h}`);
+check(await ev("document.querySelector('#papers details.paper-course[open] a.paper-link-primary').textContent.startsWith('Exam')"), "the exam itself is the first, emphasised link in each year");
+await ev("document.querySelector('#papers .paper-tick input').click()"); await sleep(200);
+check(await ev("JSON.parse(localStorage.getItem('hsc-papers-done') || '[]').length === 1 && /1 of \\d+ done/.test(document.querySelector('#papers details.paper-course[open] summary').textContent)"), "ticking a paper as done is remembered and counted");
+await ev("document.querySelector('#papers .paper-tick input').click()");
+
 // ---- wayfinding: other tabs open on their own content, the bar carries the ATAR ----
 await setViewport(1440);
 await load(url.replace(/#.*$/, ""));

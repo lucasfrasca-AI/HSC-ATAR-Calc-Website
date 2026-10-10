@@ -9,6 +9,7 @@ import { AppBar, Hero } from "./components/Header.tsx";
 import { Suspense, lazy } from "react";
 import { decodeShare, readShareFromLocation } from "./lib/share.ts";
 const Syllabuses = lazy(() => import("./components/Syllabuses.tsx"));
+const Papers = lazy(() => import("./components/Papers.tsx"));
 const Guide = lazy(() => import("./components/Guide.tsx"));
 const loadSubjects = () => import("./components/Subjects.tsx");
 const loadHelp = () => import("./components/HowItWorks.tsx");
@@ -28,12 +29,13 @@ import { CalculatorProvider, useCalc } from "./lib/state.tsx";
 import { GUIDE_KEY, read, write } from "./lib/storage.ts";
 import { t } from "./lib/text.ts";
 
-const ORDER: TabKey[] = ["calc", "subj", "syl", "help"];
+const ORDER: TabKey[] = ["calc", "subj", "syl", "pap", "help"];
 // Tab icons, shown on the phone tab bar (SF Symbols-like line icons, inline SVG).
 const ICON: Record<TabKey, string> = {
   calc: "M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm2 4h10M8 12h.01M12 12h.01M16 12h.01M8 16h.01M12 16h.01M16 16h.01",
   subj: "M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01",
   syl: "M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5v14Zm0 0A2.5 2.5 0 0 0 6.5 22H20v-5",
+  pap: "M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5Zm0 0v5h5M9 13h6M9 17h4",
   help: "M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Zm-2.9-13a3 3 0 0 1 5.8 1c0 2-3 3-3 3m.1 4h.01",
 };
 
@@ -64,7 +66,7 @@ function Shell() {
   const { data, v, undo, redo, replace } = useCalc();
   const { toast, confirm } = useFeedback();
   const [tab, setTab] = useState<TabKey>(fromHash);
-  const tabRefs = useRef<Record<TabKey, HTMLButtonElement | null>>({ calc: null, subj: null, syl: null, help: null });
+  const tabRefs = useRef<Record<TabKey, HTMLButtonElement | null>>({ calc: null, subj: null, syl: null, pap: null, help: null });
   const phone = usePhoneLayout();
   // First visit (nothing saved, no guide history, not arriving via a share link): offer the guide.
   const [guide, setGuide] = useState(() => !data.subjects.length && read(GUIDE_KEY) === null && !readShareFromLocation());
@@ -193,6 +195,7 @@ function Shell() {
           <div role="tabpanel" id="panel-calc" aria-labelledby="tab-calc" hidden={tab !== "calc"}><Calculator /></div>
           <div role="tabpanel" id="panel-subj" aria-labelledby="tab-subj" hidden={tab !== "subj"}>{visited.has("subj") && <Suspense fallback={null}><Subjects /></Suspense>}</div>
           <div role="tabpanel" id="panel-syl" aria-labelledby="tab-syl" hidden={tab !== "syl"}>{visited.has("syl") && <Suspense fallback={null}><Syllabuses /></Suspense>}</div>
+          <div role="tabpanel" id="panel-pap" aria-labelledby="tab-pap" hidden={tab !== "pap"}>{visited.has("pap") && <Suspense fallback={null}><Papers /></Suspense>}</div>
           <div role="tabpanel" id="panel-help" aria-labelledby="tab-help" hidden={tab !== "help"}>{visited.has("help") && <Suspense fallback={null}><HowItWorks /></Suspense>}</div>
         </main>
         <footer className="mt-6 border-t border-border/10 pt-5 text-[0.8rem] text-foreground-3">

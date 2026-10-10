@@ -1,4 +1,4 @@
-name: syllabus-links
+name: external-links
 
 # External NESA pages can move. Checked weekly and on demand; never blocks a deploy.
 on:
@@ -19,3 +19,5 @@ jobs:
           node-version: 22
       - name: Every syllabus link resolves (404s and home-page redirects fail)
         run: node scripts/build-syllabuses.mjs --check
+      - name: Every past-paper link is a live file on nsw.gov.au
+        run: node scripts/build-papers.mjs --check

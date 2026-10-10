@@ -95,7 +95,7 @@ export default function Guide({ tab, onClose }: { tab: TabKey; onClose: () => vo
         {step === "more" && (
           <div className="mt-3">
             <div className="guide-meter" aria-hidden="true"><span style={{ "--w": `${units * 10}%` } as CSSProperties} /></div>
-            <p className="mt-1.5 text-[0.78rem] text-foreground-3">{t(g.more.units, { n: v.totalUnits })}</p>
+            <p className="mt-1.5 text-[0.78rem] text-foreground-3">{t(v.totalUnits >= 10 ? g.more.unitsEnough : g.more.units, { n: v.totalUnits })}</p>
           </div>
         )}
       </div>

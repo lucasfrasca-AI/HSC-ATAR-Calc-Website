@@ -24,7 +24,8 @@
     "units": "{n} of 10 units so far",
     "eligible": "That's enough for an ATAR. Add any others you take, then see your estimate.",
     "done": "See my ATAR",
-    "go": "Go to Subjects"
+    "go": "Go to Subjects",
+    "unitsEnough": "{n} units entered"
   },
   "result": {
     "title": "This is your projected ATAR",

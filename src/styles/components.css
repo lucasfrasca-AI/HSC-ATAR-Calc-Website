@@ -494,3 +494,31 @@ section > h2 { font-size: clamp(1.7rem, 3.4vw, 2.4rem); letter-spacing: -0.032em
   :root:has(.guide) .toast { bottom: calc(var(--guide-h, 0px) + 96px + env(safe-area-inset-bottom, 0px)); }
 }
 @media (prefers-reduced-motion: reduce) { .guide { animation: reveal 0.2s ease both; } .guide-spot { animation: none; } .guide-meter > span { transition: none; } }
+
+/* ---------- past papers ---------- */
+.paper-course > summary { list-style: none; border-radius: inherit; }
+.paper-course > summary::-webkit-details-marker { display: none; }
+.paper-course > summary:hover { background: hsl(var(--foreground) / 0.03); }
+.paper-course > summary .chev { transition: transform 0.3s cubic-bezier(.2, .9, .3, 1); }
+.paper-course[open] > summary .chev { transform: rotate(180deg); }
+.paper-year { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; }
+.paper-year + .paper-year { border-top: 1px solid hsl(var(--border) / 0.07); }
+.paper-tick { padding-top: 2px; cursor: pointer; }
+.paper-link {
+  display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 5px 12px; border-radius: 999px;
+  font-size: 0.8rem; color: hsl(var(--foreground)); text-decoration: none; background: hsl(var(--foreground) / 0.07);
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+.paper-link:hover { background: hsl(var(--foreground) / 0.12); }
+.paper-link:active { transform: scale(0.97); transition: transform 100ms ease-out; }
+.paper-link-primary { background: hsl(var(--accent) / 0.16); }
+.paper-link-primary:hover { background: hsl(var(--accent) / 0.24); }
+.paper-link-quiet { background: transparent; color: hsl(var(--foreground-2)); text-decoration: underline; text-underline-offset: 3px; }
+.paper-size { font-size: 0.7rem; color: hsl(var(--foreground-3)); }
+@media (prefers-reduced-motion: reduce) { .paper-course > summary .chev { transition: none; } }
+
+/* Five tabs: between the phone breakpoint and 1100px the segmented control tightens so it never
+   meets the actions (browser-check measures the gaps at six widths). */
+@media (min-width: 900px) and (max-width: 1099px) {
+  .tabbar .tab { padding: 6px 9px; gap: 4px; font-size: 0.82rem; }
+}

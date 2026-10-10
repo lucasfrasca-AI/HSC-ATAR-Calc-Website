@@ -97,6 +97,11 @@
       "label": "Syllabuses",
       "short": "Syllabuses",
       "hash": "syllabuses"
+    },
+    "pap": {
+      "label": "Past HSC papers",
+      "short": "Papers",
+      "hash": "past-papers"
     }
   },
   "steps": {
@@ -215,7 +220,8 @@
     "scaling": "Reference",
     "syllabuses": "NESA syllabuses",
     "plan": "04 · Plan",
-    "breakdown": "03 · Breakdown"
+    "breakdown": "03 · Breakdown",
+    "papers": "NESA past papers"
   },
   "author": {
     "url": "https://lucasfrasca.com",
