@@ -11,3 +11,4 @@ service-account*.json
 .env*
 .build-meta
 .claude/launch.json
+infra/cdk.out/
