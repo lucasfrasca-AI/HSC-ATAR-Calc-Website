@@ -35,6 +35,9 @@ jobs:
         run: npm run check:content
       - name: Performance budget
         run: npm run check:budget
+      - name: AWS hosting tests (headers generated from firebase.json)
+        working-directory: infra
+        run: npm ci && npm run typecheck && npm test
       # include-hidden-files: without it dist/.well-known silently vanishes.
       - uses: actions/upload-artifact@v7
         with:
@@ -71,3 +74,48 @@ jobs:
           service_account: github-deploy@hsc-atar-calc.iam.gserviceaccount.com
       - name: Deploy to Firebase Hosting
         run: npx --yes firebase-tools@15.30.0 deploy --only hosting --project hsc-atar-calc --non-interactive
+
+  # The same verified files, published to AWS (hscatarcalculator.lucasfrasca.com).
+  # Runs beside the Firebase deploy while both hosts serve the site.
+  deploy-aws:
+    needs: verify
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: aws
+      url: https://hscatarcalculator.lucasfrasca.com
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      # Checkout is only for firebase.json, to compare the live CSP; dist comes from verify.
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: dist
+      - name: Assert the verified artifact is intact
+        run: |
+          test -f dist/index.html || { echo "::error::dist/index.html missing"; exit 1; }
+          test -f dist/.well-known/security.txt || { echo "::error::dist/.well-known/security.txt missing: hidden files dropped by the artifact"; exit 1; }
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::562200984824:role/hsc-github-deploy
+          aws-region: ap-southeast-2
+      - name: Publish to S3 and clear CloudFront
+        run: |
+          out() { aws cloudformation describe-stacks --stack-name HscSite --query "Stacks[0].Outputs[?OutputKey=='$1'].OutputValue" --output text; }
+          BUCKET=$(out BucketName); DIST=$(out DistributionId); HOST=$(out DistributionDomain)
+          # Assets first, index.html last, so a visitor never gets a page whose files are not there yet.
+          aws s3 sync dist "s3://$BUCKET" --exclude index.html --no-progress
+          aws s3 cp dist/index.html "s3://$BUCKET/index.html" --content-type "text/html; charset=utf-8" --no-progress
+          ID=$(aws cloudfront create-invalidation --distribution-id "$DIST" --paths "/*" --query Invalidation.Id --output text)
+          aws cloudfront wait invalidation-completed --distribution-id "$DIST" --id "$ID"
+          echo "HOST=$HOST" >> "$GITHUB_ENV"
+      - name: Check the live AWS site
+        run: |
+          curl -fsS -o /dev/null "https://$HOST/" || { echo "::error::AWS site did not answer 200"; exit 1; }
+          curl -fsS -o /dev/null "https://$HOST/.well-known/security.txt" || { echo "::error::security.txt missing on AWS"; exit 1; }
+          WANT=$(node -e "console.log(require('./firebase.json').hosting.headers.find(r=>r.source==='**').headers.find(h=>h.key==='Content-Security-Policy').value)")
+          GOT=$(curl -sSI "https://$HOST/" | tr -d '\r' | sed -n 's/^[Cc]ontent-[Ss]ecurity-[Pp]olicy: //p')
+          [ "$WANT" = "$GOT" ] || { echo "::error::The AWS CSP differs from firebase.json (theme script hash?). Run: cd infra && npx cdk deploy HscSite"; exit 1; }

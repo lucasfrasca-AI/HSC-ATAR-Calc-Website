@@ -75,8 +75,12 @@ Push to `main` → `verify` (typecheck, lint, contrast, build, content, budget, 
 Auth is keyless: Workload Identity Federation pool `github`, provider `hsc-repo`, condition `repository == lucasfrasca-AI/HSC-ATAR-Calc-Website && ref == refs/heads/main`, impersonating `github-deploy@hsc-atar-calc.iam.gserviceaccount.com` (roles: Firebase Hosting Admin, Service Usage Consumer). No service-account key exists; keep it that way.
 Verify every deploy against production with curl, not the emulator.
 
+## AWS hosting (hscatarcalculator.lucasfrasca.com)
+`infra/` is a CDK app (account 562200984824): `HscSite` (ap-southeast-2: private S3 bucket, CloudFront, `hsc-github-deploy` role) and, with `-c domain=true`, `HscCert` (us-east-1 certificate) plus A/AAAA aliases for `hscatarcalculator.lucasfrasca.com` and `www.` (which 301s to the main address) in the lucasfrasca.com Route 53 zone. Headers and Cache-Control are generated from `firebase.json`, so it stays the one place to edit them. `deploy-aws` in ci.yml publishes the same verified `dist` beside the Firebase deploy (assets first, index.html last, then a `/*` invalidation) and fails if the live AWS CSP differs from `firebase.json`.
+Stacks are deployed by hand: `cd infra && npx cdk deploy HscSite -c domain=true --profile LucasAWS`. Tests: `cd infra && npm test`.
+
 ## Changing the inline theme script
-Its SHA-256 is in the CSP in `firebase.json`. Edit the script → build → `node scripts/check-content.mjs` prints the new hash → replace it in `firebase.json`.
+Its SHA-256 is in the CSP in `firebase.json`. Edit the script → build → `node scripts/check-content.mjs` prints the new hash → replace it in `firebase.json`, then redeploy `HscSite` so AWS serves the same CSP.
 
 ## Traps (each one has happened)
 - A closed `<details>` hides every child except `<summary>`, including an injected canvas: WebGL glass on collapsed disclosure cards vanished. liquidGlass skips `details`; asserted.
