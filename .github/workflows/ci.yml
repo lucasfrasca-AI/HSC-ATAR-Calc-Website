@@ -81,9 +81,8 @@ jobs:
     needs: verify
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    environment:
-      name: aws
-      url: https://hscatarcalculator.lucasfrasca.com
+    # No `environment:` here: it would change GitHub's token subject from the
+    # branch to the environment, and the AWS role only trusts refs/heads/main.
     permissions:
       contents: read
       id-token: write
